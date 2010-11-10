@@ -5,9 +5,11 @@
 #ifndef KNAPSACK_H
 #define KNAPSACK_H
 
+// STL
 #include <vector>
 
-class Item;
+// Project
+#include "Item.h"
 
 class Knapsack
 {

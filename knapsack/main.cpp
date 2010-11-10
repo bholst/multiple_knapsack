@@ -2,15 +2,27 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
+// STL
 #include <iostream>
 
+// Project
 #include "Item.h"
 #include "Knapsack.h"
+#include "Test.h"
 
 using namespace std;
 
 int main(int argc, char **argv) {
     bool stop = false;
+
+    cout << "Do you want to run the tests? (y,n) ";
+    string testString;
+    cin >> testString;
+    if(testString.compare("y") == 0) {
+        Test test;
+        test.run();
+        return 0;
+    }
 
     cout << "Bitte geben Sie die Größe des Rucksacks an: ";
     int size = 0;
