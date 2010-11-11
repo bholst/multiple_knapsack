@@ -108,11 +108,45 @@ void Test::run()
         it != m_knapsackInstances.end();
         ++it)
     {
+        list< set<int> > expectedList = it->expectedMaximumProfitItems();
+        set<int> returnedSet = it->maximumProfitItems();
+        bool foundRightSet = false;
+
+        for(list< set<int> >::iterator expectedSetIt = expectedList.begin();
+            expectedSetIt != expectedList.end();
+            ++expectedSetIt)
+        {
+            bool rightSet = true;
+            if(expectedSetIt->size() == returnedSet.size()) {
+                for(set<int>::iterator it = expectedSetIt->begin();
+                    it != expectedSetIt->end();
+                    ++it)
+                {
+                    if(returnedSet.find(*it) == returnedSet.end()) {
+                        rightSet = false;
+                        break;
+                    }
+                }
+            }
+            else {
+                rightSet = false;
+            }
+
+            if(rightSet) {
+                foundRightSet = true;
+                break;
+            }
+        }
+
         if(it->maximumProfit() != it->expectedMaximumProfit()) {
             cerr << "Test failed:" << endl;
             cerr << "The calculated profit is " << it->maximumProfit()
                  << ", but the expected Profit is "
                  << it->expectedMaximumProfit() << ".\n";
+            ++testsFailed;
+        }
+        else if(!foundRightSet) {
+            cerr << "Wrong set of items" << endl;
             ++testsFailed;
         }
         else {
