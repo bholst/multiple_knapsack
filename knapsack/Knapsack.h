@@ -7,6 +7,7 @@
 
 // STL
 #include <vector>
+#include <set>
 
 // Project
 #include "Item.h"
@@ -26,6 +27,7 @@ public:
     void setItems(const std::vector<int> &sizes, const std::vector<int> &profits);
 
     int maximumProfit();
+    std::set<int> maximumProfitItems();
 
 private:
     void recalculateValues();
@@ -37,6 +39,7 @@ private:
 
     // Output
     int m_maximumProfit;
+    std::set<int> m_maximumProfitItems;
 };
 
 #endif // KNAPSACK_H

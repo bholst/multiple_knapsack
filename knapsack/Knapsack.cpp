@@ -74,6 +74,15 @@ int Knapsack::maximumProfit()
     return m_maximumProfit;
 }
 
+std::set< int > Knapsack::maximumProfitItems()
+{
+    if(m_dirty) {
+        recalculateValues();
+    }
+
+    return m_maximumProfitItems;
+}
+
 void Knapsack::recalculateValues()
 {
     int profitSum = 0;
@@ -82,17 +91,21 @@ void Knapsack::recalculateValues()
     }
 
     int minimumSize[m_items.size()][profitSum];
+    set<int> minimumSizeItems[m_items.size()][profitSum];
     int maximumProfit = 0;
+    set<int> maximumProfitItems;
 
     int profitFirst = m_items[0].profit();
     int sizeFirst = m_items[0].size();
 
     if( sizeFirst <= m_size ) {
         maximumProfit = profitFirst;
+        maximumProfitItems.insert(0);
     }
 
     for(int i = 1; i <= profitFirst; ++i) {
         minimumSize[0][i-1] = sizeFirst;
+        minimumSizeItems[0][i-1].insert(0);
     }
     for(int i = profitFirst + 1; i <= profitSum; ++i) {
         minimumSize[0][i-1] = -1;
@@ -102,27 +115,44 @@ void Knapsack::recalculateValues()
         for(int i = 1; i <= profitSum; ++i) {
             int a, b = -1;
             a = minimumSize[j-1][i-1];
+            set<int> bItems;
 
             if(i <= m_items[j].profit()) {
+                // Item j is the only item in the set.
                 b = m_items[j].size();
             }
             else {
                 if(minimumSize[j-1][i-1-m_items[j].profit()] >= 0) {
+                    // Item j comes into the set of other items.
                     b = m_items[j].size() + minimumSize[j-1][i-1-m_items[j].profit()];
+                    bItems = minimumSizeItems[j-1][i-1-m_items[j].profit()];
                 }
             }
 
-            minimumSize[j][i-1] = ((a <= b && a >= 0) || b < 0) ? a : b;
+            if((a <= b && a >= 0) || b < 0) {
+                // Item j does not come into the set of items.
+                minimumSize[j][i-1] = a;
+                minimumSizeItems[j][i-1] = minimumSizeItems[j-1][i-1];
+            }
+            else {
+                // Item j comes into the set of items
+                minimumSize[j][i-1] = b;
+                minimumSizeItems[j][i-1] = bItems;
+                minimumSizeItems[j][i-1].insert(j);
+            }
+
             if(minimumSize[j][i-1] >= 0
                && minimumSize[j][i-1] <= m_size
                && maximumProfit < i)
             {
                 maximumProfit = i;
+                maximumProfitItems = minimumSizeItems[j][i-1];
             }
         }
     }
 
     m_maximumProfit = maximumProfit;
+    m_maximumProfitItems = maximumProfitItems;
     m_dirty = false;
 }
 

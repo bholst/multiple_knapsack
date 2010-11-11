@@ -5,6 +5,10 @@
 #ifndef KNAPSACKTESTINSTANCE_H
 #define KNAPSACKTESTINSTANCE_H
 
+// STL
+#include <list>
+#include <set>
+
 // Project
 #include "Knapsack.h"
 
@@ -18,9 +22,12 @@ public:
     void setExpectedMaximumProfit(int expectedMaximumProfit);
     int expectedMaximumProfit() const;
 
+    void setExpectedMaximumProfitItems(std::list < std::set<int> > list);
+    std::list < std::set<int> > expectedMaximumProfitItems();
+
 private:
     int m_expectedMaximumProfit;
-    // List of sets of items
+    std::list < std::set<int> > m_expectedMaximumProfitItems;
 };
 
 #endif // KNAPSACKTESTINSTANCE_H
