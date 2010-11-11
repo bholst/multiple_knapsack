@@ -1,4 +1,4 @@
 project(knapsack)
 
-add_executable(knapsack Test.cpp Knapsack.cpp Item.cpp main.cpp)
+add_executable(knapsack KnapsackTestInstance.cpp Test.cpp Knapsack.cpp Item.cpp main.cpp)
 

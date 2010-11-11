@@ -93,7 +93,6 @@ void Knapsack::recalculateValues()
 
     for(int i = 1; i <= profitFirst; ++i) {
         minimumSize[0][i-1] = sizeFirst;
-        cerr << "Minimum Size " << 0 << ", " << i << ": " << minimumSize[0][i-1] << endl;
     }
     for(int i = profitFirst + 1; i <= profitSum; ++i) {
         minimumSize[0][i-1] = -1;
@@ -114,7 +113,6 @@ void Knapsack::recalculateValues()
             }
 
             minimumSize[j][i-1] = ((a <= b && a >= 0) || b < 0) ? a : b;
-            cerr << "Minimum Size " << j << ", " << i << ": " << minimumSize[j][i-1] << endl;
             if(minimumSize[j][i-1] >= 0
                && minimumSize[j][i-1] <= m_size
                && maximumProfit < i)
