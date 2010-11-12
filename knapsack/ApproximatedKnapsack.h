@@ -2,47 +2,43 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
-#ifndef KNAPSACK_H
-#define KNAPSACK_H
+#ifndef APPROXIMATEDKNAPSACK_H
+#define APPROXIMATEDKNAPSACK_H
 
 // STL
 #include <vector>
 #include <set>
-#include <string>
 
-// Project
-#include "Item.h"
+class Item;
 
-class Knapsack
+class ApproximatedKnapsack
 {
 
 public:
-    Knapsack();
-    virtual ~Knapsack();
+    ApproximatedKnapsack();
+    virtual ~ApproximatedKnapsack();
 
-    int size() const;
     void setSize(int size);
+    int size() const;
+
+    void setApproximationLevel(double approximationLevel);
+    double approximationLevel() const;
 
     std::vector<Item> items() const;
     void setItems(const std::vector<Item> &items);
-    void setItems(const std::vector<int> &sizes, const std::vector<int> &profits);
 
     int maximumProfit();
     std::set<int> maximumProfitItems();
 
-    std::string toString() const;
-
 private:
     void recalculateValues();
 
-    // Input
-    bool              m_dirty;
-    int               m_size;
+    bool m_dirty;
+    double m_approximationLevel;
     std::vector<Item> m_items;
-
-    // Output
+    int m_size;
     int m_maximumProfit;
     std::set<int> m_maximumProfitItems;
 };
 
-#endif // KNAPSACK_H
+#endif // APPROXIMATEDKNAPSACK_H

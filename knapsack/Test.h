@@ -17,7 +17,6 @@ public:
     virtual ~Test();
 
     void run();
-    bool runIteration(Knapsack knapsack, int expectedMaximumProfit);
 
 private:
     std::vector<KnapsackTestInstance> m_knapsackInstances;

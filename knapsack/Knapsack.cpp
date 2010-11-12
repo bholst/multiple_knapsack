@@ -4,7 +4,6 @@
 
 // STL
 #include <iostream>
-#include <limits>
 
 // Project
 #include "Item.h"
@@ -154,6 +153,27 @@ void Knapsack::recalculateValues()
     m_maximumProfit = maximumProfit;
     m_maximumProfitItems = maximumProfitItems;
     m_dirty = false;
+}
+
+string Knapsack::toString() const
+{
+    string result = "";
+    result += "Bin size ";
+    result += size();
+    result += "\n";
+    result += "Items:\n";
+    for(int i = 0; i <= m_items.size(); ++i) {
+        result += i;
+        result += ":\n";
+        result += "Size: ";
+        result += m_items[i].size();
+        result += "\n";
+        result += "Profit: ";
+        result += m_items[i].profit();
+        result += "\n";
+    }
+
+    return result;
 }
 
 

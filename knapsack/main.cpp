@@ -7,7 +7,7 @@
 
 // Project
 #include "Item.h"
-#include "Knapsack.h"
+#include "ApproximatedKnapsack.h"
 #include "Test.h"
 
 using namespace std;
@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    Knapsack knapsack;
+    ApproximatedKnapsack knapsack;
     knapsack.setSize(size);
     knapsack.setItems(items);
 
-    cout << "Der maximale Profit ist: " << knapsack.maximumProfit() << endl;
+    cout << "Der maximale Profit ist etwa " << knapsack.maximumProfit() << endl;
 
     return 0;
 }
