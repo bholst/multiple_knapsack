@@ -17,10 +17,19 @@ using namespace std;
 
 ApproximatedKnapsack::ApproximatedKnapsack()
     : m_dirty(true),
-      m_approximationLevel(0.1),
+      m_approximationLevel(0.0),
       m_items(),
       m_size(0)
 {
+}
+
+ApproximatedKnapsack::ApproximatedKnapsack(const Knapsack& knapsack)
+    : m_dirty(true),
+      m_approximationLevel(0.0),
+      m_items(knapsack.items()),
+      m_size(knapsack.size())
+{
+
 }
 
 ApproximatedKnapsack::~ApproximatedKnapsack()
@@ -99,7 +108,7 @@ void ApproximatedKnapsack::recalculateValues()
     }
 
     vector<Item> approximatedItems(m_items.size());
-    for(int i = 0; i <= m_items.size(); ++i) {
+    for(int i = 0; i < m_items.size(); ++i) {
         Item approximatedItem = m_items[i];
         approximatedItem.setProfit(approximatedItem.profit() / profitDivisor);
         approximatedItems[i] = approximatedItem;
@@ -112,13 +121,15 @@ void ApproximatedKnapsack::recalculateValues()
 
     m_maximumProfitItems = knapsack.maximumProfitItems();
     set<int>::iterator endIterator = m_maximumProfitItems.end();
-    int m_maximumProfit = 0;
+    m_maximumProfit = 0;
     for(set<int>::iterator it = m_maximumProfitItems.begin();
         it != endIterator;
         ++it)
     {
         m_maximumProfit += m_items[*it].profit();
     }
+
+    m_dirty = false;
 }
 
 

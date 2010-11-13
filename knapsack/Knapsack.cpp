@@ -157,23 +157,23 @@ void Knapsack::recalculateValues()
 
 string Knapsack::toString() const
 {
-    string result = "";
-    result += "Bin size ";
-    result += size();
-    result += "\n";
-    result += "Items:\n";
-    for(int i = 0; i <= m_items.size(); ++i) {
-        result += i;
-        result += ":\n";
-        result += "Size: ";
-        result += m_items[i].size();
-        result += "\n";
-        result += "Profit: ";
-        result += m_items[i].profit();
-        result += "\n";
+    // FIXME: Has to return a string!!!
+    cerr << "Bin size ";
+    cerr << size();
+    cerr << "\n";
+    cerr << "Items:\n";
+    for(int i = 0; i < m_items.size(); ++i) {
+        cerr << i;
+        cerr << ":\n";
+        cerr << "Size: ";
+        cerr << m_items[i].size();
+        cerr << "\n";
+        cerr << "Profit: ";
+        cerr << m_items[i].profit();
+        cerr << "\n";
     }
 
-    return result;
+    return "";
 }
 
 

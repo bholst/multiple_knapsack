@@ -10,12 +10,14 @@
 #include <set>
 
 class Item;
+class Knapsack;
 
 class ApproximatedKnapsack
 {
 
 public:
     ApproximatedKnapsack();
+    ApproximatedKnapsack(const Knapsack &knapsack);
     virtual ~ApproximatedKnapsack();
 
     void setSize(int size);

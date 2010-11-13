@@ -11,6 +11,7 @@
 // Project
 #include "Knapsack.h"
 #include "KnapsackTestInstance.h"
+#include "ApproximatedKnapsack.h"
 
 // Self
 #include "Test.h"
@@ -151,6 +152,24 @@ void Test::run()
         }
         else {
             cerr << "Test successful!" << endl;
+        }
+
+        cerr << "Approximation:";
+        ApproximatedKnapsack approx(*it);
+        approx.setApproximationLevel(0.1);
+
+        cerr << "The approximated value is " << approx.maximumProfit()
+             << ", whereas the exact value is " << it->maximumProfit()
+             << " and it would be sufficient to get a value like "
+             << (1.0 - approx.approximationLevel()) * it->maximumProfit() << endl;
+        if(approx.maximumProfit() <
+           (1.0 - approx.approximationLevel()) * it->maximumProfit())
+        {
+            cerr << "The approximation is not sufficient!\n";
+            ++testsFailed;
+        }
+        else {
+            cerr << "The approximation is sufficient!\n";
         }
     }
 
