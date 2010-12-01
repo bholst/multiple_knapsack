@@ -17,6 +17,7 @@ public:
     virtual ~Test();
 
     void run();
+    void runMultipleKnapsackTests();
 
 private:
     std::vector<KnapsackTestInstance> m_knapsackInstances;

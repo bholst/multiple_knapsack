@@ -12,6 +12,7 @@
 #include "Knapsack.h"
 #include "KnapsackTestInstance.h"
 #include "ApproximatedKnapsack.h"
+#include "MultipleKnapsack.h"
 
 // Self
 #include "Test.h"
@@ -104,6 +105,8 @@ Test::~Test()
 
 void Test::run()
 {
+    runMultipleKnapsackTests();
+    
     int testsFailed = 0;
     for(vector<KnapsackTestInstance>::iterator it = m_knapsackInstances.begin();
         it != m_knapsackInstances.end();
@@ -174,6 +177,65 @@ void Test::run()
     }
 
     cerr << testsFailed << " tests failed.\n";
+}
+
+void Test::runMultipleKnapsackTests()
+{
+    cout << "Multiple Knapsack test starting" << endl << endl;
+    list<int> bins;
+    bins.push_back(133);
+    bins.push_back(1200);
+    bins.push_back(421);
+    vector<Item> items;
+    {
+        Item item;
+        item.setSize(102);
+        item.setProfit(142);
+        items.push_back(item);
+    }
+    {
+        Item item;
+        item.setSize(699);
+        item.setProfit(799);
+        items.push_back(item);
+    }
+    {
+        Item item;
+        item.setSize(688);
+        item.setProfit(608);
+        items.push_back(item);
+    }
+    {
+        Item item;
+        item.setSize(306);
+        item.setProfit(346);
+        items.push_back(item);
+    }
+    {
+        Item item;
+        item.setSize(983);
+        item.setProfit(1073);
+        items.push_back(item);
+    }
+    {
+        Item item;
+        item.setSize(555);
+        item.setProfit(545);
+        items.push_back(item);
+    }
+    
+    MultipleKnapsack knapsacks;
+    knapsacks.setSizes(bins);
+    knapsacks.setItems(items);
+    knapsacks.setApproximationLevel(0.1);
+    
+    if(knapsacks.maximumProfit() == 1561) {
+        cout << "Test successful" << endl;
+    }
+    else {
+        cout << "Test failed" << endl;
+    }
+    cout << "Multiple Knapsack 1, Profit: " << knapsacks.maximumProfit() << endl;
 }
 
 

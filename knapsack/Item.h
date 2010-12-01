@@ -7,6 +7,7 @@
 
 class Item
 {
+    friend class MultipleKnapsack;
 
 public:
     Item();
@@ -19,8 +20,12 @@ public:
     void setProfit(int profit);
 
 private:
+    int id() const;
+    void setId(int id);
+
     int m_size;
     int m_profit;
+    int m_id;
 };
 
 #endif // ITEM_H
