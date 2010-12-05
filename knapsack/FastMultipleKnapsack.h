@@ -9,6 +9,7 @@
 
 // STL
 #include <set>
+#include <vector>
 
 // Project
 #include "MultipleKnapsack.h"
@@ -23,6 +24,9 @@ private:
     virtual void recalculateValues();
     void handleSubset(const std::set<int>& subset);
     bool testAssignment(const std::vector<int>& assignment);
+    void printAssignment(const std::vector<int>& assignment);
+
+    std::vector<int> m_sizesVector;
 };
 
 #endif // FASTMULTIPLEKNAPSACK_H
