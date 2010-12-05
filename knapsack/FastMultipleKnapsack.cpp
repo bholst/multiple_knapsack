@@ -108,13 +108,55 @@ void FastMultipleKnapsack::recalculateValues()
 
 void FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
 {
+    vector<int> assignment(items().size(), -1);
     cout << "Subset containing items:" << endl;
     set<int>::iterator endIterator = subset.end();
     for(set<int>::iterator it = subset.begin();
         it != endIterator;
         ++it)
     {
+        assignment[*it] = 0;
         cout << *it << endl;
+    }
+    cout << endl;
+    
+    bool validAssignmentFound = testAssignment(assignment);
+    bool runThroughAllAssignments = false;
+    while(!validAssignmentFound && !runThroughAllAssignments) {
+        bool assignmentChanged = false;
+        endIterator = subset.end();
+        set<int>::iterator it = subset.begin();
+        if(it == endIterator) {
+            runThroughAllAssignments = true;
+        }
+        while (!assignmentChanged && !runThroughAllAssignments) {
+            if(assignment[*it] < sizes().size() - 1) {
+                assignment[*it] = assignment[*it] + 1;
+                assignmentChanged = true;
+            }
+            else {
+                assignment[*it] = 0;
+                ++it;
+                
+                if(it == endIterator) {
+                    runThroughAllAssignments = true;
+                }
+            }
+        }
+        
+        if(!runThroughAllAssignments) {
+            validAssignmentFound = testAssignment(assignment);
+        }
+    }
+}
+
+bool FastMultipleKnapsack::testAssignment(const std::vector< int >& assignment)
+{
+    cout << "Assignment for subset:" << endl;
+    int numberOfItems = assignment.size();
+    for(int i = 0; i < numberOfItems; ++i)
+    {
+        cout << "Item " << i << " in bin " << assignment[i] << endl;
     }
     cout << endl;
 }

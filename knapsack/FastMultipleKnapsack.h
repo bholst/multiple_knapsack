@@ -22,6 +22,7 @@ public:
 private:
     virtual void recalculateValues();
     void handleSubset(const std::set<int>& subset);
+    bool testAssignment(const std::vector<int>& assignment);
 };
 
 #endif // FASTMULTIPLEKNAPSACK_H
