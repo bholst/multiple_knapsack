@@ -28,15 +28,17 @@ public:
     void setApproximationLevel(double approximationLevel);
 
     int maximumProfit();
+    
+protected:
+    int m_maximumProfit;
 
 private:
-    void recalculateValues();
+    virtual void recalculateValues();
 
     std::list<int> m_sizes;
     std::vector<Item> m_items;
     double m_approximationLevel;
     bool m_dirty;
-    int m_maximumProfit;
 };
 
 #endif // MULTIPLEKNAPSACK_H

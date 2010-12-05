@@ -13,6 +13,7 @@
 #include "KnapsackTestInstance.h"
 #include "ApproximatedKnapsack.h"
 #include "MultipleKnapsack.h"
+#include "FastMultipleKnapsack.h"
 
 // Self
 #include "Test.h"
@@ -195,6 +196,12 @@ void Test::runMultipleKnapsackTests()
     }
     {
         Item item;
+        item.setSize(102);
+        item.setProfit(12);
+        items.push_back(item);
+    }
+    {
+        Item item;
         item.setSize(699);
         item.setProfit(799);
         items.push_back(item);
@@ -236,6 +243,12 @@ void Test::runMultipleKnapsackTests()
         cout << "Test failed" << endl;
     }
     cout << "Multiple Knapsack 1, Profit: " << knapsacks.maximumProfit() << endl;
+    
+    FastMultipleKnapsack fastKnapsacks;
+    fastKnapsacks.setSizes(bins);
+    fastKnapsacks.setItems(items);
+    fastKnapsacks.setApproximationLevel(0.1);
+    fastKnapsacks.maximumProfit();
 }
 
 
