@@ -14,6 +14,8 @@
 // Project
 #include "MultipleKnapsack.h"
 
+class SubsetAssignment;
+
 class FastMultipleKnapsack : public MultipleKnapsack
 {
 public:
@@ -22,11 +24,9 @@ public:
 
 private:
     virtual void recalculateValues();
-    void handleSubset(const std::set<int>& subset);
+    SubsetAssignment handleSubset(const std::set<int>& subset);
     bool testAssignment(const std::vector<int>& assignment);
     void printAssignment(const std::vector<int>& assignment);
-
-    std::vector<int> m_sizesVector;
 };
 
 #endif // FASTMULTIPLEKNAPSACK_H

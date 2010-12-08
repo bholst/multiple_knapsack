@@ -117,8 +117,6 @@ void ApproximatedKnapsack::recalculateValues()
     knapsack.setItems(approximatedItems);
     knapsack.setSize(m_size);
 
-    cerr << knapsack.toString();
-
     m_maximumProfitItems = knapsack.maximumProfitItems();
     set<int>::iterator endIterator = m_maximumProfitItems.end();
     m_maximumProfit = 0;

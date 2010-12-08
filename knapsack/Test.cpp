@@ -248,7 +248,7 @@ void Test::runMultipleKnapsackTests()
     fastKnapsacks.setSizes(bins);
     fastKnapsacks.setItems(items);
     fastKnapsacks.setApproximationLevel(0.1);
-    fastKnapsacks.maximumProfit();
+    cout << "Better approximation: " << fastKnapsacks.maximumProfit() << endl;
 }
 
 

@@ -13,6 +13,8 @@
 
 // Project
 #include "Item.h"
+#include "FillRemainingMultipleKnapsack.h"
+#include "SubsetAssignment.h"
 
 // Self
 #include "FastMultipleKnapsack.h"
@@ -31,16 +33,6 @@ FastMultipleKnapsack::~FastMultipleKnapsack()
 
 void FastMultipleKnapsack::recalculateValues()
 {
-    // Make sizes vector
-    list<int> allSizes = sizes();
-    list<int>::iterator sizesEnd = allSizes.end();
-    for(list<int>::iterator it = allSizes.begin();
-        it != sizesEnd;
-        ++it)
-    {
-        m_sizesVector.push_back(*it);
-    }
-
     double rho = approximationLevel() / 5.0;
     MultipleKnapsack greedy;
     greedy.setApproximationLevel(rho/2.0);
@@ -48,6 +40,7 @@ void FastMultipleKnapsack::recalculateValues()
     greedy.setSizes(sizes());
     
     int approximatedMaximum = greedy.maximumProfit();
+    cout << "The approximated Maximum is :" << approximatedMaximum << endl;
     
     // Split the set of items into 3 groups:
     // Small and much profit:
@@ -58,13 +51,13 @@ void FastMultipleKnapsack::recalculateValues()
     // Rest:
     set<int> littleProfitItems;
     
-    list<int> sortedSizes = allSizes;
+    list<int> sortedSizes = sizes();
     sortedSizes.sort();
     vector<Item> allItems = items();
     int numberOfItems = allItems.size();
     int muchProfit = ceil(rho/sizes().size() * 2.0 * (1 + rho) * approximatedMaximum);
     cout << "Much profit means more than: " << muchProfit << endl;
-    int small = rho * *(sortedSizes.begin());
+    int small = rho * *(sortedSizes.begin()); // TODO: This seems to be bullshit
     for(int i = 0; i < numberOfItems; ++i) {
         if(allItems[i].profit() >= muchProfit) {
             muchProfitItems.insert(i);
@@ -83,8 +76,9 @@ void FastMultipleKnapsack::recalculateValues()
     list< set<int> > subsets;
     set<int> emptySet;
     subsets.push_back(emptySet);
-    handleSubset(emptySet);
-    int itemLimit = allSizes.size() / rho;
+    SubsetAssignment largestSubsetAssignment = handleSubset(emptySet);
+    int itemLimit = sizes().size() / rho;
+    cout << "Please choose a maximum of " << itemLimit << " items only" << endl;
     
     set<int>::iterator endIterator = muchProfitItems.end();
     for(set<int>::iterator it = muchProfitItems.begin();
@@ -101,7 +95,12 @@ void FastMultipleKnapsack::recalculateValues()
                 set<int> expandedSet = *setIt;
                 expandedSet.insert(*it);
                 expandedSubSets.push_back(expandedSet);
-                handleSubset(expandedSet);
+                SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet);
+                if(otherSubsetAssignment.valid()
+                   && otherSubsetAssignment > largestSubsetAssignment)
+                {
+                    largestSubsetAssignment = otherSubsetAssignment;
+                }
             }
         }
         
@@ -113,9 +112,16 @@ void FastMultipleKnapsack::recalculateValues()
             subsets.push_back(*expandedSetIt);
         }
     }
+    
+    if(largestSubsetAssignment.valid()) {
+        m_maximumProfit = largestSubsetAssignment.profit();
+    }
+    else {
+        m_maximumProfit = 0;
+    }
 }
 
-void FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
+SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
 {
     vector<int> assignment(items().size(), -1);
     cout << "Subset containing items:" << endl;
@@ -157,11 +163,28 @@ void FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
             validAssignmentFound = testAssignment(assignment);
         }
     }
+    
+    if(validAssignmentFound) {
+        FillRemainingMultipleKnapsack fillRemaining;
+        fillRemaining.setStartAssignment(assignment);
+        fillRemaining.setItems(items());
+        fillRemaining.setSizes(sizes());
+        assignment = fillRemaining.assignment();
+        int profitForAssignment = fillRemaining.maximumProfit();
+        
+        SubsetAssignment subsetAssignment;
+        subsetAssignment.setSubset(subset);
+        subsetAssignment.setProfit(profitForAssignment);
+        subsetAssignment.setAssignment(assignment);
+        return subsetAssignment;
+    }
+    
+    return SubsetAssignment();
 }
 
 bool FastMultipleKnapsack::testAssignment(const std::vector< int >& assignment)
 {
-    vector<int> remainingSizes = m_sizesVector;
+    vector<int> remainingSizes = sizesVector();
     vector<Item> allItems = items();
     int numberOfItems = assignment.size();
     for(int i = 0; i < numberOfItems; ++i)
@@ -182,7 +205,6 @@ bool FastMultipleKnapsack::testAssignment(const std::vector< int >& assignment)
 
 void FastMultipleKnapsack::printAssignment(const std::vector< int >& assignment)
 {
-    cout << "Assignment for subset:" << endl;
     int numberOfItems = assignment.size();
     for(int i = 0; i < numberOfItems; ++i)
     {
