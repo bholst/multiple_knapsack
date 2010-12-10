@@ -33,58 +33,57 @@ FastMultipleKnapsack::~FastMultipleKnapsack()
 
 void FastMultipleKnapsack::recalculateValues()
 {
+    list<int> sortedSizes = sizes();
+    sortedSizes.sort();
+
     double rho = approximationLevel() / 5.0;
     MultipleKnapsack greedy;
     greedy.setApproximationLevel(rho/2.0);
     greedy.setItems(items());
-    greedy.setSizes(sizes());
+    greedy.setSizes(sortedSizes);
     
     int approximatedMaximum = greedy.maximumProfit();
     cout << "The approximated Maximum is :" << approximatedMaximum << endl;
     
-    // Split the set of items into 3 groups:
-    // Small and much profit:
-    set<int> smallAndMuchProfitItems;
-    // Large and much profit:
-    set<int> largeAndMuchProfitItems;
+    // Split the set of items into 2 groups:
+    // Much profit:
     set<int> muchProfitItems;
     // Rest:
     set<int> littleProfitItems;
     
-    list<int> sortedSizes = sizes();
-    sortedSizes.sort();
     vector<Item> allItems = items();
     int numberOfItems = allItems.size();
     int muchProfit = ceil(rho/sizes().size() * 2.0 * (1 + rho) * approximatedMaximum);
-    cout << "Much profit means more than: " << muchProfit << endl;
-    int small = rho * *(sortedSizes.begin()); // TODO: This seems to be bullshit
+    //int small = rho * (*sortedSizes.begin());
     for(int i = 0; i < numberOfItems; ++i) {
         if(allItems[i].profit() >= muchProfit) {
             muchProfitItems.insert(i);
-            if(allItems[i].size() <= small) {
-                smallAndMuchProfitItems.insert(i);
-            }
-            else {
-                largeAndMuchProfitItems.insert(i);
-            }
         }
         else {
             littleProfitItems.insert(i);
         }
     }
     
+    // The list of the sets we tested until now
     list< set<int> > subsets;
     set<int> emptySet;
     subsets.push_back(emptySet);
+    // Storing the subset with the largest profit until now
     SubsetAssignment largestSubsetAssignment = handleSubset(emptySet);
+
+    // Only include itemLimit items per set
     int itemLimit = sizes().size() / rho;
-    cout << "Please choose a maximum of " << itemLimit << " items only" << endl;
     
+    // Run though all subsets of items with much profit
     set<int>::iterator endIterator = muchProfitItems.end();
     for(set<int>::iterator it = muchProfitItems.begin();
         it != endIterator;
         ++it)
     {
+        // Run throuh all subsets generated before and add the current item if possible
+        // to create a new subset.
+        
+        // The list of new subsets
         list< set<int> > expandedSubSets;
         list< set<int> >::iterator endSetIterator = subsets.end();
         for(list< set<int> >::iterator setIt = subsets.begin();
@@ -95,7 +94,10 @@ void FastMultipleKnapsack::recalculateValues()
                 set<int> expandedSet = *setIt;
                 expandedSet.insert(*it);
                 expandedSubSets.push_back(expandedSet);
+                
+                // Test if we find a valid assignment for this subset.
                 SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet);
+
                 if(otherSubsetAssignment.valid()
                    && otherSubsetAssignment > largestSubsetAssignment)
                 {
@@ -104,6 +106,7 @@ void FastMultipleKnapsack::recalculateValues()
             }
         }
         
+        // Add the new subsets to the list.
         list< set<int> >::iterator endExpandedSubsets = expandedSubSets.end();
         for(list< set<int> >::iterator expandedSetIt = expandedSubSets.begin();
             expandedSetIt != endExpandedSubsets;
@@ -117,23 +120,30 @@ void FastMultipleKnapsack::recalculateValues()
         m_maximumProfit = largestSubsetAssignment.profit();
     }
     else {
+        // We did not find any valid assignment for any subset.
         m_maximumProfit = 0;
     }
 }
 
 SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
 {
+    int totalItemSize = 0;
+    vector<Item> allItems = items();
+    // Create a start assignment and calculate the total size of our subsets.
     vector<int> assignment(items().size(), -1);
-    cout << "Subset containing items:" << endl;
     set<int>::iterator endIterator = subset.end();
     for(set<int>::iterator it = subset.begin();
         it != endIterator;
         ++it)
     {
         assignment[*it] = 0;
-        cout << *it << endl;
+        totalItemSize += allItems[*it].size();
     }
-    cout << endl;
+    
+    // There is no assignment for the items of our subset.
+    if(totalItemSize > totalSize()) {
+        return SubsetAssignment();
+    }
     
     bool validAssignmentFound = testAssignment(assignment);
     bool runThroughAllAssignments = false;
@@ -165,13 +175,15 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subse
     }
     
     if(validAssignmentFound) {
+        // Fill in the small items.
         FillRemainingMultipleKnapsack fillRemaining;
         fillRemaining.setStartAssignment(assignment);
-        fillRemaining.setItems(items());
-        fillRemaining.setSizes(sizes());
+        fillRemaining.setItems(items()); // FIXME: These are copys, we should use
+        fillRemaining.setSizes(sizes()); // FIXME: copy-on-write containers instead.
         assignment = fillRemaining.assignment();
         int profitForAssignment = fillRemaining.maximumProfit();
         
+        // Create the subset assignment.
         SubsetAssignment subsetAssignment;
         subsetAssignment.setSubset(subset);
         subsetAssignment.setProfit(profitForAssignment);

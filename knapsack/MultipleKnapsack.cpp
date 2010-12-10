@@ -12,7 +12,8 @@
 using namespace std;
 
 MultipleKnapsack::MultipleKnapsack()
-    : m_sizesVectorDirty(true),
+    : m_totalSizeDirty(true),
+      m_sizesVectorDirty(true),
       m_approximationLevel(0),
       m_dirty(true)
 {
@@ -54,6 +55,7 @@ std::list<int> MultipleKnapsack::sizes() const
 void MultipleKnapsack::setSizes(std::list< int > sizes)
 {
     m_sizesVectorDirty = true;
+    m_totalSizeDirty = true;
     update();
     m_sizes = sizes;
 }
@@ -75,6 +77,24 @@ std::vector< int > MultipleKnapsack::sizesVector()
     }
     
     return m_sizesVector;
+}
+
+int MultipleKnapsack::totalSize()
+{
+    if(m_totalSizeDirty) {
+        m_totalSize = 0;
+        list<int> allSizes = sizes();
+        list<int>::iterator sizesEnd = allSizes.end();
+        for(list<int>::iterator it = allSizes.begin();
+            it != sizesEnd;
+            ++it)
+        {
+            m_totalSize += *it;
+        }
+        
+        m_totalSizeDirty = false;
+    }
+    return m_totalSize;
 }
 
 int MultipleKnapsack::maximumProfit()

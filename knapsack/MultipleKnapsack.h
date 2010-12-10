@@ -21,6 +21,8 @@ public:
     std::list<int> sizes() const;
     std::vector<int> sizesVector();
     void setSizes(std::list<int> sizes);
+    
+    int totalSize();
 
     std::vector<Item> items() const;
     void setItems(std::vector<Item> items);
@@ -41,6 +43,8 @@ private:
     virtual void recalculateValues();
 
     std::list<int> m_sizes;
+    int m_totalSize;
+    bool m_totalSizeDirty;
     std::vector<int> m_sizesVector;
     bool m_sizesVectorDirty;
     std::vector<Item> m_items;
