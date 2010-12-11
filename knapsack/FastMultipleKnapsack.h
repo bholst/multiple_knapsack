@@ -7,9 +7,9 @@
 #ifndef FASTMULTIPLEKNAPSACK_H
 #define FASTMULTIPLEKNAPSACK_H
 
-// STL
-#include <set>
-#include <vector>
+// Qt
+#include<QtCore/QSet>
+#include<QtCore/QVector>
 
 // Project
 #include "MultipleKnapsack.h"
@@ -24,9 +24,9 @@ public:
 
 private:
     virtual void recalculateValues();
-    SubsetAssignment handleSubset(const std::set<int>& subset);
-    bool testAssignment(const std::vector<int>& assignment);
-    void printAssignment(const std::vector<int>& assignment);
+    SubsetAssignment handleSubset(const QSet<int>& subset);
+    bool testAssignment(const QVector<int>& assignment);
+    void printAssignment(const QVector<int>& assignment);
 };
 
 #endif // FASTMULTIPLEKNAPSACK_H

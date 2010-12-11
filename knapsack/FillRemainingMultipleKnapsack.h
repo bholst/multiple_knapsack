@@ -6,7 +6,7 @@
 #define FILLREMAININGMULTIPLEKNAPSACK_H
 
 // STD
-#include <vector>
+#include <QtCore/QVector>
 
 // Project
 #include "MultipleKnapsack.h"
@@ -17,12 +17,12 @@ class FillRemainingMultipleKnapsack : public MultipleKnapsack
 public:
     FillRemainingMultipleKnapsack();
     
-    void setStartAssignment(const std::vector<int>& assignment);
-    std::vector<int> startAssignment() const;
+    void setStartAssignment(const QVector<int>& assignment);
+    QVector<int> startAssignment() const;
     
-    std::vector<int> assignment();
+    QVector<int> assignment();
 
-    std::vector<int> remainingSizes();
+    QVector<int> remainingSizes();
     int remainingSize();
     
     virtual void update();
@@ -30,12 +30,12 @@ public:
 private:
     virtual void recalculateValues();
     
-    std::vector<int> m_startAssignment;
-    std::vector<int> m_remainingSizes;
+    QVector<int> m_startAssignment;
+    QVector<int> m_remainingSizes;
     bool m_remainingSizesDirty;
     int m_remainingSize;
     bool m_remainingSizeDirty;
-    std::vector<int> m_assignment;
+    QVector<int> m_assignment;
 };
 
 #endif // FILLREMAININGMULTIPLEKNAPSACK_H

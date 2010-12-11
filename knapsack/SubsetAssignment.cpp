@@ -16,23 +16,23 @@ SubsetAssignment::SubsetAssignment()
 
 }
 
-std::set< int > SubsetAssignment::subset() const
+QSet< int > SubsetAssignment::subset() const
 {
     return m_subset;
 }
 
-void SubsetAssignment::setSubset(const std::set< int >& subset)
+void SubsetAssignment::setSubset(const QSet< int >& subset)
 {
     m_subset = subset;
     m_subsetSet = true;
 }
 
-std::vector< int, std::allocator< int > > SubsetAssignment::assingment() const
+QVector< int > SubsetAssignment::assingment() const
 {
     return m_assingment;
 }
 
-void SubsetAssignment::setAssignment(const std::vector< int >& assingment)
+void SubsetAssignment::setAssignment(const QVector< int >& assingment)
 {
     m_assingment = assingment;
     m_assignmentSet = true;

@@ -5,13 +5,14 @@
 #ifndef KNAPSACK_H
 #define KNAPSACK_H
 
-// STL
-#include <vector>
-#include <set>
-#include <string>
+// Qt
+#include <QtCore/QVector>
+#include <QtCore/QSet>
 
 // Project
 #include "Item.h"
+
+class QString;
 
 class Knapsack
 {
@@ -23,14 +24,14 @@ public:
     int size() const;
     void setSize(int size);
 
-    std::vector<Item> items() const;
-    void setItems(const std::vector<Item> &items);
-    void setItems(const std::vector<int> &sizes, const std::vector<int> &profits);
+    QVector<Item> items() const;
+    void setItems(const QVector<Item> &items);
+    void setItems(const QVector<int> &sizes, const QVector<int> &profits);
 
     int maximumProfit();
-    std::set<int> maximumProfitItems();
+    QSet<int> maximumProfitItems();
 
-    std::string toString() const;
+    QString toString() const;
 
 private:
     void recalculateValues();
@@ -38,11 +39,11 @@ private:
     // Input
     bool              m_dirty;
     int               m_size;
-    std::vector<Item> m_items;
+    QVector<Item> m_items;
 
     // Output
     int m_maximumProfit;
-    std::set<int> m_maximumProfitItems;
+    QSet<int> m_maximumProfitItems;
 };
 
 #endif // KNAPSACK_H

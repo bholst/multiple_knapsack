@@ -1,4 +1,24 @@
 project(knapsack)
+cmake_minimum_required(VERSION 2.6)
 
-add_executable(knapsack SubsetAssignment.cpp RelativeItemSize.cpp FillRemainingMultipleKnapsack.cpp FastMultipleKnapsack.cpp MultipleKnapsack.cpp ApproximatedKnapsack.cpp KnapsackTestInstance.cpp Test.cpp Knapsack.cpp Item.cpp main.cpp)
+find_package(Qt4 COMPONENTS QtCore REQUIRED)
 
+set(knapsack_SRCS SubsetAssignment.cpp
+                  RelativeItemSize.cpp
+                  FillRemainingMultipleKnapsack.cpp
+                  FastMultipleKnapsack.cpp
+                  MultipleKnapsack.cpp
+                  ApproximatedKnapsack.cpp
+                  KnapsackTestInstance.cpp
+                  Test.cpp
+                  Knapsack.cpp
+                  Item.cpp
+                  main.cpp)
+
+qt4_automoc(${knapsack_SRCS})
+
+include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(knapsack ${knapsack_SRCS})
+
+target_link_libraries(knapsack ${QT_QTCORE_LIBRARY})

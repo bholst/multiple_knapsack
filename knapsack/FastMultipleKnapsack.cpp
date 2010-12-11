@@ -5,11 +5,12 @@
 */
 
 // STD
-#include <set>
-#include <vector>
-#include <stack>
 #include <cmath>
 #include <iostream>
+
+// Qt
+#include <QtCore/QList>
+#include <QtCore/QtAlgorithms>
 
 // Project
 #include "Item.h"
@@ -33,8 +34,8 @@ FastMultipleKnapsack::~FastMultipleKnapsack()
 
 void FastMultipleKnapsack::recalculateValues()
 {
-    list<int> sortedSizes = sizes();
-    sortedSizes.sort();
+    QList<int> sortedSizes = sizes();
+    qSort(sortedSizes);
 
     double rho = approximationLevel() / 5.0;
     MultipleKnapsack greedy;
@@ -47,11 +48,11 @@ void FastMultipleKnapsack::recalculateValues()
     
     // Split the set of items into 2 groups:
     // Much profit:
-    set<int> muchProfitItems;
+    QSet<int> muchProfitItems;
     // Rest:
-    set<int> littleProfitItems;
+    QSet<int> littleProfitItems;
     
-    vector<Item> allItems = items();
+    QVector<Item> allItems = items();
     int numberOfItems = allItems.size();
     int muchProfit = ceil(rho/sizes().size() * 2.0 * (1 + rho) * approximatedMaximum);
     //int small = rho * (*sortedSizes.begin());
@@ -65,8 +66,8 @@ void FastMultipleKnapsack::recalculateValues()
     }
     
     // The list of the sets we tested until now
-    list< set<int> > subsets;
-    set<int> emptySet;
+    QList< QSet<int> > subsets;
+    QSet<int> emptySet;
     subsets.push_back(emptySet);
     // Storing the subset with the largest profit until now
     SubsetAssignment largestSubsetAssignment = handleSubset(emptySet);
@@ -75,8 +76,8 @@ void FastMultipleKnapsack::recalculateValues()
     int itemLimit = sizes().size() / rho;
     
     // Run though all subsets of items with much profit
-    set<int>::iterator endIterator = muchProfitItems.end();
-    for(set<int>::iterator it = muchProfitItems.begin();
+    QSet<int>::iterator endIterator = muchProfitItems.end();
+    for(QSet<int>::iterator it = muchProfitItems.begin();
         it != endIterator;
         ++it)
     {
@@ -84,14 +85,14 @@ void FastMultipleKnapsack::recalculateValues()
         // to create a new subset.
         
         // The list of new subsets
-        list< set<int> > expandedSubSets;
-        list< set<int> >::iterator endSetIterator = subsets.end();
-        for(list< set<int> >::iterator setIt = subsets.begin();
+        QList< QSet<int> > expandedSubSets;
+        QList< QSet<int> >::iterator endSetIterator = subsets.end();
+        for(QList< QSet<int> >::iterator setIt = subsets.begin();
             setIt != endSetIterator;
             ++setIt)
         {
             if(setIt->size() < itemLimit) {
-                set<int> expandedSet = *setIt;
+                QSet<int> expandedSet = *setIt;
                 expandedSet.insert(*it);
                 expandedSubSets.push_back(expandedSet);
                 
@@ -107,8 +108,8 @@ void FastMultipleKnapsack::recalculateValues()
         }
         
         // Add the new subsets to the list.
-        list< set<int> >::iterator endExpandedSubsets = expandedSubSets.end();
-        for(list< set<int> >::iterator expandedSetIt = expandedSubSets.begin();
+        QList< QSet<int> >::iterator endExpandedSubsets = expandedSubSets.end();
+        for(QList< QSet<int> >::iterator expandedSetIt = expandedSubSets.begin();
             expandedSetIt != endExpandedSubsets;
             ++expandedSetIt)
         {
@@ -125,14 +126,14 @@ void FastMultipleKnapsack::recalculateValues()
     }
 }
 
-SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subset)
+SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset)
 {
     int totalItemSize = 0;
-    vector<Item> allItems = items();
+    QVector<Item> allItems = items();
     // Create a start assignment and calculate the total size of our subsets.
-    vector<int> assignment(items().size(), -1);
-    set<int>::iterator endIterator = subset.end();
-    for(set<int>::iterator it = subset.begin();
+    QVector<int> assignment(items().size(), -1);
+    QSet<int>::const_iterator endIterator = subset.end();
+    for(QSet<int>::const_iterator it = subset.begin();
         it != endIterator;
         ++it)
     {
@@ -150,7 +151,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subse
     while(!validAssignmentFound && !runThroughAllAssignments) {
         bool assignmentChanged = false;
         endIterator = subset.end();
-        set<int>::iterator it = subset.begin();
+        QSet<int>::const_iterator it = subset.begin();
         if(it == endIterator) {
             runThroughAllAssignments = true;
         }
@@ -194,10 +195,10 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const std::set< int >& subse
     return SubsetAssignment();
 }
 
-bool FastMultipleKnapsack::testAssignment(const std::vector< int >& assignment)
+bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment)
 {
-    vector<int> remainingSizes = sizesVector();
-    vector<Item> allItems = items();
+    QVector<int> remainingSizes = sizesVector();
+    QVector<Item> allItems = items();
     int numberOfItems = assignment.size();
     for(int i = 0; i < numberOfItems; ++i)
     {
@@ -215,7 +216,7 @@ bool FastMultipleKnapsack::testAssignment(const std::vector< int >& assignment)
     return true;
 }
 
-void FastMultipleKnapsack::printAssignment(const std::vector< int >& assignment)
+void FastMultipleKnapsack::printAssignment(const QVector< int >& assignment)
 {
     int numberOfItems = assignment.size();
     for(int i = 0; i < numberOfItems; ++i)

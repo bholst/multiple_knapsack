@@ -5,9 +5,9 @@
 #ifndef MULTIPLEKNAPSACK_H
 #define MULTIPLEKNAPSACK_H
 
-// std
-#include <vector>
-#include <list>
+// Qt
+#include <QtCore/QVector>
+#include <QtCore/QList>
 
 class Item;
 
@@ -18,14 +18,14 @@ public:
     MultipleKnapsack();
     virtual ~MultipleKnapsack();
 
-    std::list<int> sizes() const;
-    std::vector<int> sizesVector();
-    void setSizes(std::list<int> sizes);
+    QList<int> sizes() const;
+    QVector<int> sizesVector();
+    void setSizes(QList<int> sizes);
     
     int totalSize();
 
-    std::vector<Item> items() const;
-    void setItems(std::vector<Item> items);
+    QVector<Item> items() const;
+    void setItems(QVector<Item> items);
 
     double approximationLevel() const;
     void setApproximationLevel(double approximationLevel);
@@ -42,12 +42,12 @@ protected:
 private:
     virtual void recalculateValues();
 
-    std::list<int> m_sizes;
+    QList<int> m_sizes;
     int m_totalSize;
     bool m_totalSizeDirty;
-    std::vector<int> m_sizesVector;
+    QVector<int> m_sizesVector;
     bool m_sizesVectorDirty;
-    std::vector<Item> m_items;
+    QVector<Item> m_items;
     double m_approximationLevel;
     bool m_dirty;
 };

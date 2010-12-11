@@ -5,9 +5,9 @@
 #ifndef APPROXIMATEDKNAPSACK_H
 #define APPROXIMATEDKNAPSACK_H
 
-// STL
-#include <vector>
-#include <set>
+// Qt
+#include <QtCore/QVector>
+#include <QtCore/QSet>
 
 class Item;
 class Knapsack;
@@ -26,21 +26,21 @@ public:
     void setApproximationLevel(double approximationLevel);
     double approximationLevel() const;
 
-    std::vector<Item> items() const;
-    void setItems(const std::vector<Item> &items);
+    QVector<Item> items() const;
+    void setItems(const QVector<Item> &items);
 
     int maximumProfit();
-    std::set<int> maximumProfitItems();
+    QSet<int> maximumProfitItems();
 
 private:
     void recalculateValues();
 
     bool m_dirty;
     double m_approximationLevel;
-    std::vector<Item> m_items;
+    QVector<Item> m_items;
     int m_size;
     int m_maximumProfit;
-    std::set<int> m_maximumProfitItems;
+    QSet<int> m_maximumProfitItems;
 };
 
 #endif // APPROXIMATEDKNAPSACK_H

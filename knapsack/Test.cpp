@@ -4,9 +4,11 @@
 
 // STL
 #include <iostream>
-#include <list>
-#include <set>
-#include <vector>
+
+// Qt
+#include <QtCore/QVector>
+#include <QtCore/QList>
+#include <QtCore/QSet>
 
 // Project
 #include "Knapsack.h"
@@ -24,7 +26,7 @@ Test::Test()
 {
     KnapsackTestInstance instance;
     instance.setSize(5);
-    vector<int> sizes(3, 0), profit(3, 0);
+    QVector<int> sizes(3, 0), profit(3, 0);
     sizes[0] = 2;
     sizes[1] = 4;
     sizes[2] = 1;
@@ -33,8 +35,8 @@ Test::Test()
     profit[2] = 4;
     instance.setItems(sizes, profit);
     instance.setExpectedMaximumProfit(10);
-    std::list< std::set<int> > itemList;
-    std::set<int> set1;
+    QList< QSet<int> > itemList;
+    QSet<int> set1;
     set1.insert(1);
     set1.insert(2);
     itemList.push_back(set1);
@@ -43,15 +45,15 @@ Test::Test()
 
     KnapsackTestInstance instance2;
     instance2.setSize(100);
-    vector<int> sizes2(2, 0), profit2(2, 0);
+    QVector<int> sizes2(2, 0), profit2(2, 0);
     sizes2[0] = 1;
     sizes2[1] = 100;
     profit2[0] = 1;
     profit2[1] = 2;
     instance2.setItems(sizes2, profit2);
     instance2.setExpectedMaximumProfit(2);
-    std::list< std::set<int> > itemList2;
-    std::set<int> set2;
+    QList< QSet<int> > itemList2;
+    QSet<int> set2;
     set2.insert(1);
     itemList2.push_back(set2);
     instance2.setExpectedMaximumProfitItems(itemList2);
@@ -59,7 +61,7 @@ Test::Test()
 
     KnapsackTestInstance instance3;
     instance3.setSize(1024);
-    vector<int> sizes3(5, 0), profit3(5, 0);
+    QVector<int> sizes3(5, 0), profit3(5, 0);
     sizes3[0] = 1024;
     sizes3[1] = 2048;
     sizes3[2] = 512;
@@ -72,9 +74,9 @@ Test::Test()
     profit3[4] = 1025;
     instance3.setItems(sizes3, profit3);
     instance3.setExpectedMaximumProfit(2048);
-    std::list< std::set<int> > itemList3;
-    std::set<int> set3;
-    std::set<int> set4;
+    QList< QSet<int> > itemList3;
+    QSet<int> set3;
+    QSet<int> set4;
     set3.insert(0);
     set4.insert(2);
     set4.insert(4);
@@ -85,7 +87,7 @@ Test::Test()
 
     KnapsackTestInstance instance4;
     instance4.setSize(10);
-    vector<int> sizes4(3, 0), profit4(3, 0);
+    QVector<int> sizes4(3, 0), profit4(3, 0);
     sizes4[0] = 128;
     sizes4[1] = 16;
     sizes4[2] = 11;
@@ -94,7 +96,8 @@ Test::Test()
     profit4[2] = 16;
     instance4.setItems(sizes4, profit4);
     instance4.setExpectedMaximumProfit(0);
-    std::list< std::set<int> > itemList4(1);
+    QList< QSet<int> > itemList4;
+    itemList4.append(QSet<int>());
     instance4.setExpectedMaximumProfitItems(itemList4);
     m_knapsackInstances.insert(m_knapsackInstances.end(), instance4);
 }
@@ -109,21 +112,21 @@ void Test::run()
     runMultipleKnapsackTests();
     
     int testsFailed = 0;
-    for(vector<KnapsackTestInstance>::iterator it = m_knapsackInstances.begin();
+    for(QVector<KnapsackTestInstance>::iterator it = m_knapsackInstances.begin();
         it != m_knapsackInstances.end();
         ++it)
     {
-        list< set<int> > expectedList = it->expectedMaximumProfitItems();
-        set<int> returnedSet = it->maximumProfitItems();
+        QList< QSet<int> > expectedList = it->expectedMaximumProfitItems();
+        QSet<int> returnedSet = it->maximumProfitItems();
         bool foundRightSet = false;
 
-        for(list< set<int> >::iterator expectedSetIt = expectedList.begin();
+        for(QList< QSet<int> >::iterator expectedSetIt = expectedList.begin();
             expectedSetIt != expectedList.end();
             ++expectedSetIt)
         {
             bool rightSet = true;
             if(expectedSetIt->size() == returnedSet.size()) {
-                for(set<int>::iterator it = expectedSetIt->begin();
+                for(QSet<int>::iterator it = expectedSetIt->begin();
                     it != expectedSetIt->end();
                     ++it)
                 {
@@ -183,11 +186,11 @@ void Test::run()
 void Test::runMultipleKnapsackTests()
 {
     cout << "Multiple Knapsack test starting" << endl << endl;
-    list<int> bins;
+    QList<int> bins;
     bins.push_back(133);
     bins.push_back(1200);
     bins.push_back(421);
-    vector<Item> items;
+    QVector<Item> items;
     {
         Item item;
         item.setSize(102);

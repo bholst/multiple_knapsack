@@ -7,19 +7,20 @@
 #ifndef SUBSETASSIGNMENT_H
 #define SUBSETASSIGNMENT_H
 
-#include <set>
-#include <vector>
+// Qt
+#include <QtCore/QSet>
+#include <QtCore/QVector>
 
 class SubsetAssignment
 {
 public:
     SubsetAssignment();
     
-    std::set<int> subset() const;
-    void setSubset(const std::set<int>& subset);
+    QSet<int> subset() const;
+    void setSubset(const QSet<int>& subset);
     
-    std::vector<int> assingment() const;
-    void setAssignment(const std::vector<int>& assingment);
+    QVector<int> assingment() const;
+    void setAssignment(const QVector<int>& assingment);
     
     int profit() const;
     void setProfit(int profit);
@@ -29,9 +30,9 @@ public:
     bool operator>(const SubsetAssignment& other);
     
 private:
-    std::set<int> m_subset;
+    QSet<int> m_subset;
     bool m_subsetSet;
-    std::vector<int> m_assingment;
+    QVector<int> m_assingment;
     bool m_assignmentSet;
     int m_profit;
     bool m_profitSet;

@@ -24,12 +24,12 @@ int KnapsackTestInstance::expectedMaximumProfit() const
     return m_expectedMaximumProfit;
 }
 
-void KnapsackTestInstance::setExpectedMaximumProfitItems(std::list< std::set< int > > list)
+void KnapsackTestInstance::setExpectedMaximumProfitItems(QList< QSet< int > > list)
 {
     m_expectedMaximumProfitItems = list;
 }
 
-std::list< std::set< int > > KnapsackTestInstance::expectedMaximumProfitItems()
+QList< QSet< int > > KnapsackTestInstance::expectedMaximumProfitItems()
 {
     return m_expectedMaximumProfitItems;
 }

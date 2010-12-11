@@ -2,6 +2,9 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
+// Qt
+#include <QtCore/QtAlgorithms>
+
 // Project
 #include "Item.h"
 #include "ApproximatedKnapsack.h"
@@ -36,23 +39,23 @@ void MultipleKnapsack::setApproximationLevel(double approximationLevel)
     m_approximationLevel = approximationLevel;
 }
 
-std::vector<Item> MultipleKnapsack::items() const
+QVector<Item> MultipleKnapsack::items() const
 {
     return m_items;
 }
 
-void MultipleKnapsack::setItems(vector< Item > items)
+void MultipleKnapsack::setItems(QVector< Item > items)
 {
     m_dirty = true;
     m_items = items;
 }
 
-std::list<int> MultipleKnapsack::sizes() const
+QList<int> MultipleKnapsack::sizes() const
 {
     return m_sizes;
 }
 
-void MultipleKnapsack::setSizes(std::list< int > sizes)
+void MultipleKnapsack::setSizes(QList< int > sizes)
 {
     m_sizesVectorDirty = true;
     m_totalSizeDirty = true;
@@ -60,13 +63,13 @@ void MultipleKnapsack::setSizes(std::list< int > sizes)
     m_sizes = sizes;
 }
 
-std::vector< int > MultipleKnapsack::sizesVector()
+QVector< int > MultipleKnapsack::sizesVector()
 {
     if(m_sizesVectorDirty) {
         // Make sizes vector
-        list<int> allSizes = sizes();
-        list<int>::iterator sizesEnd = allSizes.end();
-        for(list<int>::iterator it = allSizes.begin();
+        QList<int> allSizes = sizes();
+        QList<int>::iterator sizesEnd = allSizes.end();
+        for(QList<int>::iterator it = allSizes.begin();
             it != sizesEnd;
             ++it)
         {
@@ -83,9 +86,9 @@ int MultipleKnapsack::totalSize()
 {
     if(m_totalSizeDirty) {
         m_totalSize = 0;
-        list<int> allSizes = sizes();
-        list<int>::iterator sizesEnd = allSizes.end();
-        for(list<int>::iterator it = allSizes.begin();
+        QList<int> allSizes = sizes();
+        QList<int>::iterator sizesEnd = allSizes.end();
+        for(QList<int>::iterator it = allSizes.begin();
             it != sizesEnd;
             ++it)
         {
@@ -109,11 +112,11 @@ int MultipleKnapsack::maximumProfit()
 void MultipleKnapsack::recalculateValues()
 {
     // Do the calculation stuff
-    vector<Item> remainingItems = m_items;
-    m_sizes.sort();
-    list<int>::iterator end = m_sizes.end();
+    QVector<Item> remainingItems = m_items;
+    qSort(m_sizes);
+    QList<int>::iterator end = m_sizes.end();
     m_maximumProfit = 0;
-    for(list<int>::iterator it = m_sizes.begin();
+    for(QList<int>::iterator it = m_sizes.begin();
         it != end;
         ++it)
     {
@@ -123,9 +126,9 @@ void MultipleKnapsack::recalculateValues()
         knapsack.setItems(remainingItems);
         
         m_maximumProfit += knapsack.maximumProfit();
-        set<int> maximumProfitItems = knapsack.maximumProfitItems();
+        QSet<int> maximumProfitItems = knapsack.maximumProfitItems();
         int itemNumber = remainingItems.size();
-        vector<Item> newRemainingItems;
+        QVector<Item> newRemainingItems;
         for(int i = 0; i < itemNumber; ++i) {
             if(maximumProfitItems.find(i) == maximumProfitItems.end()) {
                 newRemainingItems.push_back(remainingItems[i]);

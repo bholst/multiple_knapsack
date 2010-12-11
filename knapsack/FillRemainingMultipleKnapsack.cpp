@@ -23,7 +23,7 @@ void FillRemainingMultipleKnapsack::recalculateValues()
 {
     list<RelativeItemSize> relativeSizes;
     
-    vector<Item> itemVector = items();
+    QVector<Item> itemVector = items();
     int itemNumber = itemVector.size();
     for(int i = 0; i < itemNumber; ++i) {
         RelativeItemSize relativeSize(i, itemVector[i]);
@@ -37,7 +37,7 @@ void FillRemainingMultipleKnapsack::recalculateValues()
     list<RelativeItemSize>::iterator it = relativeSizes.begin();
     
     m_assignment = m_startAssignment;
-    vector<int> sizesStillAvailable = remainingSizes();
+    QVector<int> sizesStillAvailable = remainingSizes();
     int currentBin = 0;
     
     while((it != endIterator) && completeSize > 0) {
@@ -64,18 +64,18 @@ void FillRemainingMultipleKnapsack::recalculateValues()
     setDirty(false);
 }
 
-vector<int> FillRemainingMultipleKnapsack::startAssignment() const
+QVector<int> FillRemainingMultipleKnapsack::startAssignment() const
 {
     return m_startAssignment;
 }
 
-void FillRemainingMultipleKnapsack::setStartAssignment(const vector< int >& assignment)
+void FillRemainingMultipleKnapsack::setStartAssignment(const QVector< int >& assignment)
 {
     update();
     m_startAssignment = assignment;
 }
 
-std::vector< int > FillRemainingMultipleKnapsack::assignment()
+QVector< int > FillRemainingMultipleKnapsack::assignment()
 {
     if(dirty()) {
         recalculateValues();
@@ -83,12 +83,12 @@ std::vector< int > FillRemainingMultipleKnapsack::assignment()
     return m_assignment;
 }
 
-std::vector< int > FillRemainingMultipleKnapsack::remainingSizes()
+QVector< int > FillRemainingMultipleKnapsack::remainingSizes()
 {
     if(m_remainingSizesDirty) {
         m_remainingSizes = sizesVector();
 
-        vector<Item> allItems = items();
+        QVector<Item> allItems = items();
         int numberOfItems = m_startAssignment.size();
         for(int i = 0; i < numberOfItems; ++i)
         {
@@ -107,10 +107,10 @@ int FillRemainingMultipleKnapsack::remainingSize()
 {
     if(m_remainingSizeDirty) {
         m_remainingSize = 0;
-        vector<int> sizes = remainingSizes();
+        QVector<int> sizes = remainingSizes();
         
-        vector<int>::iterator endIterator = sizes.end();
-        for(vector<int>::iterator it = sizes.begin();
+        QVector<int>::iterator endIterator = sizes.end();
+        for(QVector<int>::iterator it = sizes.begin();
             it != endIterator;
             ++it)
         {

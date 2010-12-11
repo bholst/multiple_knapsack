@@ -2,8 +2,9 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
-// STL
-#include <iostream>
+// Qt
+#include <QtCore/QString>
+#include <QtCore/QDebug>
 
 // Project
 #include "Item.h"
@@ -11,10 +12,8 @@
 // Self
 #include "Knapsack.h"
 
-using namespace std;
-
 Knapsack::Knapsack()
-    : m_dirty(false),
+    : m_dirty(true),
       m_size(0),
       m_maximumProfit(0)
 {
@@ -37,21 +36,21 @@ void Knapsack::setSize ( int size )
     m_size = size;
 }
 
-std::vector< Item > Knapsack::items() const
+QVector< Item > Knapsack::items() const
 {
     return m_items;
 }
 
-void Knapsack::setItems ( const vector< Item >& items )
+void Knapsack::setItems ( const QVector< Item >& items )
 {
     m_dirty = true;
     m_items = items;
 }
 
-void Knapsack::setItems(const std::vector<int>& sizes, const std::vector<int>& profits)
+void Knapsack::setItems(const QVector<int>& sizes, const QVector<int>& profits)
 {
     if(sizes.size() == profits.size()) {
-        std::vector<Item> items;
+        QVector<Item> items;
 
         int length = sizes.size();
         for(int i = 0; i < length; ++i) {
@@ -73,7 +72,7 @@ int Knapsack::maximumProfit()
     return m_maximumProfit;
 }
 
-std::set< int > Knapsack::maximumProfitItems()
+QSet< int > Knapsack::maximumProfitItems()
 {
     if(m_dirty) {
         recalculateValues();
@@ -90,9 +89,9 @@ void Knapsack::recalculateValues()
     }
 
     int minimumSize[m_items.size()][profitSum];
-    set<int> minimumSizeItems[m_items.size()][profitSum];
+    QSet<int> minimumSizeItems[m_items.size()][profitSum];
     int maximumProfit = 0;
-    set<int> maximumProfitItems;
+    QSet<int> maximumProfitItems;
 
     int profitFirst = m_items[0].profit();
     int sizeFirst = m_items[0].size();
@@ -114,7 +113,7 @@ void Knapsack::recalculateValues()
         for(int i = 1; i <= profitSum; ++i) {
             int a, b = -1;
             a = minimumSize[j-1][i-1];
-            set<int> bItems;
+            QSet<int> bItems;
 
             if(i <= m_items[j].profit()) {
                 // Item j is the only item in the set.
@@ -155,25 +154,26 @@ void Knapsack::recalculateValues()
     m_dirty = false;
 }
 
-string Knapsack::toString() const
+QString Knapsack::toString() const
 {
+    QString returnString;
     // FIXME: Has to return a string!!!
-    cerr << "Bin size ";
-    cerr << size();
-    cerr << "\n";
-    cerr << "Items:\n";
+    returnString += "Bin size ";
+    returnString += size();
+    returnString += "\n";
+    returnString += "Items:\n";
     for(int i = 0; i < m_items.size(); ++i) {
-        cerr << i;
-        cerr << ":\n";
-        cerr << "Size: ";
-        cerr << m_items[i].size();
-        cerr << "\n";
-        cerr << "Profit: ";
-        cerr << m_items[i].profit();
-        cerr << "\n";
+        returnString += i;
+        returnString += ":\n";
+        returnString += "Size: ";
+        returnString += m_items[i].size();
+        returnString += "\n";
+        returnString += "Profit: ";
+        returnString += m_items[i].profit();
+        returnString += "\n";
     }
 
-    return "";
+    return returnString;
 }
 
 

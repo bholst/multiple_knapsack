@@ -5,9 +5,9 @@
 #ifndef KNAPSACKTESTINSTANCE_H
 #define KNAPSACKTESTINSTANCE_H
 
-// STL
-#include <list>
-#include <set>
+// Qt
+#include <QtCore/QList>
+#include <QtCore/QSet>
 
 // Project
 #include "Knapsack.h"
@@ -22,12 +22,12 @@ public:
     void setExpectedMaximumProfit(int expectedMaximumProfit);
     int expectedMaximumProfit() const;
 
-    void setExpectedMaximumProfitItems(std::list < std::set<int> > list);
-    std::list < std::set<int> > expectedMaximumProfitItems();
+    void setExpectedMaximumProfitItems(QList < QSet<int> > list);
+    QList < QSet<int> > expectedMaximumProfitItems();
 
 private:
     int m_expectedMaximumProfit;
-    std::list < std::set<int> > m_expectedMaximumProfitItems;
+    QList < QSet<int> > m_expectedMaximumProfitItems;
 };
 
 #endif // KNAPSACKTESTINSTANCE_H

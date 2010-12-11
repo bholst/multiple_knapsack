@@ -5,7 +5,8 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include <vector>
+// Qt
+#include <QtCore/QVector>
 
 class KnapsackTestInstance;
 
@@ -20,7 +21,7 @@ public:
     void runMultipleKnapsackTests();
 
 private:
-    std::vector<KnapsackTestInstance> m_knapsackInstances;
+    QVector<KnapsackTestInstance> m_knapsackInstances;
 };
 
 #endif // TEST_H
