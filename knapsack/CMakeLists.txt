@@ -13,7 +13,8 @@ set(knapsack_SRCS SubsetAssignment.cpp
                   Test.cpp
                   Knapsack.cpp
                   Item.cpp
-                  main.cpp)
+                  main.cpp
+                  InstanceParser.cpp)
 
 qt4_automoc(${knapsack_SRCS})
 
