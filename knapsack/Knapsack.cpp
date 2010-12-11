@@ -5,12 +5,16 @@
 // Qt
 #include <QtCore/QString>
 #include <QtCore/QDebug>
+#include <QtCore/QPair>
 
 // Project
 #include "Item.h"
+#include "ChainedSet.h"
 
 // Self
 #include "Knapsack.h"
+
+typedef QPair<int,int> IntPair;
 
 Knapsack::Knapsack()
     : m_dirty(true),
@@ -90,89 +94,99 @@ void Knapsack::recalculateValues()
     }
 
     qDebug() << QString("The size of the field is %1 x %2").arg(m_items.size()).arg(profitSum);
-    int minimumSize[m_items.size()][profitSum];
-    QSet<int> *minimumSizeItems[m_items.size()][profitSum];
-    QList< QSet<int>* > sets;
+    //int minimumSize[m_items.size()][profitSum];
+    QHash<IntPair,int> minimumSize;
+    //QSet<int> *minimumSizeItems[m_items.size()][profitSum];
+    QHash<IntPair,ChainedSet *> minimumSizeItems;
+    QList< ChainedSet * > sets;
+    /*
     for(int i = 0; i < m_items.size(); ++i) {
         for(int j = 0; j < profitSum; ++j) {
             minimumSizeItems[i][j] = 0;
         }
-    }
+    }*/
     int maximumProfit = 0;
-    QSet<int> maximumProfitItems;
+    ChainedSet *maximumProfitItems = 0;
 
     int profitFirst = m_items[0].profit();
     int sizeFirst = m_items[0].size();
 
+    ChainedSet *zeroSet = new ChainedSet(0);
+    sets.append(zeroSet);
     if( sizeFirst <= m_size ) {
         maximumProfit = profitFirst;
-        maximumProfitItems.insert(0);
+        maximumProfitItems = zeroSet;
     }
 
-    QSet<int> *zeroSet = new QSet<int>();
-    sets.append(zeroSet);
-    zeroSet->insert(0);
     for(int i = 1; i <= profitFirst; ++i) {
-        minimumSize[0][i-1] = sizeFirst;
-        minimumSizeItems[0][i-1] = zeroSet;
+//         minimumSize[0][i-1] = sizeFirst;
+//         minimumSizeItems[0][i-1] = zeroSet;
+        minimumSize.insert(IntPair(0,i-1), sizeFirst);
+        minimumSizeItems.insert(IntPair(0,i-1), zeroSet);
     }
     for(int i = profitFirst + 1; i <= profitSum; ++i) {
-        minimumSize[0][i-1] = -1;
+//         minimumSize[0][i-1] = -1;
+        minimumSize.insert(IntPair(0,i-1), -1);
     }
 
     for(int j = 1; j < m_items.size(); ++j) {
         for(int i = 1; i <= profitSum; ++i) {
             int a, b = -1;
-            a = minimumSize[j-1][i-1];
-            QSet<int> *bItems = 0;
+//             a = minimumSize[j-1][i-1];
+            a = minimumSize.value(IntPair(j-1, i-1));
+            ChainedSet *bItems = 0;
 
             if(i <= m_items[j].profit()) {
                 // Item j is the only item in the set.
                 b = m_items[j].size();
-                bItems = new QSet<int>();
+                bItems = new ChainedSet(j);
             }
             else {
-                if(minimumSize[j-1][i-1-m_items[j].profit()] >= 0) {
+                if(minimumSize.value(IntPair(j-1,i-1-m_items[j].profit())) >= 0) {
                     // Item j comes into the set of other items.
-                    b = m_items[j].size() + minimumSize[j-1][i-1-m_items[j].profit()];
-                    bItems = new QSet<int>(*minimumSizeItems[j-1][i-1-m_items[j].profit()]);
+                    b = m_items[j].size() + minimumSize.value(IntPair(j-1,i-1-m_items[j].profit()));
+                    bItems = new ChainedSet(minimumSizeItems.value(IntPair(j-1,i-1-m_items[j].profit())), j);
                 }
             }
 
             if((a <= b && a >= 0) || b < 0) {
                 // Item j does not come into the set of items.
-                minimumSize[j][i-1] = a;
-                minimumSizeItems[j][i-1] = minimumSizeItems[j-1][i-1];
+                minimumSize.insert(IntPair(j, i-1), a);
+                minimumSizeItems.insert(IntPair(j, i-1), minimumSizeItems.value(IntPair(j-1, i-1)));
                 delete bItems;
             }
             else {
                 // Item j comes into the set of items
-                minimumSize[j][i-1] = b;
-                bItems->insert(j);
-                minimumSizeItems[j][i-1] = bItems;
+                minimumSize.insert(IntPair(j, i-1), b);
+                minimumSizeItems.insert(IntPair(j, i-1), bItems);
                 sets.append(bItems);
             }
 
-            if(minimumSize[j][i-1] >= 0
-               && minimumSize[j][i-1] <= m_size
+            if(minimumSize.value(IntPair(j,i-1)) >= 0
+               && minimumSize.value(IntPair(j,i-1)) <= m_size
                && maximumProfit < i)
             {
                 maximumProfit = i;
-                maximumProfitItems = *minimumSizeItems[j][i-1];
+                maximumProfitItems = minimumSizeItems.value(IntPair(j, i-1));
             }
         }
     }
+
+    m_maximumProfit = maximumProfit;
+    if(maximumProfitItems) {
+        m_maximumProfitItems = maximumProfitItems->set();
+    }
+    else {
+        m_maximumProfitItems.clear();
+    }
     
-    QList< QSet<int>* >::iterator endIterator = sets.end();
-    for(QList< QSet<int>* >::iterator it = sets.begin();
+    QList< ChainedSet* >::iterator endIterator = sets.end();
+    for(QList< ChainedSet* >::iterator it = sets.begin();
         it != endIterator;
         ++it)
     {
         delete *it;
     }
-
-    m_maximumProfit = maximumProfit;
-    m_maximumProfitItems = maximumProfitItems;
     m_dirty = false;
 }
 

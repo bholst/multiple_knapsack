@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 COMPONENTS QtCore REQUIRED)
 
-set(knapsack_SRCS SubsetAssignment.cpp
+set(knapsack_SRCS ChainedSet.cpp
+                  SubsetAssignment.cpp
                   RelativeItemSize.cpp
                   FillRemainingMultipleKnapsack.cpp
                   FastMultipleKnapsack.cpp
