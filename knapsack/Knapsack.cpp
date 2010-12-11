@@ -86,10 +86,18 @@ void Knapsack::recalculateValues()
     int profitSum = 0;
     for(int i=0; i < m_items.size(); ++i) {
         profitSum += m_items[i].profit();
+        qDebug() << "Profit sum: " << profitSum;
     }
 
+    qDebug() << QString("The size of the field is %1 x %2").arg(m_items.size()).arg(profitSum);
     int minimumSize[m_items.size()][profitSum];
-    QSet<int> minimumSizeItems[m_items.size()][profitSum];
+    QSet<int> *minimumSizeItems[m_items.size()][profitSum];
+    QList< QSet<int>* > sets;
+    for(int i = 0; i < m_items.size(); ++i) {
+        for(int j = 0; j < profitSum; ++j) {
+            minimumSizeItems[i][j] = 0;
+        }
+    }
     int maximumProfit = 0;
     QSet<int> maximumProfitItems;
 
@@ -101,9 +109,12 @@ void Knapsack::recalculateValues()
         maximumProfitItems.insert(0);
     }
 
+    QSet<int> *zeroSet = new QSet<int>();
+    sets.append(zeroSet);
+    zeroSet->insert(0);
     for(int i = 1; i <= profitFirst; ++i) {
         minimumSize[0][i-1] = sizeFirst;
-        minimumSizeItems[0][i-1].insert(0);
+        minimumSizeItems[0][i-1] = zeroSet;
     }
     for(int i = profitFirst + 1; i <= profitSum; ++i) {
         minimumSize[0][i-1] = -1;
@@ -113,17 +124,18 @@ void Knapsack::recalculateValues()
         for(int i = 1; i <= profitSum; ++i) {
             int a, b = -1;
             a = minimumSize[j-1][i-1];
-            QSet<int> bItems;
+            QSet<int> *bItems = 0;
 
             if(i <= m_items[j].profit()) {
                 // Item j is the only item in the set.
                 b = m_items[j].size();
+                bItems = new QSet<int>();
             }
             else {
                 if(minimumSize[j-1][i-1-m_items[j].profit()] >= 0) {
                     // Item j comes into the set of other items.
                     b = m_items[j].size() + minimumSize[j-1][i-1-m_items[j].profit()];
-                    bItems = minimumSizeItems[j-1][i-1-m_items[j].profit()];
+                    bItems = new QSet<int>(*minimumSizeItems[j-1][i-1-m_items[j].profit()]);
                 }
             }
 
@@ -131,12 +143,14 @@ void Knapsack::recalculateValues()
                 // Item j does not come into the set of items.
                 minimumSize[j][i-1] = a;
                 minimumSizeItems[j][i-1] = minimumSizeItems[j-1][i-1];
+                delete bItems;
             }
             else {
                 // Item j comes into the set of items
                 minimumSize[j][i-1] = b;
+                bItems->insert(j);
                 minimumSizeItems[j][i-1] = bItems;
-                minimumSizeItems[j][i-1].insert(j);
+                sets.append(bItems);
             }
 
             if(minimumSize[j][i-1] >= 0
@@ -144,9 +158,17 @@ void Knapsack::recalculateValues()
                && maximumProfit < i)
             {
                 maximumProfit = i;
-                maximumProfitItems = minimumSizeItems[j][i-1];
+                maximumProfitItems = *minimumSizeItems[j][i-1];
             }
         }
+    }
+    
+    QList< QSet<int>* >::iterator endIterator = sets.end();
+    for(QList< QSet<int>* >::iterator it = sets.begin();
+        it != endIterator;
+        ++it)
+    {
+        delete *it;
     }
 
     m_maximumProfit = maximumProfit;
