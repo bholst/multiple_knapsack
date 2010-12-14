@@ -2,6 +2,9 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
+// Qt
+#include <QtCore/QDebug>
+
 // Project
 #include "Item.h"
 #include "RelativeItemSize.h"
@@ -24,11 +27,13 @@ void FillRemainingMultipleKnapsack::recalculateValues()
     list<RelativeItemSize> relativeSizes;
     
     QVector<Item> itemVector = items();
-    int itemNumber = itemVector.size();
-    for(int i = 0; i < itemNumber; ++i) {
-        RelativeItemSize relativeSize(i, itemVector[i]);
-        relativeSizes.push_back(relativeSize);
-    };
+    QSet<int>::iterator itemsToUseEnd = m_itemsToUse.end();
+    for(QSet<int>::iterator it = m_itemsToUse.begin(); it != itemsToUseEnd; ++it) {
+        if(m_startAssignment[*it] < 0) {
+            RelativeItemSize relativeSize(*it, itemVector[*it]);
+            relativeSizes.push_back(relativeSize);
+        }
+    }
     
     relativeSizes.sort();
     
@@ -55,7 +60,9 @@ void FillRemainingMultipleKnapsack::recalculateValues()
         ++it;
     }
     
-    m_maximumProfit = 0;
+    m_maximumProfit = startProfit();
+    qDebug() << "Start profit is" << m_maximumProfit;
+    int itemNumber = itemVector.size();
     for(int i = 0; i < itemNumber; ++i) {
         if(m_assignment[i] >= 0) {
             m_maximumProfit += itemVector[i].profit();
@@ -86,22 +93,39 @@ QVector< int > FillRemainingMultipleKnapsack::assignment()
 QVector< int > FillRemainingMultipleKnapsack::remainingSizes()
 {
     if(m_remainingSizesDirty) {
-        m_remainingSizes = sizesVector();
-
-        QVector<Item> allItems = items();
-        int numberOfItems = m_startAssignment.size();
-        for(int i = 0; i < numberOfItems; ++i)
-        {
-            if(m_startAssignment[i] < 0) {
-                continue;
-            }
-            m_remainingSizes[m_startAssignment[i]] = m_remainingSizes[m_startAssignment[i]] - allItems[i].size();
-        }
-        m_remainingSizesDirty = false;
+        recalculateRemainingSizes();
     }
     
     return m_remainingSizes;
 }
+
+int FillRemainingMultipleKnapsack::startProfit()
+{
+    if(m_remainingSizesDirty) {
+        recalculateRemainingSizes();
+    }
+    
+    return m_startProfit;
+}
+
+void FillRemainingMultipleKnapsack::recalculateRemainingSizes()
+{
+    m_remainingSizes = sizesVector();
+    m_startProfit = 0;
+
+    QVector<Item> allItems = items();
+    int numberOfItems = m_startAssignment.size();
+    for(int i = 0; i < numberOfItems; ++i)
+    {
+        if(m_startAssignment[i] < 0) {
+            continue;
+        }
+        m_remainingSizes[m_startAssignment[i]] = m_remainingSizes[m_startAssignment[i]] - allItems[i].size();
+        m_startProfit += allItems[i].profit();
+    }
+    m_remainingSizesDirty = false;
+}
+
 
 int FillRemainingMultipleKnapsack::remainingSize()
 {
@@ -128,5 +152,15 @@ void FillRemainingMultipleKnapsack::update()
     MultipleKnapsack::update();
     m_remainingSizeDirty = true;
     m_remainingSizesDirty = true;
+}
+
+QSet< int > FillRemainingMultipleKnapsack::itemsToUse() const
+{
+    return m_itemsToUse;
+}
+
+void FillRemainingMultipleKnapsack::setItemsToUse(const QSet< int > itemsToUse)
+{
+    m_itemsToUse = itemsToUse;
 }
 

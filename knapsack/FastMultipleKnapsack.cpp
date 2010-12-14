@@ -70,7 +70,7 @@ void FastMultipleKnapsack::recalculateValues()
     QSet<int> emptySet;
     subsets.push_back(emptySet);
     // Storing the subset with the largest profit until now
-    SubsetAssignment largestSubsetAssignment = handleSubset(emptySet);
+    SubsetAssignment largestSubsetAssignment = handleSubset(emptySet, littleProfitItems);
 
     // Only include itemLimit items per set
     int itemLimit = sizes().size() / rho;
@@ -97,7 +97,7 @@ void FastMultipleKnapsack::recalculateValues()
                 expandedSubSets.push_back(expandedSet);
                 
                 // Test if we find a valid assignment for this subset.
-                SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet);
+                SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet, littleProfitItems);
 
                 if(otherSubsetAssignment.valid()
                    && otherSubsetAssignment > largestSubsetAssignment)
@@ -126,7 +126,8 @@ void FastMultipleKnapsack::recalculateValues()
     }
 }
 
-SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset)
+SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
+                                                    const QSet<int>& remainingItems)
 {
     int totalItemSize = 0;
     QVector<Item> allItems = items();
@@ -181,6 +182,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset)
         fillRemaining.setStartAssignment(assignment);
         fillRemaining.setItems(items());
         fillRemaining.setSizes(sizes());
+        fillRemaining.setItemsToUse(remainingItems);
         assignment = fillRemaining.assignment();
         int profitForAssignment = fillRemaining.maximumProfit();
         

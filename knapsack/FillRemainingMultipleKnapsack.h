@@ -7,6 +7,7 @@
 
 // STD
 #include <QtCore/QVector>
+#include <QtCore/QSet>
 
 // Project
 #include "MultipleKnapsack.h"
@@ -23,19 +24,27 @@ public:
     QVector<int> assignment();
 
     QVector<int> remainingSizes();
+    int startProfit();
     int remainingSize();
+    
+    QSet<int> itemsToUse() const;
+    void setItemsToUse(const QSet<int> itemsToUse);
     
     virtual void update();
     
 private:
     virtual void recalculateValues();
     
+    void recalculateRemainingSizes();
+    
     QVector<int> m_startAssignment;
     QVector<int> m_remainingSizes;
+    int m_startProfit;
     bool m_remainingSizesDirty;
     int m_remainingSize;
     bool m_remainingSizeDirty;
     QVector<int> m_assignment;
+    QSet<int> m_itemsToUse;
 };
 
 #endif // FILLREMAININGMULTIPLEKNAPSACK_H
