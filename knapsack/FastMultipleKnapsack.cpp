@@ -179,8 +179,8 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset)
         // Fill in the small items.
         FillRemainingMultipleKnapsack fillRemaining;
         fillRemaining.setStartAssignment(assignment);
-        fillRemaining.setItems(items()); // FIXME: These are copys, we should use
-        fillRemaining.setSizes(sizes()); // FIXME: copy-on-write containers instead.
+        fillRemaining.setItems(items());
+        fillRemaining.setSizes(sizes());
         assignment = fillRemaining.assignment();
         int profitForAssignment = fillRemaining.maximumProfit();
         
