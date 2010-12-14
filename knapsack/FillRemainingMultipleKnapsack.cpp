@@ -45,12 +45,15 @@ void FillRemainingMultipleKnapsack::recalculateValues()
     QVector<int> sizesStillAvailable = remainingSizes();
     int currentBin = 0;
     
+    m_maximumProfit = startProfit();
+    qDebug() << "Start profit is" << m_maximumProfit;
     while((it != endIterator) && completeSize > 0) {
         int currentItemId = it->id();
         int currentItemSize = itemVector[currentItemId].size();
         completeSize -= currentItemSize;
         if(sizesStillAvailable[currentBin] >= currentItemSize) {
             m_assignment[currentItemId] = currentBin;
+            m_maximumProfit += itemVector[currentItemId].profit();
             sizesStillAvailable[currentBin] = sizesStillAvailable[currentBin] - currentItemSize;
         }
         else {
@@ -59,15 +62,7 @@ void FillRemainingMultipleKnapsack::recalculateValues()
 
         ++it;
     }
-    
-    m_maximumProfit = startProfit();
-    qDebug() << "Start profit is" << m_maximumProfit;
-    int itemNumber = itemVector.size();
-    for(int i = 0; i < itemNumber; ++i) {
-        if(m_assignment[i] >= 0) {
-            m_maximumProfit += itemVector[i].profit();
-        }
-    }
+
     setDirty(false);
 }
 

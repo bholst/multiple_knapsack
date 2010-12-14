@@ -24,7 +24,8 @@ public:
 
 private:
     virtual void recalculateValues();
-    SubsetAssignment handleSubset(const QSet<int>& subset, const QSet<int>& remainingItems);
+    SubsetAssignment handleSubset(const QSet<int>& subset, const QSet<int>& remainingItems,
+                                  int remainingItemsProfit, int minimumProfit);
     bool testAssignment(const QVector<int>& assignment);
     void printAssignment(const QVector<int>& assignment);
 };

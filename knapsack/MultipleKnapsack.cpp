@@ -3,6 +3,7 @@
 //
 
 // Qt
+#include <QtCore/QDebug>
 #include <QtCore/QtAlgorithms>
 
 // Project
@@ -17,7 +18,7 @@ using namespace std;
 MultipleKnapsack::MultipleKnapsack()
     : m_totalSizeDirty(true),
       m_sizesVectorDirty(true),
-      m_approximationLevel(0),
+      m_approximationLevel(0.5),
       m_dirty(true)
 {
 
@@ -35,6 +36,10 @@ double MultipleKnapsack::approximationLevel() const
 
 void MultipleKnapsack::setApproximationLevel(double approximationLevel)
 {
+    if(approximationLevel <= 0) {
+        qDebug() << "Invalid approximationLevel"; 
+        return;
+    }
     m_dirty = true;
     m_approximationLevel = approximationLevel;
 }
