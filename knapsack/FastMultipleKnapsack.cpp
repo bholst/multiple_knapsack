@@ -137,10 +137,12 @@ void FastMultipleKnapsack::recalculateValues()
     
     if(largestSubsetAssignment.valid()) {
         m_maximumProfit = largestSubsetAssignment.profit();
+        m_assignment = largestSubsetAssignment.assingment();
     }
     else {
         // We did not find any valid assignment for any subset.
         m_maximumProfit = 0;
+        m_assignment.clear();
     }
 }
 
