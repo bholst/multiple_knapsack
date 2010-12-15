@@ -15,6 +15,7 @@
 #include "MultipleKnapsack.h"
 
 class SubsetAssignment;
+class ItemWithIndex;
 
 class FastMultipleKnapsack : public MultipleKnapsack
 {
@@ -26,7 +27,7 @@ private:
     virtual void recalculateValues();
     SubsetAssignment handleSubset(const QSet<int>& subset, const QSet<int>& remainingItems,
                                   int remainingItemsProfit, int minimumProfit);
-    bool testAssignment(const QVector<int>& assignment);
+    bool testAssignment(const QVector<int>& assignment, const QVector<ItemWithIndex>& assignedItems);
     void printAssignment(const QVector<int>& assignment);
 };
 

@@ -17,6 +17,7 @@
 #include "Item.h"
 #include "FillRemainingMultipleKnapsack.h"
 #include "SubsetAssignment.h"
+#include "ItemWithIndex.h"
 
 // Self
 #include "FastMultipleKnapsack.h"
@@ -151,15 +152,16 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     int totalItemSize = 0;
     int totalItemProfit = 0;
     QVector<Item> allItems = items();
+    QVector<ItemWithIndex> subsetItems;
     // Create a start assignment and calculate the total size of our subsets.
 //     qDebug() << "Items selected";
-    QVector<int> assignment(items().size(), -1);
+    QVector<int> assignment(subset.size(), 0);
     QSet<int>::const_iterator endIterator = subset.end();
     for(QSet<int>::const_iterator it = subset.begin();
         it != endIterator;
         ++it)
     {
-        assignment[*it] = 0;
+        subsetItems.push_back(ItemWithIndex(*it, allItems[*it]));
         totalItemSize += allItems[*it].size();
         totalItemProfit += allItems[*it].profit();
     }
@@ -180,32 +182,32 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     static int numberOfTestedSubsets = 0;
     numberOfTestedSubsets++;
     
-    bool validAssignmentFound = testAssignment(assignment);
+    bool validAssignmentFound = testAssignment(assignment, subsetItems);
     bool runThroughAllAssignments = false;
     while(!validAssignmentFound && !runThroughAllAssignments) {
         bool assignmentChanged = false;
         endIterator = subset.end();
-        QSet<int>::const_iterator it = subset.begin();
-        if(it == endIterator) {
+        int i = 0;
+        if(i == subsetItems.size()) {
             runThroughAllAssignments = true;
         }
         while (!assignmentChanged && !runThroughAllAssignments) {
-            if(assignment[*it] < sizes().size() - 1) {
-                assignment[*it] = assignment[*it] + 1;
+            if(assignment[i] < sizes().size() - 1) {
+                assignment[i] = assignment[i] + 1;
                 assignmentChanged = true;
             }
             else {
-                assignment[*it] = 0;
-                ++it;
+                assignment[i] = 0;
+                ++i;
                 
-                if(it == endIterator) {
+                if(i == subsetItems.size()) {
                     runThroughAllAssignments = true;
                 }
             }
         }
         
         if(!runThroughAllAssignments) {
-            validAssignmentFound = testAssignment(assignment);
+            validAssignmentFound = testAssignment(assignment, subsetItems);
         }
     }
     
@@ -213,8 +215,14 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     
     if(validAssignmentFound) {
         // Fill in the small items.
+        QVector<int> completeAssignment(allItems.size(), -1);
+        for(int i = 0; i < subsetItems.size(); ++i) {
+            completeAssignment[subsetItems[i].index()] = assignment[i];
+        }
+        qDebug() << "Valid assignment";
+        printAssignment(completeAssignment);
         FillRemainingMultipleKnapsack fillRemaining;
-        fillRemaining.setStartAssignment(assignment);
+        fillRemaining.setStartAssignment(completeAssignment);
         fillRemaining.setItems(items());
         fillRemaining.setSizes(sizes());
         fillRemaining.setItemsToUse(remainingItems);
@@ -236,24 +244,22 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     return subsetAssignment;
 }
 
-bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment)
+bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment,
+                                          const QVector<ItemWithIndex>& assignmentItems)
 {
     QVector<int> remainingSizes = sizesVector();
-    QVector<Item> allItems = items();
     int numberOfItems = assignment.size();
-    for(int i = 0; i < numberOfItems; ++i)
+    for(int i = 0; i < assignment.size(); ++i)
     {
         if(assignment[i] < 0) {
             continue;
         }
-        remainingSizes[assignment[i]] = remainingSizes[assignment[i]] - allItems[i].size();
+        remainingSizes[assignment[i]] = remainingSizes[assignment[i]] - assignmentItems[i].size();
         if(remainingSizes[assignment[i]] < 0) {
             return false;
         }
     }
     
-    cout << "Valid assignment!" << endl;
-    printAssignment(assignment);
     return true;
 }
 
