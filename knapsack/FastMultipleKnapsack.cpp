@@ -104,7 +104,6 @@ void FastMultipleKnapsack::recalculateValues()
         // Run throuh all subsets generated before and add the current item if possible
         // to create a new subset.
         
-        QList< QSet<int> >::iterator endSetIterator = subsets.end();
         int numberOfSubsets = subsets.size();
         for(int i = 0;
             i < numberOfSubsets;
