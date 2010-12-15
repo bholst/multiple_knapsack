@@ -19,7 +19,6 @@ public:
     virtual ~MultipleKnapsack();
 
     QList<int> sizes() const;
-    QVector<int> sizesVector();
     void setSizes(QList<int> sizes);
     
     int totalSize();
@@ -48,8 +47,6 @@ private:
     QList<int> m_sizes;
     int m_totalSize;
     bool m_totalSizeDirty;
-    QVector<int> m_sizesVector;
-    bool m_sizesVectorDirty;
     QVector<Item> m_items;
     double m_approximationLevel;
     bool m_dirty;

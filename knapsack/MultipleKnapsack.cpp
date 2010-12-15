@@ -17,7 +17,6 @@ using namespace std;
 
 MultipleKnapsack::MultipleKnapsack()
     : m_totalSizeDirty(true),
-      m_sizesVectorDirty(true),
       m_approximationLevel(0.5),
       m_dirty(true)
 {
@@ -62,29 +61,9 @@ QList<int> MultipleKnapsack::sizes() const
 
 void MultipleKnapsack::setSizes(QList< int > sizes)
 {
-    m_sizesVectorDirty = true;
     m_totalSizeDirty = true;
     update();
     m_sizes = sizes;
-}
-
-QVector< int > MultipleKnapsack::sizesVector()
-{
-    if(m_sizesVectorDirty) {
-        // Make sizes vector
-        QList<int> allSizes = sizes();
-        QList<int>::iterator sizesEnd = allSizes.end();
-        for(QList<int>::iterator it = allSizes.begin();
-            it != sizesEnd;
-            ++it)
-        {
-            m_sizesVector.push_back(*it);
-        }
-    
-        m_sizesVectorDirty = false;
-    }
-    
-    return m_sizesVector;
 }
 
 int MultipleKnapsack::totalSize()

@@ -150,9 +150,10 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
                                                     int minimumProfit)
 {
     int totalItemSize = 0;
-//     int totalItemProfit = 0;
+    int totalItemProfit = 0;
     QVector<Item> allItems = items();
     QVector<ItemWithIndex> subsetItems;
+    subsetItems.reserve(subset.size());
     // Create a start assignment and calculate the total size of our subsets.
 //     qDebug() << "Items selected";
     QVector<int> assignment(subset.size(), 0);
@@ -163,7 +164,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     {
         subsetItems.push_back(ItemWithIndex(*it, allItems[*it]));
         totalItemSize += allItems[*it].size();
-//         totalItemProfit += allItems[*it].profit();
+        totalItemProfit += allItems[*it].profit();
     }
     
     // There is no assignment for the items of our subset.
@@ -173,14 +174,6 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         subsetAssignment.setNoAssignmentPossible(true);
         return subsetAssignment;
     }
-    
-    // Trying to find out if our set would give a profit large enough makes no sense.
-    // It would result into more subsets being in the list of subsets so it later takes more
-    // time to do this with expandedSets.
-//     if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
-// //         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
-//         return SubsetAssignment();
-//     }
     
     static int numberOfTestedSubsets = 0;
     numberOfTestedSubsets++;
@@ -217,6 +210,11 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
 //     qDebug() << "Really tested" << numberOfTestedSubsets << "subsets";
     
     if(validAssignmentFound) {
+        if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
+// //         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit; 
+            return SubsetAssignment();
+        }
+
         // Fill in the small items.
         QVector<int> completeAssignment(allItems.size(), -1);
         for(int i = 0; i < subsetItems.size(); ++i) {
@@ -250,7 +248,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
 bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment,
                                           const QVector<ItemWithIndex>& assignmentItems)
 {
-    QVector<int> remainingSizes = sizesVector();
+    QList<int> remainingSizes = sizes();
     int numberOfItems = assignment.size();
     for(int i = 0; i < assignment.size(); ++i)
     {

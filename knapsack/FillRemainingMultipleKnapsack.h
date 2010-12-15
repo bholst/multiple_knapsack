@@ -21,7 +21,7 @@ public:
     void setStartAssignment(const QVector<int>& assignment);
     QVector<int> startAssignment() const;
 
-    QVector<int> remainingSizes();
+    QList<int> remainingSizes();
     int startProfit();
     int remainingSize();
     
@@ -36,7 +36,7 @@ private:
     void recalculateRemainingSizes();
     
     QVector<int> m_startAssignment;
-    QVector<int> m_remainingSizes;
+    QList<int> m_remainingSizes;
     int m_startProfit;
     bool m_remainingSizesDirty;
     int m_remainingSize;

@@ -42,7 +42,7 @@ void FillRemainingMultipleKnapsack::recalculateValues()
     list<RelativeItemSize>::iterator it = relativeSizes.begin();
     
     m_assignment = m_startAssignment;
-    QVector<int> sizesStillAvailable = remainingSizes();
+    QList<int> sizesStillAvailable = remainingSizes();
     int currentBin = 0;
     
     m_maximumProfit = startProfit();
@@ -77,7 +77,7 @@ void FillRemainingMultipleKnapsack::setStartAssignment(const QVector< int >& ass
     m_startAssignment = assignment;
 }
 
-QVector< int > FillRemainingMultipleKnapsack::remainingSizes()
+QList< int > FillRemainingMultipleKnapsack::remainingSizes()
 {
     if(m_remainingSizesDirty) {
         recalculateRemainingSizes();
@@ -97,7 +97,7 @@ int FillRemainingMultipleKnapsack::startProfit()
 
 void FillRemainingMultipleKnapsack::recalculateRemainingSizes()
 {
-    m_remainingSizes = sizesVector();
+    m_remainingSizes = sizes();
     m_startProfit = 0;
 
     QVector<Item> allItems = items();
@@ -118,10 +118,10 @@ int FillRemainingMultipleKnapsack::remainingSize()
 {
     if(m_remainingSizeDirty) {
         m_remainingSize = 0;
-        QVector<int> sizes = remainingSizes();
+        QList<int> sizes = remainingSizes();
         
-        QVector<int>::iterator endIterator = sizes.end();
-        for(QVector<int>::iterator it = sizes.begin();
+        QList<int>::iterator endIterator = sizes.end();
+        for(QList<int>::iterator it = sizes.begin();
             it != endIterator;
             ++it)
         {
