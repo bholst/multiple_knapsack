@@ -77,14 +77,6 @@ void FillRemainingMultipleKnapsack::setStartAssignment(const QVector< int >& ass
     m_startAssignment = assignment;
 }
 
-QVector< int > FillRemainingMultipleKnapsack::assignment()
-{
-    if(dirty()) {
-        recalculateValues();
-    }
-    return m_assignment;
-}
-
 QVector< int > FillRemainingMultipleKnapsack::remainingSizes()
 {
     if(m_remainingSizesDirty) {

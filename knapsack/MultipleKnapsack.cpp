@@ -7,7 +7,7 @@
 #include <QtCore/QtAlgorithms>
 
 // Project
-#include "Item.h"
+#include "ItemWithIndex.h"
 #include "ApproximatedKnapsack.h"
 
 // Self
@@ -117,26 +117,35 @@ int MultipleKnapsack::maximumProfit()
 void MultipleKnapsack::recalculateValues()
 {
     // Do the calculation stuff
-    QVector<Item> remainingItems = m_items;
+    QVector<ItemWithIndex> remainingItems;
+    for(int i = 0; i < m_items.size(); ++i) {
+        remainingItems.push_back(ItemWithIndex(i, m_items[i]));
+    }
+    
+    m_assignment = QVector<int>(items().size(), -1);
+
     qSort(m_sizes);
-    QList<int>::iterator end = m_sizes.end();
     m_maximumProfit = 0;
-    for(QList<int>::iterator it = m_sizes.begin();
-        it != end;
-        ++it)
-    {
+    for(int i = 0; i < m_sizes.size(); ++i) {
+        QVector<Item> itemsForKnapsack;
+        for(int j = 0; j < remainingItems.size(); ++j) {
+            itemsForKnapsack.append(remainingItems[j]);
+        }
         ApproximatedKnapsack knapsack;
-        knapsack.setSize(*it);
+        knapsack.setSize(m_sizes[i]);
         knapsack.setApproximationLevel(m_approximationLevel);
-        knapsack.setItems(remainingItems);
+        knapsack.setItems(itemsForKnapsack);
         
         m_maximumProfit += knapsack.maximumProfit();
         QSet<int> maximumProfitItems = knapsack.maximumProfitItems();
         int itemNumber = remainingItems.size();
-        QVector<Item> newRemainingItems;
-        for(int i = 0; i < itemNumber; ++i) {
-            if(maximumProfitItems.find(i) == maximumProfitItems.end()) {
-                newRemainingItems.push_back(remainingItems[i]);
+        QVector<ItemWithIndex> newRemainingItems;
+        for(int j = 0; j < itemNumber; ++j) {
+            if(maximumProfitItems.find(j) == maximumProfitItems.end()) {
+                newRemainingItems.push_back(remainingItems[j]);
+            }
+            else {
+                m_assignment[remainingItems[j].index()] = i;
             }
         }
         
@@ -159,3 +168,12 @@ void MultipleKnapsack::setDirty(bool dirty)
 {
     m_dirty = dirty;
 }
+
+QVector< int > MultipleKnapsack::assignment()
+{
+    if(dirty()) {
+        recalculateValues();
+    }
+    return m_assignment;
+}
+

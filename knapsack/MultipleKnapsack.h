@@ -35,9 +35,12 @@ public:
     virtual void update();
     bool dirty();
     
+    QVector<int> assignment();
+    
 protected:
     void setDirty(bool dirty);
     int m_maximumProfit;
+    QVector<int> m_assignment;
 
 private:
     virtual void recalculateValues();

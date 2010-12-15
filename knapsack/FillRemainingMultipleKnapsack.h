@@ -20,8 +20,6 @@ public:
     
     void setStartAssignment(const QVector<int>& assignment);
     QVector<int> startAssignment() const;
-    
-    QVector<int> assignment();
 
     QVector<int> remainingSizes();
     int startProfit();
@@ -43,7 +41,6 @@ private:
     bool m_remainingSizesDirty;
     int m_remainingSize;
     bool m_remainingSizeDirty;
-    QVector<int> m_assignment;
     QSet<int> m_itemsToUse;
 };
 

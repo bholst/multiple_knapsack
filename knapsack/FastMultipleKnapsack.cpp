@@ -45,6 +45,11 @@ void FastMultipleKnapsack::recalculateValues()
     greedy.setSizes(sortedSizes);
     
     int approximatedMaximum = greedy.maximumProfit();
+    QVector<int> approximatedAssignment = greedy.assignment();
+    SubsetAssignment approximatedSubsetAssignment;
+    approximatedSubsetAssignment.setAssignment(approximatedAssignment);
+    approximatedSubsetAssignment.setProfit(approximatedMaximum);
+    approximatedSubsetAssignment.setSubset(QSet<int>());
     cout << "The approximated Maximum is :" << approximatedMaximum << endl;
     
     // Split the set of items into 2 groups:
@@ -81,6 +86,9 @@ void FastMultipleKnapsack::recalculateValues()
     SubsetAssignment largestSubsetAssignment = handleSubset(emptySet, littleProfitItems,
                                                             profitForLittleProfitItems,
                                                             0);
+    if(approximatedSubsetAssignment > largestSubsetAssignment) {
+        largestSubsetAssignment = approximatedSubsetAssignment;
+    }
     numberOfTestedSubsets++;
 
     // Only include itemLimit items per set
@@ -107,7 +115,7 @@ void FastMultipleKnapsack::recalculateValues()
             // Test if we find a valid assignment for this subset.
             SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet, littleProfitItems,
                                                                   profitForLittleProfitItems,
-                                                                  largestSubsetAssignment.profit() /*approximatedMaximum*/);
+                                                                  largestSubsetAssignment.profit());
             numberOfTestedSubsets++;
             
             if(!otherSubsetAssignment.noAssignmentPossible()) {
@@ -144,7 +152,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     int totalItemProfit = 0;
     QVector<Item> allItems = items();
     // Create a start assignment and calculate the total size of our subsets.
-    qDebug() << "Items selected";
+//     qDebug() << "Items selected";
     QVector<int> assignment(items().size(), -1);
     QSet<int>::const_iterator endIterator = subset.end();
     for(QSet<int>::const_iterator it = subset.begin();
@@ -158,14 +166,14 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     
     // There is no assignment for the items of our subset.
     if(totalItemSize > totalSize()) {
-        qDebug() << "The items do not fit";
+//         qDebug() << "The items do not fit";
         SubsetAssignment subsetAssignment;
         subsetAssignment.setNoAssignmentPossible(true);
         return subsetAssignment;
     }
     
     if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
-        qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
+//         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
         return SubsetAssignment();
     }
     
@@ -201,7 +209,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         }
     }
     
-    qDebug() << "Really tested" << numberOfTestedSubsets << "subsets";
+//     qDebug() << "Really tested" << numberOfTestedSubsets << "subsets";
     
     if(validAssignmentFound) {
         // Fill in the small items.
