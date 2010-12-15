@@ -72,6 +72,7 @@ void FastMultipleKnapsack::recalculateValues()
         }
     }
     
+    int numberOfTestedSubsets = 0;
     // The list of the sets we tested until now
     QList< QSet<int> > subsets;
     QSet<int> emptySet;
@@ -80,6 +81,7 @@ void FastMultipleKnapsack::recalculateValues()
     SubsetAssignment largestSubsetAssignment = handleSubset(emptySet, littleProfitItems,
                                                             profitForLittleProfitItems,
                                                             0);
+    numberOfTestedSubsets++;
 
     // Only include itemLimit items per set
     int itemLimit = sizes().size() / rho;
@@ -93,41 +95,33 @@ void FastMultipleKnapsack::recalculateValues()
         // Run throuh all subsets generated before and add the current item if possible
         // to create a new subset.
         
-        // The list of new subsets
-        QList< QSet<int> > expandedSubSets;
         QList< QSet<int> >::iterator endSetIterator = subsets.end();
-        for(QList< QSet<int> >::iterator setIt = subsets.begin();
-            setIt != endSetIterator;
-            ++setIt)
+        int numberOfSubsets = subsets.size();
+        for(int i = 0;
+            i < numberOfSubsets;
+            ++i)
         {               
-            QSet<int> expandedSet = *setIt;
+            QSet<int> expandedSet = subsets[i];
             expandedSet.insert(*it);
 
             // Test if we find a valid assignment for this subset.
             SubsetAssignment otherSubsetAssignment = handleSubset(expandedSet, littleProfitItems,
                                                                   profitForLittleProfitItems,
                                                                   largestSubsetAssignment.profit() /*approximatedMaximum*/);
-            
-            if(expandedSet.size() < itemLimit) {
-                expandedSubSets.push_back(expandedSet);
-            }
+            numberOfTestedSubsets++;
             
             if(otherSubsetAssignment.valid()) {
+                if(expandedSet.size() < itemLimit) {
+                    subsets.push_back(expandedSet);
+                }
                 if(otherSubsetAssignment > largestSubsetAssignment) {
                     largestSubsetAssignment = otherSubsetAssignment;
                 }
             }
         }
-        
-        // Add the new subsets to the list.
-        QList< QSet<int> >::iterator endExpandedSubsets = expandedSubSets.end();
-        for(QList< QSet<int> >::iterator expandedSetIt = expandedSubSets.begin();
-            expandedSetIt != endExpandedSubsets;
-            ++expandedSetIt)
-        {
-            subsets.push_back(*expandedSetIt);
-        }
     }
+    
+    qDebug() << "Tested" << numberOfTestedSubsets << "subsets";
     
     if(largestSubsetAssignment.valid()) {
         m_maximumProfit = largestSubsetAssignment.profit();
@@ -157,7 +151,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         qDebug() << *it << "with profit" << allItems[*it].profit();
         assignment[*it] = 0;
         totalItemSize += allItems[*it].size();
-        totalItemProfit += allItems[*it].profit();
+//         totalItemProfit += allItems[*it].profit();
     }
     
     // There is no assignment for the items of our subset.
@@ -166,10 +160,10 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         return SubsetAssignment();
     }
     
-    if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
-        qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
-        return SubsetAssignment();
-    }
+//     if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
+//         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
+//         return SubsetAssignment();
+//     }
     
     bool validAssignmentFound = testAssignment(assignment);
     bool runThroughAllAssignments = false;
