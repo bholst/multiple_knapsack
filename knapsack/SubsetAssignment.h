@@ -27,6 +27,9 @@ public:
     
     bool valid() const;
     
+    void setNoAssignmentPossible(bool noAssignmentPossible);
+    bool noAssignmentPossible() const;
+    
     bool operator>(const SubsetAssignment& other);
     
 private:
@@ -36,6 +39,7 @@ private:
     bool m_assignmentSet;
     int m_profit;
     bool m_profitSet;
+    bool m_noAssignmentPossible;
 };
 
 #endif // SUBSETASSIGNMENT_H

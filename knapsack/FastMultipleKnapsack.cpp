@@ -110,10 +110,13 @@ void FastMultipleKnapsack::recalculateValues()
                                                                   largestSubsetAssignment.profit() /*approximatedMaximum*/);
             numberOfTestedSubsets++;
             
-            if(otherSubsetAssignment.valid()) {
+            if(!otherSubsetAssignment.noAssignmentPossible()) {
                 if(expandedSet.size() < itemLimit) {
                     subsets.push_back(expandedSet);
                 }
+            }
+            
+            if(otherSubsetAssignment.valid()) {
                 if(otherSubsetAssignment > largestSubsetAssignment) {
                     largestSubsetAssignment = otherSubsetAssignment;
                 }
@@ -148,22 +151,26 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         it != endIterator;
         ++it)
     {
-        qDebug() << *it << "with profit" << allItems[*it].profit();
         assignment[*it] = 0;
         totalItemSize += allItems[*it].size();
-//         totalItemProfit += allItems[*it].profit();
+        totalItemProfit += allItems[*it].profit();
     }
     
     // There is no assignment for the items of our subset.
     if(totalItemSize > totalSize()) {
         qDebug() << "The items do not fit";
+        SubsetAssignment subsetAssignment;
+        subsetAssignment.setNoAssignmentPossible(true);
+        return subsetAssignment;
+    }
+    
+    if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
+        qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
         return SubsetAssignment();
     }
     
-//     if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
-//         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit;
-//         return SubsetAssignment();
-//     }
+    static int numberOfTestedSubsets = 0;
+    numberOfTestedSubsets++;
     
     bool validAssignmentFound = testAssignment(assignment);
     bool runThroughAllAssignments = false;
@@ -194,6 +201,8 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         }
     }
     
+    qDebug() << "Really tested" << numberOfTestedSubsets << "subsets";
+    
     if(validAssignmentFound) {
         // Fill in the small items.
         FillRemainingMultipleKnapsack fillRemaining;
@@ -210,10 +219,13 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         subsetAssignment.setSubset(subset);
         subsetAssignment.setProfit(profitForAssignment);
         subsetAssignment.setAssignment(assignment);
+        subsetAssignment.setNoAssignmentPossible(false);
         return subsetAssignment;
     }
     
-    return SubsetAssignment();
+    SubsetAssignment subsetAssignment;
+    subsetAssignment.setNoAssignmentPossible(true);
+    return subsetAssignment;
 }
 
 bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment)

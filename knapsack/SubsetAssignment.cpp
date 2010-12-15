@@ -11,7 +11,8 @@ using namespace std;
 SubsetAssignment::SubsetAssignment()
     : m_subsetSet(false),
       m_assignmentSet(false),
-      m_profitSet(false)
+      m_profitSet(false),
+      m_noAssignmentPossible(false)
 {
 
 }
@@ -57,5 +58,15 @@ bool SubsetAssignment::operator>(const SubsetAssignment& other)
 bool SubsetAssignment::valid() const
 {
     return m_assignmentSet && m_profitSet && m_subsetSet;
+}
+
+bool SubsetAssignment::noAssignmentPossible() const
+{
+    return m_noAssignmentPossible;
+}
+
+void SubsetAssignment::setNoAssignmentPossible(bool noAssignmentPossible)
+{
+    m_noAssignmentPossible = noAssignmentPossible;
 }
 
