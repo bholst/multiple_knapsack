@@ -10,6 +10,7 @@
 
 // Qt
 #include <QtCore/QDebug>
+#include <QtCore/QTime>
 #include <QtCore/QList>
 #include <QtCore/QtAlgorithms>
 
@@ -105,10 +106,10 @@ void FastMultipleKnapsack::recalculateValues()
         // to create a new subset.
         
         int numberOfSubsets = subsets.size();
-        for(int i = 0;
-            i < numberOfSubsets;
-            ++i)
-        {               
+        qDebug() << "Number of subsets for item" << *it << "is" << numberOfSubsets;
+        
+        for(int i = 0; i < numberOfSubsets; ++i)
+        {
             QSet<int> expandedSet = subsets[i];
             expandedSet.insert(*it);
 
@@ -156,32 +157,34 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     QVector<ItemWithIndex> subsetItems;
     subsetItems.reserve(subset.size());
     // Create a start assignment and calculate the total size of our subsets.
-//     qDebug() << "Items selected";
     QVector<int> assignment(subset.size(), 0);
     QSet<int>::const_iterator endIterator = subset.end();
     for(QSet<int>::const_iterator it = subset.begin();
         it != endIterator;
         ++it)
     {
-        subsetItems.push_back(ItemWithIndex(*it, allItems[*it]));
-        totalItemSize += allItems[*it].size();
-        totalItemProfit += allItems[*it].profit();
+        ItemWithIndex currentItem(*it, allItems[*it]);
+        subsetItems.push_back(currentItem);
+        totalItemSize += currentItem.size();
+        totalItemProfit += currentItem.profit();
     }
     
     // There is no assignment for the items of our subset.
     if(totalItemSize > totalSize()) {
-//         qDebug() << "The items do not fit";
         SubsetAssignment subsetAssignment;
         subsetAssignment.setNoAssignmentPossible(true);
         return subsetAssignment;
     }
     
-    static int numberOfTestedSubsets = 0;
-    numberOfTestedSubsets++;
-    
-    bool validAssignmentFound = testAssignment(assignment, subsetItems);
+    QList<int> remainingSizes = sizes();
+    int numberOfOverfullBins = 0;
+    remainingSizes[0] = remainingSizes[0] - totalItemSize;
+    if(remainingSizes[0] < 0) {
+        numberOfOverfullBins++;
+    }
+//     bool validAssignmentFound = testAssignment(assignment, subsetItems);
     bool runThroughAllAssignments = false;
-    while(!validAssignmentFound && !runThroughAllAssignments) {
+    while(numberOfOverfullBins != 0 && !runThroughAllAssignments) {
         bool assignmentChanged = false;
         endIterator = subset.end();
         int i = 0;
@@ -189,30 +192,53 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
             runThroughAllAssignments = true;
         }
         while (!assignmentChanged && !runThroughAllAssignments) {
+            int itemSize = subsetItems[i].size();
+            // Take the item out of the old bin
+            remainingSizes[assignment[i]] += itemSize;
+            if(remainingSizes[assignment[i]] >= 0
+               && remainingSizes[assignment[i]] < itemSize)
+            {
+                numberOfOverfullBins--;
+            }
+
+            // Change assignment
+            int nextAssignment;
             if(assignment[i] < sizes().size() - 1) {
-                assignment[i] = assignment[i] + 1;
+                nextAssignment = assignment[i] + 1;
+                assignment[i] = nextAssignment;
+                
                 assignmentChanged = true;
             }
             else {
-                assignment[i] = 0;
+                nextAssignment = 0;
+                assignment[i] = nextAssignment;
                 ++i;
                 
                 if(i == subsetItems.size()) {
                     runThroughAllAssignments = true;
                 }
             }
+            
+            // Put the item into the new bin
+            
+            remainingSizes[nextAssignment] = remainingSizes[nextAssignment] - itemSize;
+            if(remainingSizes[nextAssignment] < 0
+               && remainingSizes[nextAssignment] >= -itemSize)
+            {
+                numberOfOverfullBins++;
+            }
         }
         
-        if(!runThroughAllAssignments) {
-            validAssignmentFound = testAssignment(assignment, subsetItems);
+        if(runThroughAllAssignments) {
+//             validAssignmentFound = testAssignment(assignment, subsetItems);
+            numberOfOverfullBins = -1;
         }
     }
     
-//     qDebug() << "Really tested" << numberOfTestedSubsets << "subsets";
-    
-    if(validAssignmentFound) {
+    if(numberOfOverfullBins == 0) {
         if((totalItemProfit + remainingItemsProfit) < minimumProfit) {
 // //         qDebug() << "Total profit is" << totalItemProfit + remainingItemsProfit << "but we need a profit of" << minimumProfit; 
+//             m_totalTimeSum += totalTime.elapsed();
             return SubsetAssignment();
         }
 
@@ -238,11 +264,13 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         subsetAssignment.setProfit(profitForAssignment);
         subsetAssignment.setAssignment(assignment);
         subsetAssignment.setNoAssignmentPossible(false);
+//         m_totalTimeSum += totalTime.elapsed();
         return subsetAssignment;
     }
     
     SubsetAssignment subsetAssignment;
     subsetAssignment.setNoAssignmentPossible(true);
+//     m_totalTimeSum += totalTime.elapsed();
     return subsetAssignment;
 }
 
