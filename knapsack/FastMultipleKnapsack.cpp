@@ -97,8 +97,8 @@ void FastMultipleKnapsack::recalculateValues()
     int itemLimit = sizes().size() / rho;
     
     // Run though all subsets of items with much profit
-    QSet<int>::iterator endIterator = muchProfitItems.end();
-    for(QSet<int>::iterator it = muchProfitItems.begin();
+    QSet<int>::const_iterator endIterator = muchProfitItems.constEnd();
+    for(QSet<int>::const_iterator it = muchProfitItems.constBegin();
         it != endIterator;
         ++it)
     {
@@ -158,8 +158,8 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     subsetItems.reserve(subset.size());
     // Create a start assignment and calculate the total size of our subsets.
     QVector<int> assignment(subset.size(), 0);
-    QSet<int>::const_iterator endIterator = subset.end();
-    for(QSet<int>::const_iterator it = subset.begin();
+    QSet<int>::const_iterator endIterator = subset.constEnd();
+    for(QSet<int>::const_iterator it = subset.constBegin();
         it != endIterator;
         ++it)
     {

@@ -71,8 +71,8 @@ int MultipleKnapsack::totalSize()
     if(m_totalSizeDirty) {
         m_totalSize = 0;
         QList<int> allSizes = sizes();
-        QList<int>::iterator sizesEnd = allSizes.end();
-        for(QList<int>::iterator it = allSizes.begin();
+        QList<int>::const_iterator sizesEnd = allSizes.constEnd();
+        for(QList<int>::const_iterator it = allSizes.constBegin();
             it != sizesEnd;
             ++it)
         {

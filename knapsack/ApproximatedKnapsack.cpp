@@ -89,8 +89,8 @@ void ApproximatedKnapsack::recalculateValues()
     Knapsack knapsack;
 
     int maximumItemProfit = 0;
-    for(QVector<Item>::iterator it = m_items.begin();
-        it != m_items.end();
+    for(QVector<Item>::const_iterator it = m_items.constBegin();
+        it != m_items.constEnd();
         ++it)
     {
         int profit = it->profit();
@@ -117,9 +117,9 @@ void ApproximatedKnapsack::recalculateValues()
     knapsack.setSize(m_size);
 
     m_maximumProfitItems = knapsack.maximumProfitItems();
-    QSet<int>::iterator endIterator = m_maximumProfitItems.end();
+    QSet<int>::const_iterator endIterator = m_maximumProfitItems.constEnd();
     m_maximumProfit = 0;
-    for(QSet<int>::iterator it = m_maximumProfitItems.begin();
+    for(QSet<int>::const_iterator it = m_maximumProfitItems.constBegin();
         it != endIterator;
         ++it)
     {

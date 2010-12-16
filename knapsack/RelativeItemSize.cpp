@@ -42,7 +42,7 @@ void RelativeItemSize::setRelativeItemSize(double relativeItemSize)
     m_relativeItemSize = relativeItemSize;
 }
 
-bool RelativeItemSize::operator<(const RelativeItemSize& other)
+bool RelativeItemSize::operator<(const RelativeItemSize& other) const
 {
     return m_relativeItemSize < other.m_relativeItemSize;
 }

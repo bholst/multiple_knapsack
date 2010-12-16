@@ -21,7 +21,7 @@ public:
     double relativeItemSize() const;
     void setRelativeItemSize(double relativeItemSize);
     
-    bool operator<(const RelativeItemSize&);
+    bool operator<(const RelativeItemSize&) const;
 private:
     int m_id;
     double m_relativeItemSize;

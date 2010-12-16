@@ -180,8 +180,8 @@ void Knapsack::recalculateValues()
         m_maximumProfitItems.clear();
     }
     
-    QList< ChainedSet* >::iterator endIterator = sets.end();
-    for(QList< ChainedSet* >::iterator it = sets.begin();
+    QList< ChainedSet* >::const_iterator endIterator = sets.constEnd();
+    for(QList< ChainedSet* >::const_iterator it = sets.constBegin();
         it != endIterator;
         ++it)
     {
@@ -193,7 +193,6 @@ void Knapsack::recalculateValues()
 QString Knapsack::toString() const
 {
     QString returnString;
-    // FIXME: Has to return a string!!!
     returnString += "Bin size ";
     returnString += size();
     returnString += "\n";

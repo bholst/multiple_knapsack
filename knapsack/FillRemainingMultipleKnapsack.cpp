@@ -4,6 +4,8 @@
 
 // Qt
 #include <QtCore/QDebug>
+#include <QtCore/QList>
+#include <QtCore/QtAlgorithms>
 
 // Project
 #include "Item.h"
@@ -24,22 +26,22 @@ FillRemainingMultipleKnapsack::FillRemainingMultipleKnapsack()
 
 void FillRemainingMultipleKnapsack::recalculateValues()
 {
-    list<RelativeItemSize> relativeSizes;
+    QList<RelativeItemSize> relativeSizes;
     
     QVector<Item> itemVector = items();
-    QSet<int>::iterator itemsToUseEnd = m_itemsToUse.end();
-    for(QSet<int>::iterator it = m_itemsToUse.begin(); it != itemsToUseEnd; ++it) {
+    QSet<int>::const_iterator itemsToUseEnd = m_itemsToUse.constEnd();
+    for(QSet<int>::const_iterator it = m_itemsToUse.constBegin(); it != itemsToUseEnd; ++it) {
         if(m_startAssignment[*it] < 0) {
             RelativeItemSize relativeSize(*it, itemVector[*it]);
             relativeSizes.push_back(relativeSize);
         }
     }
     
-    relativeSizes.sort();
+    qSort(relativeSizes);
     
     int completeSize = remainingSize();
-    list<RelativeItemSize>::iterator endIterator = relativeSizes.end();
-    list<RelativeItemSize>::iterator it = relativeSizes.begin();
+    QList<RelativeItemSize>::const_iterator endIterator = relativeSizes.constEnd();
+    QList<RelativeItemSize>::const_iterator it = relativeSizes.constBegin();
     
     m_assignment = m_startAssignment;
     QList<int> sizesStillAvailable = remainingSizes();
@@ -120,8 +122,8 @@ int FillRemainingMultipleKnapsack::remainingSize()
         m_remainingSize = 0;
         QList<int> sizes = remainingSizes();
         
-        QList<int>::iterator endIterator = sizes.end();
-        for(QList<int>::iterator it = sizes.begin();
+        QList<int>::const_iterator endIterator = sizes.constEnd();
+        for(QList<int>::const_iterator it = sizes.constBegin();
             it != endIterator;
             ++it)
         {
