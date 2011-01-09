@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 COMPONENTS QtCore REQUIRED)
 
-set(knapsack_SRCS ItemWithIndex.cpp
+set(knapsack_SRCS ProfitItemWithIndex.cpp
+                  ProfitItem.cpp
+                  SmallBinPacking.cpp
+                  ItemWithIndex.cpp
                   ChainedSet.cpp
                   SubsetAssignment.cpp
                   RelativeItemSize.cpp

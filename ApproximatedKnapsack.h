@@ -9,7 +9,7 @@
 #include <QtCore/QVector>
 #include <QtCore/QSet>
 
-class Item;
+class ProfitItem;
 class Knapsack;
 
 class ApproximatedKnapsack
@@ -26,8 +26,8 @@ public:
     void setApproximationLevel(double approximationLevel);
     double approximationLevel() const;
 
-    QVector<Item> items() const;
-    void setItems(const QVector<Item> &items);
+    QVector<ProfitItem> items() const;
+    void setItems(const QVector<ProfitItem> &items);
 
     int maximumProfit();
     QSet<int> maximumProfitItems();
@@ -37,7 +37,7 @@ private:
 
     bool m_dirty;
     double m_approximationLevel;
-    QVector<Item> m_items;
+    QVector<ProfitItem> m_items;
     int m_size;
     int m_maximumProfit;
     QSet<int> m_maximumProfitItems;

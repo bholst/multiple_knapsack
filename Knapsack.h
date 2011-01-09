@@ -10,7 +10,7 @@
 #include <QtCore/QSet>
 
 // Project
-#include "Item.h"
+#include "ProfitItem.h"
 
 class QString;
 
@@ -24,8 +24,8 @@ public:
     int size() const;
     void setSize(int size);
 
-    QVector<Item> items() const;
-    void setItems(const QVector<Item> &items);
+    QVector<ProfitItem> items() const;
+    void setItems(const QVector<ProfitItem> &items);
     void setItems(const QVector<int> &sizes, const QVector<int> &profits);
 
     int maximumProfit();
@@ -39,7 +39,7 @@ private:
     // Input
     bool              m_dirty;
     int               m_size;
-    QVector<Item> m_items;
+    QVector<ProfitItem> m_items;
 
     // Output
     int m_maximumProfit;

@@ -15,10 +15,10 @@
 #include <QtCore/QtAlgorithms>
 
 // Project
-#include "Item.h"
+#include "ProfitItem.h"
 #include "FillRemainingMultipleKnapsack.h"
 #include "SubsetAssignment.h"
-#include "ItemWithIndex.h"
+#include "ProfitItemWithIndex.h"
 
 // Self
 #include "FastMultipleKnapsack.h"
@@ -61,7 +61,7 @@ void FastMultipleKnapsack::recalculateValues()
     QSet<int> littleProfitItems;
     int profitForLittleProfitItems = 0;
     
-    QVector<Item> allItems = items();
+    QVector<ProfitItem> allItems = items();
     int numberOfItems = allItems.size();
     int muchProfit = ceil(rho/sizes().size() * 2.0 * (1 + rho) * approximatedMaximum);
     qDebug() << "muchProfit is" << muchProfit;
@@ -153,8 +153,8 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
 {
     int totalItemSize = 0;
     int totalItemProfit = 0;
-    QVector<Item> allItems = items();
-    QVector<ItemWithIndex> subsetItems;
+    QVector<ProfitItem> allItems = items();
+    QVector<ProfitItemWithIndex> subsetItems;
     subsetItems.reserve(subset.size());
     // Create a start assignment and calculate the total size of our subsets.
     QVector<int> assignment(subset.size(), 0);
@@ -163,7 +163,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
         it != endIterator;
         ++it)
     {
-        ItemWithIndex currentItem(*it, allItems[*it]);
+        ProfitItemWithIndex currentItem(*it, allItems[*it]);
         subsetItems.push_back(currentItem);
         totalItemSize += currentItem.size();
         totalItemProfit += currentItem.profit();
@@ -275,7 +275,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
 }
 
 bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment,
-                                          const QVector<ItemWithIndex>& assignmentItems)
+                                          const QVector<ProfitItemWithIndex>& assignmentItems)
 {
     QList<int> remainingSizes = sizes();
     int numberOfItems = assignment.size();

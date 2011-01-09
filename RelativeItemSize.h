@@ -7,13 +7,13 @@
 #ifndef RELATIVEITEMSIZE_H
 #define RELATIVEITEMSIZE_H
 
-class Item;
+class ProfitItem;
 
 class RelativeItemSize
 {
 public:
     RelativeItemSize();
-    RelativeItemSize(int id, Item item);
+    RelativeItemSize(int id, ProfitItem item);
     
     int id() const;
     void setId(int id);

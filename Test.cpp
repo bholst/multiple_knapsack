@@ -190,45 +190,45 @@ void Test::runMultipleKnapsackTests()
     bins.push_back(133);
     bins.push_back(1200);
     bins.push_back(421);
-    QVector<Item> items;
+    QVector<ProfitItem> items;
     {
-        Item item;
+        ProfitItem item;
         item.setSize(102);
         item.setProfit(142);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(102);
         item.setProfit(12);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(699);
         item.setProfit(799);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(688);
         item.setProfit(608);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(306);
         item.setProfit(346);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(983);
         item.setProfit(1073);
         items.push_back(item);
     }
     {
-        Item item;
+        ProfitItem item;
         item.setSize(555);
         item.setProfit(545);
         items.push_back(item);

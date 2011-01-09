@@ -12,7 +12,6 @@ using namespace std;
 
 Item::Item()
     : m_size(0),
-      m_profit(0),
       m_id(-1)
 {
 
@@ -36,22 +35,6 @@ void Item::setSize(int size)
     }
     else {
         m_size = size;
-    }
-}
-
-int Item::profit() const
-{
-    return m_profit;
-}
-
-void Item::setProfit(int profit)
-{
-    if(profit < 0) {
-        cerr << "Only profits >= 0 are allowed";
-        m_profit = 0;
-    }
-    else {
-        m_profit = profit;
     }
 }
 

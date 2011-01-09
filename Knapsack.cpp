@@ -40,12 +40,12 @@ void Knapsack::setSize ( int size )
     m_size = size;
 }
 
-QVector< Item > Knapsack::items() const
+QVector< ProfitItem > Knapsack::items() const
 {
     return m_items;
 }
 
-void Knapsack::setItems ( const QVector< Item >& items )
+void Knapsack::setItems ( const QVector< ProfitItem >& items )
 {
     m_dirty = true;
     m_items = items;
@@ -54,11 +54,11 @@ void Knapsack::setItems ( const QVector< Item >& items )
 void Knapsack::setItems(const QVector<int>& sizes, const QVector<int>& profits)
 {
     if(sizes.size() == profits.size()) {
-        QVector<Item> items;
+        QVector<ProfitItem> items;
 
         int length = sizes.size();
         for(int i = 0; i < length; ++i) {
-            Item item;
+            ProfitItem item;
             item.setSize(sizes[i]);
             item.setProfit(profits[i]);
             items.insert(items.end(), item);

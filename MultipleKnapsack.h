@@ -9,7 +9,7 @@
 #include <QtCore/QVector>
 #include <QtCore/QList>
 
-class Item;
+class ProfitItem;
 
 class MultipleKnapsack
 {
@@ -23,8 +23,8 @@ public:
     
     int totalSize();
 
-    QVector<Item> items() const;
-    void setItems(QVector<Item> items);
+    QVector<ProfitItem> items() const;
+    void setItems(QVector<ProfitItem> items);
 
     double approximationLevel() const;
     void setApproximationLevel(double approximationLevel);
@@ -47,7 +47,7 @@ private:
     QList<int> m_sizes;
     int m_totalSize;
     bool m_totalSizeDirty;
-    QVector<Item> m_items;
+    QVector<ProfitItem> m_items;
     double m_approximationLevel;
     bool m_dirty;
 };

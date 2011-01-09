@@ -5,7 +5,7 @@
 */
 
 // Project
-#include "Item.h"
+#include "ProfitItem.h"
 
 // Self
 #include "RelativeItemSize.h"
@@ -16,7 +16,7 @@ RelativeItemSize::RelativeItemSize()
 {
 }
 
-RelativeItemSize::RelativeItemSize(int id, Item item)
+RelativeItemSize::RelativeItemSize(int id, ProfitItem item)
     : m_id(id),
       m_relativeItemSize(((double) item.size())/((double) item.profit()))
 {

@@ -11,7 +11,7 @@
 #include "InstanceParser.h"
 #include "FastMultipleKnapsack.h"
 #include "Test.h"
-#include "Item.h"
+#include "ProfitItem.h"
 
 using namespace std;
 

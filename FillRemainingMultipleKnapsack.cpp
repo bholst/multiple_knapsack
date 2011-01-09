@@ -8,7 +8,7 @@
 #include <QtCore/QtAlgorithms>
 
 // Project
-#include "Item.h"
+#include "ProfitItem.h"
 #include "RelativeItemSize.h"
 
 // Self
@@ -28,7 +28,7 @@ void FillRemainingMultipleKnapsack::recalculateValues()
 {
     QList<RelativeItemSize> relativeSizes;
     
-    QVector<Item> itemVector = items();
+    QVector<ProfitItem> itemVector = items();
     QSet<int>::const_iterator itemsToUseEnd = m_itemsToUse.constEnd();
     for(QSet<int>::const_iterator it = m_itemsToUse.constBegin(); it != itemsToUseEnd; ++it) {
         if(m_startAssignment[*it] < 0) {
@@ -102,7 +102,7 @@ void FillRemainingMultipleKnapsack::recalculateRemainingSizes()
     m_remainingSizes = sizes();
     m_startProfit = 0;
 
-    QVector<Item> allItems = items();
+    QVector<ProfitItem> allItems = items();
     int numberOfItems = m_startAssignment.size();
     for(int i = 0; i < numberOfItems; ++i)
     {

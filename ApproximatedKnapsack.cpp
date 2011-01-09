@@ -7,7 +7,7 @@
 
 // Project
 #include "Knapsack.h"
-#include "Item.h"
+#include "ProfitItem.h"
 
 // Self
 #include "ApproximatedKnapsack.h"
@@ -57,12 +57,12 @@ double ApproximatedKnapsack::approximationLevel() const
     return m_approximationLevel;
 }
 
-QVector< Item > ApproximatedKnapsack::items() const
+QVector< ProfitItem > ApproximatedKnapsack::items() const
 {
     return m_items;
 }
 
-void ApproximatedKnapsack::setItems(const QVector< Item >& items)
+void ApproximatedKnapsack::setItems(const QVector< ProfitItem >& items)
 {
     m_dirty = true;
     m_items = items;
@@ -89,7 +89,7 @@ void ApproximatedKnapsack::recalculateValues()
     Knapsack knapsack;
 
     int maximumItemProfit = 0;
-    for(QVector<Item>::const_iterator it = m_items.constBegin();
+    for(QVector<ProfitItem>::const_iterator it = m_items.constBegin();
         it != m_items.constEnd();
         ++it)
     {
@@ -106,9 +106,9 @@ void ApproximatedKnapsack::recalculateValues()
         profitDivisor = 1;
     }
 
-    QVector<Item> approximatedItems(m_items.size());
+    QVector<ProfitItem> approximatedItems(m_items.size());
     for(int i = 0; i < m_items.size(); ++i) {
-        Item approximatedItem = m_items[i];
+        ProfitItem approximatedItem = m_items[i];
         approximatedItem.setProfit(approximatedItem.profit() / profitDivisor);
         approximatedItems[i] = approximatedItem;
     }

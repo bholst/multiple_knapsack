@@ -10,7 +10,7 @@
 #include <QtCore/QFile>
 
 // Project
-#include "Item.h"
+#include "ProfitItem.h"
 
 // Self
 #include "InstanceParser.h"
@@ -31,7 +31,7 @@ void InstanceParser::setPath(const QString& path)
     m_path = path;
 }
 
-QVector< Item > InstanceParser::items() const
+QVector< ProfitItem > InstanceParser::items() const
 {    
     return m_items;
 }
@@ -158,7 +158,7 @@ void InstanceParser::readItem()
     if(elementAttributes.hasAttribute("height")
        && elementAttributes.hasAttribute("profit"))
     {
-        Item item;
+        ProfitItem item;
         item.setSize(elementAttributes.value("height").toString().toInt());
         item.setProfit(elementAttributes.value("profit").toString().toInt());
         

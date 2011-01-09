@@ -7,7 +7,7 @@
 #include <QtCore/QtAlgorithms>
 
 // Project
-#include "ItemWithIndex.h"
+#include "ProfitItemWithIndex.h"
 #include "ApproximatedKnapsack.h"
 
 // Self
@@ -43,12 +43,12 @@ void MultipleKnapsack::setApproximationLevel(double approximationLevel)
     m_approximationLevel = approximationLevel;
 }
 
-QVector<Item> MultipleKnapsack::items() const
+QVector<ProfitItem> MultipleKnapsack::items() const
 {
     return m_items;
 }
 
-void MultipleKnapsack::setItems(QVector< Item > items)
+void MultipleKnapsack::setItems(QVector< ProfitItem > items)
 {
     m_dirty = true;
     m_items = items;
@@ -96,9 +96,9 @@ int MultipleKnapsack::maximumProfit()
 void MultipleKnapsack::recalculateValues()
 {
     // Do the calculation stuff
-    QVector<ItemWithIndex> remainingItems;
+    QVector<ProfitItemWithIndex> remainingItems;
     for(int i = 0; i < m_items.size(); ++i) {
-        remainingItems.push_back(ItemWithIndex(i, m_items[i]));
+        remainingItems.push_back(ProfitItemWithIndex(i, m_items[i]));
     }
     
     m_assignment = QVector<int>(items().size(), -1);
@@ -106,7 +106,7 @@ void MultipleKnapsack::recalculateValues()
     qSort(m_sizes);
     m_maximumProfit = 0;
     for(int i = 0; i < m_sizes.size(); ++i) {
-        QVector<Item> itemsForKnapsack;
+        QVector<ProfitItem> itemsForKnapsack;
         for(int j = 0; j < remainingItems.size(); ++j) {
             itemsForKnapsack.append(remainingItems[j]);
         }
@@ -118,7 +118,7 @@ void MultipleKnapsack::recalculateValues()
         m_maximumProfit += knapsack.maximumProfit();
         QSet<int> maximumProfitItems = knapsack.maximumProfitItems();
         int itemNumber = remainingItems.size();
-        QVector<ItemWithIndex> newRemainingItems;
+        QVector<ProfitItemWithIndex> newRemainingItems;
         for(int j = 0; j < itemNumber; ++j) {
             if(maximumProfitItems.find(j) == maximumProfitItems.end()) {
                 newRemainingItems.push_back(remainingItems[j]);

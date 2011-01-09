@@ -16,15 +16,11 @@ public:
     int size() const;
     void setSize(int size);
 
-    int profit() const;
-    void setProfit(int profit);
-
 private:
     int id() const;
     void setId(int id);
 
     int m_size;
-    int m_profit;
     int m_id;
 };
 

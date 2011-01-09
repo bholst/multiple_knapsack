@@ -13,7 +13,7 @@
 #include <QtCore/QVector>
 
 class QString;
-class Item;
+class ProfitItem;
 
 class InstanceParser : public QXmlStreamReader
 {
@@ -23,7 +23,7 @@ public:
     
     void setPath(const QString& path);
     
-    QVector<Item> items() const;
+    QVector<ProfitItem> items() const;
     QList<int> sizes() const;
 
     void read();
@@ -37,7 +37,7 @@ private:
     void readItem();
     
     QString m_path;
-    QVector<Item> m_items;
+    QVector<ProfitItem> m_items;
     QList<int> m_sizes;
 };
 
