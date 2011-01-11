@@ -91,10 +91,15 @@ void SmallBinPacking::recalculateValues()
                 assignment[i] = -1;
             }
         }
+        
+        qDebug() << "Now trying te handle all assignments for" << mediumBins << "bins";
         bool foundAssignment = false;
         bool noAssignmentPossible = false;
-        while(!foundAssignment && !noAssignmentPossible) {
+        while(!noAssignmentPossible) {
             foundAssignment = handlePreassignment(assignment);
+            if(foundAssignment) {
+                break;
+            }
             
             bool assignmentChanged = false;
             QSet<int>::iterator it = largeItems.begin();
@@ -137,6 +142,7 @@ void SmallBinPacking::recalculateValues()
 
 bool SmallBinPacking::handlePreassignment(int* preassignment)
 {
+    qDebug() << "Testing a preassignment";
     for(int i = 0; i < m_items.size(); ++i) {
         qDebug() << "Item" << i << "in bin" << preassignment[i];
     }

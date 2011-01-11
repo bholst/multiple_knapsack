@@ -177,17 +177,19 @@ void InstanceParser::readItem()
              && name() == "item");
     
     QXmlStreamAttributes elementAttributes = attributes();
-    if(elementAttributes.hasAttribute("height")
-       && elementAttributes.hasAttribute("profit"))
-    {
-        if(m_type == InstanceParser::MultipleKnapsack) {
+    if(m_type == InstanceParser::MultipleKnapsack) {
+        if(elementAttributes.hasAttribute("height")
+           && elementAttributes.hasAttribute("profit"))
+        {
             ProfitItem item;
             item.setSize(elementAttributes.value("height").toString().toInt());
             item.setProfit(elementAttributes.value("profit").toString().toInt());
         
             m_mkpItems.append(item);
         }
-        else if(m_type == InstanceParser::BinPacking) {
+    }
+    else if(m_type == InstanceParser::BinPacking) {
+        if(elementAttributes.hasAttribute("height")) {
             FloatItem item;
             item.setSize(elementAttributes.value("height").toString().toFloat());
             
