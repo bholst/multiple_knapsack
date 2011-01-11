@@ -10,8 +10,10 @@
 // Project
 #include "InstanceParser.h"
 #include "FastMultipleKnapsack.h"
+#include "SmallBinPacking.h"
 #include "Test.h"
 #include "ProfitItem.h"
+#include "FloatItem.h"
 
 using namespace std;
 
@@ -28,10 +30,17 @@ int main(int argc, char **argv) {
         parser.setPath(QString(argv[i]));
         parser.read();
         
-        FastMultipleKnapsack multipleKnapsack;
-        multipleKnapsack.setItems(parser.items());
-        multipleKnapsack.setSizes(parser.sizes());
-        qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
+        if(parser.type() == InstanceParser::MultipleKnapsack) {
+            FastMultipleKnapsack multipleKnapsack;
+            multipleKnapsack.setItems(parser.mkpItems());
+            multipleKnapsack.setSizes(parser.sizes());
+            qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
+        }
+        else if(parser.type() == InstanceParser::BinPacking) {
+            SmallBinPacking binPacking;
+            binPacking.setItems(parser.binItems());
+            qDebug() << QString("Minimum number of bins is %1").arg(binPacking.minimumNumberOfBins());
+        }
     }
     return 0;
 }

@@ -11,6 +11,7 @@
 
 // Project
 #include "ProfitItem.h"
+#include "FloatItem.h"
 
 // Self
 #include "InstanceParser.h"
@@ -31,9 +32,14 @@ void InstanceParser::setPath(const QString& path)
     m_path = path;
 }
 
-QVector< ProfitItem > InstanceParser::items() const
+QVector< ProfitItem > InstanceParser::mkpItems() const
 {    
-    return m_items;
+    return m_mkpItems;
+}
+
+QVector< FloatItem > InstanceParser::binItems() const
+{
+    return m_binItems;
 }
 
 QList< int > InstanceParser::sizes() const
@@ -41,10 +47,16 @@ QList< int > InstanceParser::sizes() const
     return m_sizes;
 }
 
+InstanceParser::ProblemType InstanceParser::type() const
+{
+    return m_type;
+}
+
 void InstanceParser::read()
 {
     m_sizes.clear();
-    m_items.clear();
+    m_mkpItems.clear();
+    m_binItems.clear();
     
     QFile file(m_path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -70,6 +82,16 @@ void InstanceParser::readProblem()
 {
     Q_ASSERT(isStartElement()
              && name() == "problem");
+   
+    QXmlStreamAttributes elementAttributes = attributes();
+    if(elementAttributes.hasAttribute("name")) {
+        if(elementAttributes.value("name").toString() == "mkp") {
+            m_type = InstanceParser::MultipleKnapsack;
+        }
+        else if(elementAttributes.value("name").toString() == "BinPacking") {
+            m_type = InstanceParser::BinPacking;
+        }
+    }
     
     while(!atEnd()) {
         readNext();
@@ -158,11 +180,19 @@ void InstanceParser::readItem()
     if(elementAttributes.hasAttribute("height")
        && elementAttributes.hasAttribute("profit"))
     {
-        ProfitItem item;
-        item.setSize(elementAttributes.value("height").toString().toInt());
-        item.setProfit(elementAttributes.value("profit").toString().toInt());
+        if(m_type == InstanceParser::MultipleKnapsack) {
+            ProfitItem item;
+            item.setSize(elementAttributes.value("height").toString().toInt());
+            item.setProfit(elementAttributes.value("profit").toString().toInt());
         
-        m_items.append(item);
+            m_mkpItems.append(item);
+        }
+        else if(m_type == InstanceParser::BinPacking) {
+            FloatItem item;
+            item.setSize(elementAttributes.value("height").toString().toFloat());
+            
+            m_binItems.append(item);
+        }
     }
     
     while(!atEnd()) {

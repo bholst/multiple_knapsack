@@ -14,17 +14,25 @@
 
 class QString;
 class ProfitItem;
+class FloatItem;
 
 class InstanceParser : public QXmlStreamReader
 {
 public:
+    enum ProblemType {
+        MultipleKnapsack,
+        BinPacking
+    };
+    
     InstanceParser();
     ~InstanceParser();
     
     void setPath(const QString& path);
     
-    QVector<ProfitItem> items() const;
+    QVector<ProfitItem> mkpItems() const;
+    QVector<FloatItem> binItems() const;
     QList<int> sizes() const;
+    ProblemType type() const;
 
     void read();
     
@@ -37,8 +45,10 @@ private:
     void readItem();
     
     QString m_path;
-    QVector<ProfitItem> m_items;
+    QVector<ProfitItem> m_mkpItems;
+    QVector<FloatItem> m_binItems;
     QList<int> m_sizes;
+    ProblemType m_type;
 };
 
 #endif // INSTANCEPARSER_H

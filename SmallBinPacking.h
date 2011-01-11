@@ -6,22 +6,18 @@
 #define SMALLBINPACKING_H
 
 #include <QtCore/QVector>
-#include "Item.h"
+
+class FloatItem;
 
 class SmallBinPacking
 {
 public:
     SmallBinPacking();
 
-    QVector<Item> items() const;
-    void setItems(const QVector<Item>& items);
+    QVector<FloatItem> items() const;
+    void setItems(const QVector<FloatItem>& items);
     
     int maximumNumberOfBins() const;
-    /**
-     * Set the maximum number of bins.
-     * The default value is 10.
-     */
-    void setMaximumNumberOfBins(int maximumNumberOfBins);
     
     /**
      * Returns the number of bins that are needed to pack the items into.
@@ -30,10 +26,12 @@ public:
     int minimumNumberOfBins();
     
 private:
-    void recalculateValues();
+    virtual void recalculateValues();
+    bool handlePreassignment(int *preassignment);
 
-    int m_maximumNumberOfBins;
-    QVector<Item> m_items;
+    float m_delta;
+    int m_K;
+    QVector<FloatItem> m_items;
     
     bool m_dirty;
     int m_minimumNumberOfBins;
