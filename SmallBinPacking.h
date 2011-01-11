@@ -27,7 +27,7 @@ public:
     
 private:
     virtual void recalculateValues();
-    bool handlePreassignment(int *preassignment);
+    bool handlePreassignment(int *preassignment, int numberOfBins);
 
     float m_delta;
     int m_K;

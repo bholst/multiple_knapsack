@@ -17,7 +17,7 @@
 
 SmallBinPacking::SmallBinPacking()
     : m_dirty(true),
-      m_delta(0.25),
+      m_delta(0.6),
       m_K(8),
       m_minimumNumberOfBins(-1)
 {
@@ -92,11 +92,11 @@ void SmallBinPacking::recalculateValues()
             }
         }
         
-        qDebug() << "Now trying te handle all assignments for" << mediumBins << "bins";
+        qDebug() << "Now trying to handle all assignments for" << mediumBins << "bins";
         bool foundAssignment = false;
         bool noAssignmentPossible = false;
         while(!noAssignmentPossible) {
-            foundAssignment = handlePreassignment(assignment);
+            foundAssignment = handlePreassignment(assignment, mediumBins);
             if(foundAssignment) {
                 break;
             }
@@ -140,11 +140,23 @@ void SmallBinPacking::recalculateValues()
     }
 }
 
-bool SmallBinPacking::handlePreassignment(int* preassignment)
+bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins
+)
 {
     qDebug() << "Testing a preassignment";
+    float remainingCapacity[numberOfBins];
+    // Initializing the capacities
+    for(int i = 0; i < numberOfBins; ++i) {
+        remainingCapacity[i] = 1.0;
+    }
     for(int i = 0; i < m_items.size(); ++i) {
         qDebug() << "Item" << i << "in bin" << preassignment[i];
+        if(preassignment[i] >= 0) {
+            remainingCapacity[preassignment[i]] -= m_items[i].size();
+            if(remainingCapacity[preassignment[i]] < 0) {
+                return false;
+            }
+        }
     }
     
     return true;
