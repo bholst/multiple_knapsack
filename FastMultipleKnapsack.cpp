@@ -41,6 +41,7 @@ void FastMultipleKnapsack::recalculateValues()
     qSort(sortedSizes);
 
     double rho = approximationLevel() / 5.0;
+    qDebug() << "rho is" << rho;
     MultipleKnapsack greedy;
     greedy.setApproximationLevel(rho/2.0);
     greedy.setItems(items());
@@ -54,28 +55,64 @@ void FastMultipleKnapsack::recalculateValues()
     approximatedSubsetAssignment.setSubset(QSet<int>());
     cout << "The approximated Maximum is :" << approximatedMaximum << endl;
     
-    // Split the set of items into 2 groups:
-    // Much profit:
-    QSet<int> muchProfitItems;
+    // Split the set of items into 3 groups:
+    // Small and much profit:
+    QSet<int> smallMuchProfitItems;
+    // Large and much profit:
+    QHash< int, QMultiMap<int, int> > largeMuchProfitItems;
     // Rest:
     QSet<int> littleProfitItems;
+    // This is the set of items that will be used later
+    QSet<int> muchProfitItems;
     int profitForLittleProfitItems = 0;
     
     QVector<ProfitItem> allItems = items();
     int numberOfItems = allItems.size();
-    int muchProfit = ceil(rho/sizes().size() * 2.0 * (1 + rho) * approximatedMaximum);
+    int muchProfit = ceil(rho/sizes().size() * 2.0 * (1.0 + rho) * approximatedMaximum);
+    double roundingFactor = rho*rho/sizes().size() * 2.0 * (1.0 + rho) * approximatedMaximum;
     qDebug() << "muchProfit is" << muchProfit;
-    //int small = rho * (*sortedSizes.begin());
+    qDebug() << "The rounding factor is" << roundingFactor;
+    int small = rho * (*sortedSizes.begin());
     for(int i = 0; i < numberOfItems; ++i) {
         qDebug() << "Profit of item" << i << "is" << allItems[i].profit();
-        if(allItems[i].profit() >= muchProfit) {
+        if(allItems[i].profit() >= muchProfit
+           && allItems[i].size() <= small)
+        {
+            smallMuchProfitItems.insert(i);
             muchProfitItems.insert(i);
-            qDebug() << "The item has much profit.";
+            qDebug() << "The item is small and has much profit.";
+        }
+        else if(allItems[i].profit() >= muchProfit) {
+            int group = floor(allItems[i].profit() / roundingFactor);
+            qDebug() << "This item is in group" << group;
+            QHash< int, QMultiMap<int,int> >::iterator groupIt = largeMuchProfitItems.find(group);
+            if(groupIt == largeMuchProfitItems.end()) {
+                groupIt = largeMuchProfitItems.insert(group, QMultiMap<int,int>());
+            }
+            groupIt->insert(allItems[i].size(), i);
         }
         else {
             littleProfitItems.insert(i);
             profitForLittleProfitItems += allItems[i].profit();
             qDebug() << "The item has little profit.";
+        }
+    }
+    
+    // Now take the smallest items out of each group of large much profit items.
+    for(QHash<int, QMultiMap<int,int> >::iterator it = largeMuchProfitItems.begin();
+        it != largeMuchProfitItems.end();
+        ++it)
+    {
+        QMultiMap<int,int> group = it.value();
+        int spaceLeft = floor(1.0/it.key() * allItems.size()/(rho*rho));
+        for(QMultiMap<int,int>::iterator currentItem = group.begin();
+            currentItem != group.end() && spaceLeft > 0;
+            ++currentItem)
+        {
+            muchProfitItems.insert(currentItem.value());
+            qDebug() << "Item" << currentItem.value() << "of size" << currentItem.key()
+                     << "in group" << it.key() << "is selected.";
+            --spaceLeft;
         }
     }
     
