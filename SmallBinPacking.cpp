@@ -17,7 +17,7 @@
 
 SmallBinPacking::SmallBinPacking()
     : m_dirty(true),
-      m_delta(0.6),
+      m_delta(0.38),
       m_K(8),
       m_minimumNumberOfBins(-1)
 {
@@ -55,7 +55,9 @@ void SmallBinPacking::recalculateValues()
 
     // First calculate the sets of small, medium sized and large items.
     float small = pow(m_delta, 4);
-    float large = 1/(2 * m_K) / log2(1/m_delta);
+    float large = 1.0/(2.0 * m_K) / log2(1/m_delta);
+    qDebug() << "Small is smaller than" << small;
+    qDebug() << "Large is larger as" << large;
     
     QSet<int> smallItems;
     QSet<int> mediumItems;
@@ -64,14 +66,43 @@ void SmallBinPacking::recalculateValues()
     qDebug() << "Creating the sets";
     for(int i = 0; i < m_items.size(); ++i) {
         if(m_items[i].size() <= small) {
+            qDebug() << "Item" << i << "is small";
             smallItems.insert(i);
         }
         else if(m_items[i].size() <= large) {
+            qDebug() << "Item" << i << "is medium sized";
             mediumItems.insert(i);
         }
         else {
+            qDebug() << "Item" << i << "is large";
             largeItems.insert(i);
         }
+    }
+    
+    // Then calculate the sets of the medium sized items.
+    int r0 = 0;
+    double power = 1.0;
+    double limit = m_K * log2(1/m_delta);
+    while(power < limit) {
+        r0++;
+        power *= 2.0;
+    }
+    QList<double> upperBoundaries;
+    QList<double> lowerBoundaries;
+    int i = 0;
+    do {
+        lowerBoundaries.append(1/pow(2.0,r0+i+1));
+        upperBoundaries.append(1/pow(2.0,r0+i));
+        i++;
+    } while(lowerBoundaries.last() > small);
+    
+    QVector< QSet<int> > itemsI(lowerBoundaries.size());
+    for(QSet<int>::iterator it = mediumItems.begin();
+        it != mediumItems.end();
+        ++it)
+    {
+        int groupNr = ceil(log2(1/m_items[*it].size()) - r0 - 1);
+        qDebug() << "Item" << *it << "of size" << m_items[*it].size() << "in group" << groupNr;
     }
     
     int minimumBins = 0;
@@ -129,9 +160,9 @@ void SmallBinPacking::recalculateValues()
         }
 
         if(maximumBins == minimumBins) {
-            if(foundAssignment) {
+            if(maximumBins < maximumNumberOfBins()) {
                 foundNumber = true;
-                m_minimumNumberOfBins = minimumBins;
+                m_minimumNumberOfBins = maximumBins;
             }
             else {
                 break;
@@ -143,14 +174,14 @@ void SmallBinPacking::recalculateValues()
 bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins
 )
 {
-    qDebug() << "Testing a preassignment";
+//     qDebug() << "Testing a preassignment";
     float remainingCapacity[numberOfBins];
     // Initializing the capacities
     for(int i = 0; i < numberOfBins; ++i) {
         remainingCapacity[i] = 1.0;
     }
     for(int i = 0; i < m_items.size(); ++i) {
-        qDebug() << "Item" << i << "in bin" << preassignment[i];
+//         qDebug() << "Item" << i << "in bin" << preassignment[i];
         if(preassignment[i] >= 0) {
             remainingCapacity[preassignment[i]] -= m_items[i].size();
             if(remainingCapacity[preassignment[i]] < 0) {
