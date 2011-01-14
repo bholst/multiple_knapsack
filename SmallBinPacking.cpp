@@ -8,6 +8,7 @@
 // Qt
 #include <QtCore/QDebug>
 #include <QtCore/QSet>
+#include <QtCore/QPair>
 
 // Project
 #include "FloatItem.h"
@@ -96,13 +97,34 @@ void SmallBinPacking::recalculateValues()
         i++;
     } while(lowerBoundaries.last() > small);
     
-    QVector< QSet<int> > itemsI(lowerBoundaries.size());
+    // Sort the medium sized items in their sets
+    QVector< QMultiMap<float,int> > itemsI(lowerBoundaries.size());
     for(QSet<int>::iterator it = mediumItems.begin();
         it != mediumItems.end();
         ++it)
     {
-        int groupNr = ceil(log2(1/m_items[*it].size()) - r0 - 1);
-        qDebug() << "Item" << *it << "of size" << m_items[*it].size() << "in group" << groupNr;
+        int setNr = ceil(log2(1/m_items[*it].size()) - r0 - 1);
+        itemsI[setNr].insert(m_items[*it].size(),*it);
+        qDebug() << "Item" << *it << "of size" << m_items[*it].size() << "in set" << setNr;
+    }
+    
+    // Sort all items in the groups J
+    QVector< QMultiMap<float, int> > groupItems(itemsI.size()); // The item numbers by rounded item size.
+    for(int i = 0; i < itemsI.size(); ++i) {
+        int groupSize = ceil(pow(2,r0+i)/(m_K * log2(1/m_delta)));
+        qDebug() << "For set" << i << "there are" << groupSize << "items per group";
+        QMultiMap<float,int> items = itemsI[i];
+        QMultiMap<float,int>::iterator it = items.end();
+        while(it != items.begin()) {
+            int groupItemNumber = 0;
+            float groupItemSize = (it - 1).key();
+            while(it != items.begin() && groupItemNumber < groupSize) {
+                --it;
+                groupItems[i].insert(groupItemSize, it.value());
+                qDebug() << "Rounding the size of item" << it.value() << "to" << groupItemSize;
+                groupItemNumber++;
+            }
+        }
     }
     
     int minimumBins = 0;
