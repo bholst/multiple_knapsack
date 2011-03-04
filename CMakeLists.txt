@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 COMPONENTS QtCore REQUIRED)
 
-set(knapsack_SRCS FloatItemWithIndex.cpp
+set(knapsack_SRCS ItemVectorWithPredecessor.cpp
+                  FloatItemWithIndex.cpp
                   FloatItem.cpp
                   ProfitItemWithIndex.cpp
                   ProfitItem.cpp

@@ -305,4 +305,5 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
         return false;
     }
     */
+    return true;
 }
