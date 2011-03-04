@@ -1,4 +1,4 @@
 [Project]
-Name=knapsack
 Manager=KDevCMakeManager
+Name=multiple_knapsack
 VersionControl=kdevgit

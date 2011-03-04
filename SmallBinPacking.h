@@ -27,7 +27,9 @@ public:
     
 private:
     virtual void recalculateValues();
-    bool handlePreassignment(int *preassignment, int numberOfBins);
+    bool handlePreassignment(int *preassignment, int numberOfBins,
+                             QVector<float> normalItemSizes,
+                             QVector<int> normalItemNumbers);
 
     float m_delta;
     int m_K;

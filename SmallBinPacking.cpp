@@ -110,8 +110,13 @@ void SmallBinPacking::recalculateValues()
     
     // Sort all items in the groups J
     QVector< QMultiMap<float, int> > groupItems(itemsI.size()); // The item numbers by rounded item size.
+    QMap<float, int> extraItems; // counting all items out of a first group per set
+    QMap<float, int> normalItems; // counting all other items
+    QVector<float> normalItemsSizes;
+    QVector<int> normalItemsNumbers;
     for(int i = 0; i < itemsI.size(); ++i) {
         int groupSize = ceil(pow(2,r0+i)/(m_K * log2(1/m_delta)));
+        bool firstGroup = true;
         qDebug() << "For set" << i << "there are" << groupSize << "items per group";
         QMultiMap<float,int> items = itemsI[i];
         QMultiMap<float,int>::iterator it = items.end();
@@ -124,8 +129,19 @@ void SmallBinPacking::recalculateValues()
                 qDebug() << "Rounding the size of item" << it.value() << "to" << groupItemSize;
                 groupItemNumber++;
             }
+            if(firstGroup) {
+                extraItems.insert(groupItemSize, groupItemNumber);
+                firstGroup = false;
+            }
+            else {
+                normalItems.insert(groupItemSize, groupItemNumber);
+                normalItemsSizes.append(groupItemSize);
+                normalItemsNumbers.append(groupItemNumber);
+            }
         }
     }
+    qDebug() << "The set of extraItems is" << extraItems;
+    qDebug() << "The set of normalItems is" << normalItems;
     
     int minimumBins = 0;
     int maximumBins = maximumNumberOfBins();
@@ -149,7 +165,7 @@ void SmallBinPacking::recalculateValues()
         bool foundAssignment = false;
         bool noAssignmentPossible = false;
         while(!noAssignmentPossible) {
-            foundAssignment = handlePreassignment(assignment, mediumBins);
+            foundAssignment = handlePreassignment(assignment, mediumBins, normalItemsSizes, normalItemsNumbers);
             if(foundAssignment) {
                 break;
             }
@@ -193,24 +209,100 @@ void SmallBinPacking::recalculateValues()
     }
 }
 
-bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins
-)
+bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
+                                          QVector<float> normalItemSizes,
+                                          QVector<int> normalItemNumbers)
 {
 //     qDebug() << "Testing a preassignment";
-    float remainingCapacity[numberOfBins];
+    float remainingCapacities[numberOfBins];
     // Initializing the capacities
     for(int i = 0; i < numberOfBins; ++i) {
-        remainingCapacity[i] = 1.0;
+        remainingCapacities[i] = 1.0;
     }
     for(int i = 0; i < m_items.size(); ++i) {
 //         qDebug() << "Item" << i << "in bin" << preassignment[i];
         if(preassignment[i] >= 0) {
-            remainingCapacity[preassignment[i]] -= m_items[i].size();
-            if(remainingCapacity[preassignment[i]] < 0) {
+            remainingCapacities[preassignment[i]] -= m_items[i].size();
+            if(remainingCapacities[preassignment[i]] < 0) {
                 return false;
             }
         }
     }
     
-    return true;
+    /*
+    QList< QList< QVector<int> > > selections;
+    QList< QVector<int> > emptyList;
+    QVector<int> empty(normalItemNumbers.size(), 0);
+    emptyList.append(empty);
+    selections.append(emptyList);
+    bool foundSelection = false;
+    for(int i = 1; i <= numberOfBins && !foundSelection; ++i) {
+        float remainingCapacity = remainingCapacities[i-1];
+        QVector<int> maxItemNumber(normalItemNumbers.size());
+        for(int j = 0; j < normalItemNumbers.size(); ++j) {
+            maxItemNumber[j] = floor(remainingCapacity/normalItemSizes[j]);
+        }
+        
+        QList< QVector<int> > binAssignments;
+        QVector<int> currentBinAssignment(normalItemNumbers.size(), 0);
+        bool listedAllPossibleAssignments = false;
+        while(!listedAllPossibleAssignments) {
+            int j = 0;
+            float futureRemainingCapacity = remainingCapacity;
+            bool changedAssignment = false;
+            while(!changedAssignment && j < currentBinAssignment.size()) {
+                if(currentBinAssignment[j] < maxItemNumber[j]) {
+                    currentBinAssignment[j] = currentBinAssignment[j] + 1;
+                    changedAssignment = true;
+                }
+                else {
+                    currentBinAssignment[j] = 0;
+                }
+                
+                futureRemainingCapacity -= currentBinAssignment[j] * normalItemSizes[j];
+                ++j;
+            }
+            while(j < currentBinAssignment.size()) {
+                futureRemainingCapacity -= currentBinAssignment[j] * normalItemSizes[j];
+                ++j;
+            }
+            
+            if(futureRemainingCapacity < 0) {
+                binAssignments.append(currentBinAssignment);
+            }
+        }
+        
+        QList< QVector<int> > previousSelections = selections[i-1];
+        QList< QVector<int> > newSelections;
+        for(QList< QVector<int> >::iterator old = previousSelections.begin();
+            old != previousSelections.end();
+            ++old)
+        {
+            for(QList< QVector<int> >::iterator it = binAssignments.begin();
+                it != binAssignments.end();
+                ++it)
+            {
+                QVector<int> newAssignment = *old;
+                bool selectionFull = true;
+                for(int j = 0; j < newAssignment.size(); ++j) {
+                    newAssignment[j] = newAssignment[j] + (*it)[j];
+                    if(newAssignment[j] != normalItemNumbers[j]) {
+                        selectionFull = false;
+                    }
+                }
+                
+                if(selectionFull) {
+                    foundSelection = true;
+                }
+            }
+        }
+    }
+    
+    if(foundSelection) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    */
 }
