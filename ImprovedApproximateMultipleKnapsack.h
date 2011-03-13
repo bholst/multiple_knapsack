@@ -20,6 +20,8 @@ private:
     
     void groupItems(int approximateMaximum);
     
+    int m_largestBinCapacity;
+    
     QSet<int> m_highProfitItems;
     QSet<int> m_mediumProfitItems;
     QSet<int> m_lowProfitItems;
