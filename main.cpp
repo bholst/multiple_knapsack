@@ -25,7 +25,15 @@ int main(int argc, char **argv) {
         return 0;
     }
     
+    bool extra = false;
+    
     for(int i = 1; i < argc; ++i) {
+        if(QString(argv[i]) == "--extra") {
+            qDebug() << "Using the extra algorithm.";
+            extra = true;
+            continue;
+        }
+        
         InstanceParser parser;
         parser.setPath(QString(argv[i]));
         parser.read();
