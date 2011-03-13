@@ -16,33 +16,34 @@
 
 // Project
 #include "ProfitItem.h"
+#include "GreedyMultipleKnapsack.h"
 #include "FillRemainingMultipleKnapsack.h"
 #include "SubsetAssignment.h"
 #include "ProfitItemWithIndex.h"
 
 // Self
-#include "FastMultipleKnapsack.h"
+#include "ApproximateMultipleKnapsack.h"
 
 using namespace std;
 
-FastMultipleKnapsack::FastMultipleKnapsack()
+ApproximateMultipleKnapsack::ApproximateMultipleKnapsack()
 {
 
 }
 
-FastMultipleKnapsack::~FastMultipleKnapsack()
+ApproximateMultipleKnapsack::~ApproximateMultipleKnapsack()
 {
 
 }
 
-void FastMultipleKnapsack::recalculateValues()
+void ApproximateMultipleKnapsack::recalculateValues()
 {
     QList<int> sortedSizes = sizes();
     qSort(sortedSizes);
 
     double rho = approximationLevel() / 5.0;
     qDebug() << "rho is" << rho;
-    MultipleKnapsack greedy;
+    GreedyMultipleKnapsack greedy;
     greedy.setApproximationLevel(rho/2.0);
     greedy.setItems(items());
     greedy.setSizes(sortedSizes);
@@ -183,7 +184,7 @@ void FastMultipleKnapsack::recalculateValues()
     }
 }
 
-SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
+SubsetAssignment ApproximateMultipleKnapsack::handleSubset(const QSet< int >& subset,
                                                     const QSet<int>& remainingItems,
                                                     int remainingItemsProfit,
                                                     int minimumProfit)
@@ -311,7 +312,7 @@ SubsetAssignment FastMultipleKnapsack::handleSubset(const QSet< int >& subset,
     return subsetAssignment;
 }
 
-bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment,
+bool ApproximateMultipleKnapsack::testAssignment(const QVector< int >& assignment,
                                           const QVector<ProfitItemWithIndex>& assignmentItems)
 {
     QList<int> remainingSizes = sizes();
@@ -330,7 +331,7 @@ bool FastMultipleKnapsack::testAssignment(const QVector< int >& assignment,
     return true;
 }
 
-void FastMultipleKnapsack::printAssignment(const QVector< int >& assignment)
+void ApproximateMultipleKnapsack::printAssignment(const QVector< int >& assignment)
 {
     int numberOfItems = assignment.size();
     for(int i = 0; i < numberOfItems; ++i)

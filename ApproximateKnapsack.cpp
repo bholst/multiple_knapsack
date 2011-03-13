@@ -10,11 +10,11 @@
 #include "ProfitItem.h"
 
 // Self
-#include "ApproximatedKnapsack.h"
+#include "ApproximateKnapsack.h"
 
 using namespace std;
 
-ApproximatedKnapsack::ApproximatedKnapsack()
+ApproximateKnapsack::ApproximateKnapsack()
     : m_dirty(true),
       m_approximationLevel(0.0),
       m_items(),
@@ -22,7 +22,7 @@ ApproximatedKnapsack::ApproximatedKnapsack()
 {
 }
 
-ApproximatedKnapsack::ApproximatedKnapsack(const Knapsack& knapsack)
+ApproximateKnapsack::ApproximateKnapsack(const Knapsack& knapsack)
     : m_dirty(true),
       m_approximationLevel(0.0),
       m_items(knapsack.items()),
@@ -31,44 +31,44 @@ ApproximatedKnapsack::ApproximatedKnapsack(const Knapsack& knapsack)
 
 }
 
-ApproximatedKnapsack::~ApproximatedKnapsack()
+ApproximateKnapsack::~ApproximateKnapsack()
 {
 }
 
-void ApproximatedKnapsack::setSize(int size)
+void ApproximateKnapsack::setSize(int size)
 {
     m_dirty = true;
     m_size = size;
 }
 
-int ApproximatedKnapsack::size() const
+int ApproximateKnapsack::size() const
 {
     return m_size;
 }
 
-void ApproximatedKnapsack::setApproximationLevel(double approximationLevel)
+void ApproximateKnapsack::setApproximationLevel(double approximationLevel)
 {
     m_dirty = true;
     m_approximationLevel = approximationLevel;
 }
 
-double ApproximatedKnapsack::approximationLevel() const
+double ApproximateKnapsack::approximationLevel() const
 {
     return m_approximationLevel;
 }
 
-QVector< ProfitItem > ApproximatedKnapsack::items() const
+QVector< ProfitItem > ApproximateKnapsack::items() const
 {
     return m_items;
 }
 
-void ApproximatedKnapsack::setItems(const QVector< ProfitItem >& items)
+void ApproximateKnapsack::setItems(const QVector< ProfitItem >& items)
 {
     m_dirty = true;
     m_items = items;
 }
 
-int ApproximatedKnapsack::maximumProfit()
+int ApproximateKnapsack::maximumProfit()
 {
     if(m_dirty) {
         recalculateValues();
@@ -76,7 +76,7 @@ int ApproximatedKnapsack::maximumProfit()
     return m_maximumProfit;
 }
 
-QSet< int > ApproximatedKnapsack::maximumProfitItems()
+QSet< int > ApproximateKnapsack::maximumProfitItems()
 {
     if(m_dirty) {
         recalculateValues();
@@ -84,7 +84,7 @@ QSet< int > ApproximatedKnapsack::maximumProfitItems()
     return m_maximumProfitItems;
 }
 
-void ApproximatedKnapsack::recalculateValues()
+void ApproximateKnapsack::recalculateValues()
 {
     Knapsack knapsack;
 

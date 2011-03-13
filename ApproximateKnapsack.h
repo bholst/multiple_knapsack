@@ -2,8 +2,8 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
-#ifndef APPROXIMATEDKNAPSACK_H
-#define APPROXIMATEDKNAPSACK_H
+#ifndef APPROXIMATEKNAPSACK_H
+#define APPROXIMATEKNAPSACK_H
 
 // Qt
 #include <QtCore/QVector>
@@ -12,13 +12,13 @@
 class ProfitItem;
 class Knapsack;
 
-class ApproximatedKnapsack
+class ApproximateKnapsack
 {
 
 public:
-    ApproximatedKnapsack();
-    ApproximatedKnapsack(const Knapsack &knapsack);
-    virtual ~ApproximatedKnapsack();
+    ApproximateKnapsack();
+    ApproximateKnapsack(const Knapsack &knapsack);
+    virtual ~ApproximateKnapsack();
 
     void setSize(int size);
     int size() const;
@@ -43,4 +43,4 @@ private:
     QSet<int> m_maximumProfitItems;
 };
 
-#endif // APPROXIMATEDKNAPSACK_H
+#endif // APPROXIMATEKNAPSACK_H

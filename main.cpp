@@ -9,7 +9,7 @@
 
 // Project
 #include "InstanceParser.h"
-#include "FastMultipleKnapsack.h"
+#include "ApproximateMultipleKnapsack.h"
 #include "SmallBinPacking.h"
 #include "Test.h"
 #include "ProfitItem.h"
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
         parser.read();
         
         if(parser.type() == InstanceParser::MultipleKnapsack) {
-            FastMultipleKnapsack multipleKnapsack;
+            ApproximateMultipleKnapsack multipleKnapsack;
             multipleKnapsack.setItems(parser.mkpItems());
             multipleKnapsack.setSizes(parser.sizes());
             qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());

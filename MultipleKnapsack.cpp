@@ -1,24 +1,20 @@
 //
-// Copyright 2010      Bastian Holst <bastianholst@gmx.de>
+// Copyright (C) 2011  Bastian Holst <bastianholst@gmx.de>
 //
 
 // Qt
 #include <QtCore/QDebug>
-#include <QtCore/QtAlgorithms>
 
 // Project
-#include "ProfitItemWithIndex.h"
-#include "ApproximatedKnapsack.h"
+#include "ProfitItem.h"
 
 // Self
 #include "MultipleKnapsack.h"
 
-using namespace std;
-
 MultipleKnapsack::MultipleKnapsack()
-    : m_totalSizeDirty(true),
-      m_approximationLevel(0.5),
-      m_dirty(true)
+    : m_approximationLevel(0.5),
+      m_dirty(true),
+      m_totalSizeDirty(true)
 {
 
 }
@@ -93,46 +89,6 @@ int MultipleKnapsack::maximumProfit()
     return m_maximumProfit;
 }
 
-void MultipleKnapsack::recalculateValues()
-{
-    // Do the calculation stuff
-    QVector<ProfitItemWithIndex> remainingItems;
-    for(int i = 0; i < m_items.size(); ++i) {
-        remainingItems.push_back(ProfitItemWithIndex(i, m_items[i]));
-    }
-    
-    m_assignment = QVector<int>(items().size(), -1);
-
-    qSort(m_sizes);
-    m_maximumProfit = 0;
-    for(int i = 0; i < m_sizes.size(); ++i) {
-        QVector<ProfitItem> itemsForKnapsack;
-        for(int j = 0; j < remainingItems.size(); ++j) {
-            itemsForKnapsack.append(remainingItems[j]);
-        }
-        ApproximatedKnapsack knapsack;
-        knapsack.setSize(m_sizes[i]);
-        knapsack.setApproximationLevel(m_approximationLevel);
-        knapsack.setItems(itemsForKnapsack);
-        
-        m_maximumProfit += knapsack.maximumProfit();
-        QSet<int> maximumProfitItems = knapsack.maximumProfitItems();
-        int itemNumber = remainingItems.size();
-        QVector<ProfitItemWithIndex> newRemainingItems;
-        for(int j = 0; j < itemNumber; ++j) {
-            if(maximumProfitItems.find(j) == maximumProfitItems.end()) {
-                newRemainingItems.push_back(remainingItems[j]);
-            }
-            else {
-                m_assignment[remainingItems[j].index()] = i;
-            }
-        }
-        
-        remainingItems = newRemainingItems;
-    }
-    m_dirty = false;
-}
-
 void MultipleKnapsack::update()
 {
     setDirty(true);
@@ -155,4 +111,3 @@ QVector< int > MultipleKnapsack::assignment()
     }
     return m_assignment;
 }
-

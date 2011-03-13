@@ -2,6 +2,9 @@
 // Copyright 2010      Bastian Holst <bastianholst@gmx.de>
 //
 
+// Qt
+#include <QtCore/QDebug>
+
 // Self
 #include "ProfitItemWithIndex.h"
 

@@ -4,8 +4,8 @@
 //
 */
 
-#ifndef FASTMULTIPLEKNAPSACK_H
-#define FASTMULTIPLEKNAPSACK_H
+#ifndef APPROXIMATEMULTIPLEKNAPSACK_H
+#define APPROXIMATEMULTIPLEKNAPSACK_H
 
 // Qt
 #include<QtCore/QSet>
@@ -17,11 +17,11 @@
 class SubsetAssignment;
 class ProfitItemWithIndex;
 
-class FastMultipleKnapsack : public MultipleKnapsack
+class ApproximateMultipleKnapsack : public MultipleKnapsack
 {
 public:
-    FastMultipleKnapsack();
-    virtual ~FastMultipleKnapsack();
+    ApproximateMultipleKnapsack();
+    virtual ~ApproximateMultipleKnapsack();
 
 private:
     virtual void recalculateValues();
@@ -31,4 +31,4 @@ private:
     void printAssignment(const QVector<int>& assignment);
 };
 
-#endif // FASTMULTIPLEKNAPSACK_H
+#endif // APPROXIMATEMULTIPLEKNAPSACK_H

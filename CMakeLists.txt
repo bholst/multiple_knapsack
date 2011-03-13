@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 COMPONENTS QtCore REQUIRED)
 
-set(knapsack_SRCS ItemVector.cpp
+set(knapsack_SRCS MultipleKnapsack.cpp
+                  ItemVector.cpp
                   ItemVectorWithPredecessor.cpp
                   FloatItemWithIndex.cpp
                   FloatItem.cpp
@@ -15,9 +16,9 @@ set(knapsack_SRCS ItemVector.cpp
                   SubsetAssignment.cpp
                   RelativeItemSize.cpp
                   FillRemainingMultipleKnapsack.cpp
-                  FastMultipleKnapsack.cpp
-                  MultipleKnapsack.cpp
-                  ApproximatedKnapsack.cpp
+                  ApproximateMultipleKnapsack.cpp
+                  GreedyMultipleKnapsack.cpp
+                  ApproximateKnapsack.cpp
                   KnapsackTestInstance.cpp
                   Test.cpp
                   Knapsack.cpp

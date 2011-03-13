@@ -7,7 +7,7 @@
 
 class Item
 {
-    friend class MultipleKnapsack;
+    friend class GreedyMultipleKnapsack;
 
 public:
     Item();

@@ -13,9 +13,9 @@
 // Project
 #include "Knapsack.h"
 #include "KnapsackTestInstance.h"
-#include "ApproximatedKnapsack.h"
-#include "MultipleKnapsack.h"
-#include "FastMultipleKnapsack.h"
+#include "ApproximateKnapsack.h"
+#include "GreedyMultipleKnapsack.h"
+#include "ApproximateMultipleKnapsack.h"
 
 // Self
 #include "Test.h"
@@ -162,7 +162,7 @@ void Test::run()
         }
 
         cerr << "Approximation:";
-        ApproximatedKnapsack approx(*it);
+        ApproximateKnapsack approx(*it);
         approx.setApproximationLevel(0.1);
 
         cerr << "The approximated value is " << approx.maximumProfit()
@@ -234,7 +234,7 @@ void Test::runMultipleKnapsackTests()
         items.push_back(item);
     }
     
-    MultipleKnapsack knapsacks;
+    GreedyMultipleKnapsack knapsacks;
     knapsacks.setSizes(bins);
     knapsacks.setItems(items);
     knapsacks.setApproximationLevel(0.1);
@@ -247,7 +247,7 @@ void Test::runMultipleKnapsackTests()
     }
     cout << "Multiple Knapsack 1, Profit: " << knapsacks.maximumProfit() << endl;
     
-    FastMultipleKnapsack fastKnapsacks;
+    ApproximateMultipleKnapsack fastKnapsacks;
     fastKnapsacks.setSizes(bins);
     fastKnapsacks.setItems(items);
     fastKnapsacks.setApproximationLevel(0.1);
