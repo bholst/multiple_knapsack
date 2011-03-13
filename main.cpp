@@ -10,6 +10,7 @@
 // Project
 #include "InstanceParser.h"
 #include "ApproximateMultipleKnapsack.h"
+#include "ImprovedApproximateMultipleKnapsack.h"
 #include "SmallBinPacking.h"
 #include "Test.h"
 #include "ProfitItem.h"
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
     bool extra = false;
     
     for(int i = 1; i < argc; ++i) {
+        qDebug() << "Arg" << i;
         if(QString(argv[i]) == "--extra") {
             qDebug() << "Using the extra algorithm.";
             extra = true;
@@ -39,12 +41,22 @@ int main(int argc, char **argv) {
         parser.read();
         
         if(parser.type() == InstanceParser::MultipleKnapsack) {
-            ApproximateMultipleKnapsack multipleKnapsack;
-            multipleKnapsack.setItems(parser.mkpItems());
-            multipleKnapsack.setSizes(parser.sizes());
-            qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
+            qDebug() << "Knapsack";
+            if(!extra) {
+                ApproximateMultipleKnapsack multipleKnapsack;
+                multipleKnapsack.setItems(parser.mkpItems());
+                multipleKnapsack.setSizes(parser.sizes());
+                qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
+            }
+            else {
+                ImprovedApproximateMultipleKnapsack multipleKnapsack;
+                multipleKnapsack.setItems(parser.mkpItems());
+                multipleKnapsack.setSizes(parser.sizes());
+                multipleKnapsack.maximumProfit();
+            }
         }
         else if(parser.type() == InstanceParser::BinPacking) {
+            qDebug() << "Bin packing";
             SmallBinPacking binPacking;
             binPacking.setItems(parser.binItems());
             qDebug() << QString("Minimum number of bins is %1").arg(binPacking.minimumNumberOfBins());
