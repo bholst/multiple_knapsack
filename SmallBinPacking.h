@@ -31,7 +31,9 @@ private:
     bool handlePreassignment(int *preassignment, int numberOfBins,
                              QVector<float> normalItemSizes,
                              QVector<int> normalItemNumbers,
-                             QMultiMap<float, int> grouping);
+                             QMultiMap<float, int> grouping,
+                             int *resultingAssignment,
+                             float *resultingRemainingCapacities);
 
     float m_delta;
     int m_K;
