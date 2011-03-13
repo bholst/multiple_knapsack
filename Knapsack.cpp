@@ -90,10 +90,8 @@ void Knapsack::recalculateValues()
     int profitSum = 0;
     for(int i=0; i < m_items.size(); ++i) {
         profitSum += m_items[i].profit();
-        qDebug() << "Profit sum: " << profitSum;
     }
 
-    qDebug() << QString("The size of the field is %1 x %2").arg(m_items.size()).arg(profitSum);
     //int minimumSize[m_items.size()][profitSum];
     QHash<IntPair,int> minimumSize;
     //QSet<int> *minimumSizeItems[m_items.size()][profitSum];

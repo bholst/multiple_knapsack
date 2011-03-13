@@ -29,9 +29,7 @@ int main(int argc, char **argv) {
     bool extra = false;
     
     for(int i = 1; i < argc; ++i) {
-        qDebug() << "Arg" << i;
         if(QString(argv[i]) == "--extra") {
-            qDebug() << "Using the extra algorithm.";
             extra = true;
             continue;
         }
@@ -41,7 +39,6 @@ int main(int argc, char **argv) {
         parser.read();
         
         if(parser.type() == InstanceParser::MultipleKnapsack) {
-            qDebug() << "Knapsack";
             if(!extra) {
                 ApproximateMultipleKnapsack multipleKnapsack;
                 multipleKnapsack.setItems(parser.mkpItems());
