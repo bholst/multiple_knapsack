@@ -52,13 +52,24 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 {
     // Assigning items to their groups.
     int minHighProfit = ceil(2.0 * m_rho * (1 + m_rho) * approximateMaximum);
-    qDebug() << "An item is considered to have high profit when it has at least" << minHighProfit;
+    qDebug() << "An item is considered to have high profit if it has at least" << minHighProfit;
+    int minMediumProfit = ceil(2.0 * (m_rho / sizes().size()) * (1 + m_rho) * approximateMaximum);
+    qDebug() << "An item is considered to have medium profit if it has at least" << minMediumProfit;
     QVector<ProfitItem> allItems = items();
     
     for(int item = 0; item < allItems.size(); ++item) {
         if(allItems[item].profit() >= minHighProfit) {
             m_highProfitItems.insert(item);
             qDebug() << "Item" << item << "has high profit.";
+        }
+        else if(allItems[item].profit() >= minMediumProfit) {
+            m_mediumProfitItems.insert(item);
+            qDebug() << "Item" << item << "has medium profit.";
+            // Now it becomes interesting.
+        }
+        else {
+            m_lowProfitItems.insert(item);
+            qDebug() << "Item" << item << "has low profit.";
         }
     }
 }
