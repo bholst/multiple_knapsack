@@ -45,6 +45,12 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     
     groupItems(approximateMaximum);
     
+    while(1) {
+        // Guess next subset of all high profit items.
+        // nextHighProfitSubset();
+        break;
+    }
+    
     m_assignment.clear();
     m_maximumProfit = 0;
     setDirty(false);
@@ -57,6 +63,9 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     // Profit categories:
     int minHighProfit = ceil(2.0 * m_rho * (1 + m_rho) * approximateMaximum);
     int minMediumProfit = ceil(2.0 * (m_rho / sizes().size()) * (1 + m_rho) * approximateMaximum);
+    
+    m_itemProfitOrder = itemProfitOrder();
+    qDebug() << m_itemProfitOrder;
     
     QVector<ProfitItem> allItems = items();
     

@@ -36,12 +36,16 @@ public:
     int totalSize();
     
 protected:
+    QVector<int> itemProfitOrder();
+    
     void setDirty(bool dirty);
     int m_maximumProfit;
     QVector<int> m_assignment;
     
 private:
     virtual void recalculateValues() = 0;
+    
+    void sortItemProfitOrder(QVector<int> *order, int start, int length);
     
     QList<int> m_sizes;
     QVector<ProfitItem> m_items;

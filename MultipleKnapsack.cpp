@@ -111,3 +111,58 @@ QVector< int > MultipleKnapsack::assignment()
     }
     return m_assignment;
 }
+
+QVector< int > MultipleKnapsack::itemProfitOrder()
+{
+    QVector< int > order(m_items.size());
+    
+    // Initial fill
+    int i;
+    for(i = 0; i < m_items.size(); ++i ) {
+        order[i] = i;
+    }
+    
+    // Sorting
+    sortItemProfitOrder(&order, 0, m_items.size());
+    
+    return order;
+}
+
+void MultipleKnapsack::sortItemProfitOrder(QVector< int >* order, int start, int length)
+{
+    unsigned int left = 1, right = length - 1;
+    int temp;
+    
+    if(length <= 1) {
+        return;
+    }
+    
+    while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+        left++;
+    }
+    while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+        right--;
+    }
+    
+    while(left < right) {
+        // exchange the order
+        temp = (*order)[start + left];
+        (*order)[start + left] = (*order)[start + right];
+        (*order)[start + right] = temp;
+        
+        while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+            left++;
+        }
+        while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+            right--;
+        }
+    }
+    
+    // Putting the pivot element in the right position.
+    temp = (*order)[start];
+    (*order)[start] = (*order)[start + right];
+    (*order)[start + right] = temp;
+    
+    sortItemProfitOrder(order, start, right);
+    sortItemProfitOrder(order, start + right + 1, length - right - 1);
+}

@@ -22,6 +22,7 @@ private:
     
     int m_largestBinCapacity;
     
+    QVector<int> m_itemProfitOrder;
     QSet<int> m_highProfitItems;
     QSet<int> m_mediumProfitItems;
     QSet<int> m_lowProfitItems;
