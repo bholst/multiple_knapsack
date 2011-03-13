@@ -4,35 +4,52 @@
 
 // Qt
 #include <QtCore/QDebug>
+#include <QtCore/QString>
 
 // Self
 #include "ItemVector.h"
 
-template <int numberOfItemSizes>
-ItemVector<numberOfItemSizes>::ItemVector()
+ItemVector::ItemVector(int numberOfItemSizes)
+    : m_numberOfItemSizes(numberOfItemSizes)
 {
-
+    m_itemCount = new int[numberOfItemSizes];
+    for(int i = 0; i < numberOfItemSizes; ++i) {
+        m_itemCount[i] = 0;
+    }
 }
 
-template <int numberOfItemSizes>
-void ItemVector<numberOfItemSizes>::setItemCount(int sizeNumber, int itemCount)
+ItemVector::~ItemVector()
 {
-    if(sizeNumber >= numberOfItemSizes) {
-        qDebug() << "Error: There are only" << numberOfItemSizes << "item sizes";
+    delete m_itemCount;
+}
+
+void ItemVector::setItemCount(int sizeNumber, int itemCount)
+{
+    if(sizeNumber >= m_numberOfItemSizes) {
+        qDebug() << "Error: There are only" << m_numberOfItemSizes << "item sizes";
         return;
     }
     
     m_itemCount[sizeNumber] = itemCount;
 }
 
-template <int numberOfItemSizes>
-int ItemVector<numberOfItemSizes>::itemCount(int sizeNumber)
+int ItemVector::itemCount(int sizeNumber) const
 {
-    if(sizeNumber >= numberOfItemSizes) {
-        qDebug() << "Error: There are only" << numberOfItemSizes << "item sizes";
-        return;
+    if(sizeNumber >= m_numberOfItemSizes) {
+        qDebug() << "Error: There are only" << m_numberOfItemSizes << "item sizes";
+        return -1;
     }
     
     return m_itemCount[sizeNumber];
+}
+
+QString ItemVector::toString() const
+{
+    QString result;
+    for(int i = 0; i < m_numberOfItemSizes; i++) {
+        result.append(QString("Of size %1 we have %2 items.").arg(i).arg(m_itemCount[i]));
+    }
+    
+    return result;
 }
 

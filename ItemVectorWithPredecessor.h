@@ -5,19 +5,29 @@
 #ifndef ITEMVECTORWITHPREDECESSOR_H
 #define ITEMVECTORWITHPREDECESSOR_H
 
+// Qt
+#include <QtCore/QVector>
+
+// Project
 #include "ItemVector.h"
 
-template <int numberOfItemSizes>
 class ItemVectorWithPredecessor
 {
 
 public:
-    ItemVectorWithPredecessor();
-    ItemVectorWithPredecessor(const ItemVector<numberOfItemSizes>& add, ItemVectorWithPredecessor<numberOfItemSizes> *predecessor);
+    explicit ItemVectorWithPredecessor(int numberOfItemSizes);
+    ItemVectorWithPredecessor(const ItemVector& add, ItemVectorWithPredecessor *predecessor);
+    
+    ~ItemVectorWithPredecessor();
+    
+    bool isFull(const QVector<int>& allItems);
+    int itemCount(int sizeNumber) const;
+    ItemVectorWithPredecessor *predecessor();
     
 private:
-    ItemVectorWithPredecessor<numberOfItemSizes> *m_predecessor;
-    int m_itemCount[numberOfItemSizes];
+    ItemVectorWithPredecessor *m_predecessor;
+    int m_numberOfItemSizes;
+    int *m_itemCount;
 };
 
 #endif // ITEMVECTORWITHPREDECESSOR_H

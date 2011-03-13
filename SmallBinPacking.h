@@ -6,6 +6,7 @@
 #define SMALLBINPACKING_H
 
 #include <QtCore/QVector>
+#include <QtCore/QMultiMap>
 
 class FloatItem;
 
@@ -29,7 +30,8 @@ private:
     virtual void recalculateValues();
     bool handlePreassignment(int *preassignment, int numberOfBins,
                              QVector<float> normalItemSizes,
-                             QVector<int> normalItemNumbers);
+                             QVector<int> normalItemNumbers,
+                             QMultiMap<float, int> grouping);
 
     float m_delta;
     int m_K;

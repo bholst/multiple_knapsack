@@ -12,6 +12,8 @@
 
 // Project
 #include "FloatItem.h"
+#include "ItemVectorWithPredecessor.h"
+#include "ItemVector.h"
 
 // Self
 #include "SmallBinPacking.h"
@@ -110,6 +112,7 @@ void SmallBinPacking::recalculateValues()
     
     // Sort all items in the groups J
     QVector< QMultiMap<float, int> > groupItems(itemsI.size()); // The item numbers by rounded item size.
+    QMultiMap<float, int> allGroupItems;
     QMap<float, int> extraItems; // counting all items out of a first group per set
     QMap<float, int> normalItems; // counting all other items
     QVector<float> normalItemsSizes;
@@ -126,6 +129,7 @@ void SmallBinPacking::recalculateValues()
             while(it != items.begin() && groupItemNumber < groupSize) {
                 --it;
                 groupItems[i].insert(groupItemSize, it.value());
+                allGroupItems.insert(groupItemSize, it.value());
                 qDebug() << "Rounding the size of item" << it.value() << "to" << groupItemSize;
                 groupItemNumber++;
             }
@@ -165,7 +169,7 @@ void SmallBinPacking::recalculateValues()
         bool foundAssignment = false;
         bool noAssignmentPossible = false;
         while(!noAssignmentPossible) {
-            foundAssignment = handlePreassignment(assignment, mediumBins, normalItemsSizes, normalItemsNumbers);
+            foundAssignment = handlePreassignment(assignment, mediumBins, normalItemsSizes, normalItemsNumbers, allGroupItems);
             if(foundAssignment) {
                 break;
             }
@@ -211,9 +215,10 @@ void SmallBinPacking::recalculateValues()
 
 bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
                                           QVector<float> normalItemSizes,
-                                          QVector<int> normalItemNumbers)
+                                          QVector<int> normalItemNumbers,
+                                          QMultiMap<float, int> grouping)
 {
-//     qDebug() << "Testing a preassignment";
+    qDebug() << "Testing a preassignment";
     float remainingCapacities[numberOfBins];
     // Initializing the capacities
     for(int i = 0; i < numberOfBins; ++i) {
@@ -229,6 +234,117 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
         }
     }
     
+    QList<ItemVectorWithPredecessor *> allItemVectors;
+    QList<ItemVectorWithPredecessor *> itemVectors;
+    itemVectors.append(new ItemVectorWithPredecessor(normalItemNumbers.size()));
+    
+    ItemVectorWithPredecessor *sufficientFill = 0;
+    int sufficientBinNumber = -1;
+    for(int bin = 0; bin < numberOfBins && sufficientFill == 0; ++bin) {
+        float remainingCapacity = remainingCapacities[bin];
+        
+        QList<ItemVectorWithPredecessor *> nextItemVectors;
+        ItemVector currentBinFill(normalItemNumbers.size());
+        
+        bool allFills = false;
+        while(!allFills && sufficientFill == 0) {
+            int itemClass = normalItemSizes.size() - 1;
+            bool foundNextFill = false;
+            while(!allFills && !foundNextFill) {
+                float itemSize = normalItemSizes[itemClass];
+                int fittingClassItems = floor(remainingCapacity / itemSize);
+                if(fittingClassItems > normalItemNumbers[itemClass]) {
+                    fittingClassItems = normalItemNumbers[itemClass];
+                }
+                
+                if(fittingClassItems > currentBinFill.itemCount(itemClass)) {
+                    currentBinFill.setItemCount(itemClass, fittingClassItems);
+                    remainingCapacity -= itemSize * fittingClassItems;
+                    foundNextFill = true;
+                }
+                else {
+                    remainingCapacity += itemSize * currentBinFill.itemCount(itemClass);
+                    currentBinFill.setItemCount(itemClass, 0);
+                    itemClass--;
+                    if(itemClass < 0) {
+                        allFills = true;
+                    }
+                }
+            }
+            
+            if(!allFills) {
+                // Now we have a new fill.
+                foreach(ItemVectorWithPredecessor *vector, itemVectors) {
+                    ItemVectorWithPredecessor *nextFill = new ItemVectorWithPredecessor(currentBinFill, vector);
+                    nextItemVectors.append(nextFill);
+                    if(nextFill->isFull(normalItemNumbers)) {
+                        sufficientFill = nextFill;
+                        sufficientBinNumber = bin;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        allItemVectors.append(itemVectors);
+        itemVectors = nextItemVectors;
+    }
+    
+    int result = false;
+    int assignment[m_items.size()];
+    for(int i = 0; i < m_items.size(); ++i) {
+        assignment[i] = preassignment[i];
+    }
+    
+    if(sufficientFill != 0) {
+        ItemVectorWithPredecessor *currentVector = sufficientFill;
+        QVector<int> remainingItemNumbers = normalItemNumbers;
+        for(int bin = sufficientBinNumber; bin >= 0; --bin) {
+            for(int i = 0; i < normalItemSizes.size(); ++i) {
+                int numberOfCurrentSizeItems;
+                if(currentVector->predecessor() != 0) {
+                    numberOfCurrentSizeItems = currentVector->itemCount(i) - currentVector->predecessor()->itemCount(i);
+                }
+                else {
+                    numberOfCurrentSizeItems = currentVector->itemCount(i);
+                }
+                
+                float currentSize = normalItemSizes[i];
+                while(numberOfCurrentSizeItems > 0
+                      && remainingItemNumbers[i] > 0)
+                {
+                    QMap<float, int>::const_iterator itemIndexIterator = grouping.find(currentSize);
+                    if(itemIndexIterator == grouping.end()) {
+                        qDebug() << "Group empty";
+                        break;
+                    }
+                    int itemIndex = *itemIndexIterator;
+//                     assignment[itemIndex] = bin;
+                    assignment[itemIndex] = bin;
+                    qDebug() << "Item " << itemIndex << "in bin" << bin;
+                    remainingCapacities[bin] -= m_items[itemIndex].size();
+                    qDebug() << "Bin space now:" << remainingCapacities[bin];
+                    grouping.remove(currentSize, itemIndex);
+                    
+                    numberOfCurrentSizeItems--;
+                }
+            }
+            currentVector = currentVector->predecessor();
+        }
+        
+        qDebug() << "Found sufficient fill!";
+        result = true;
+    }
+    
+    foreach(ItemVectorWithPredecessor *vector, allItemVectors) {
+        delete vector;
+    }
+    
+    foreach(ItemVectorWithPredecessor *vector, itemVectors) {
+        delete vector;
+    }
+    
+    return result;
     /*
     QList< QList< QVector<int> > > selections;
     QList< QVector<int> > emptyList;
@@ -305,5 +421,4 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
         return false;
     }
     */
-    return true;
 }

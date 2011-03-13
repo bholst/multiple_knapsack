@@ -5,17 +5,21 @@
 #ifndef ITEMVECTOR_H
 #define ITEMVECTOR_H
 
-template <int numberOfItemSizes>
+class QString;
 class ItemVector
 {
 
 public:
-    ItemVector();
+    explicit ItemVector(int numberOfItemSizes);
+    ~ItemVector();
     void setItemCount(int sizeNumber, int itemNumber);
-    int itemCount(int sizeNumber);
+    int itemCount(int sizeNumber) const;
+    
+    QString toString() const;
     
 private:
-    int m_itemCount[numberOfItemSizes];
+    int m_numberOfItemSizes;
+    int *m_itemCount;
 };
 
 #endif // ITEMVECTOR_H
