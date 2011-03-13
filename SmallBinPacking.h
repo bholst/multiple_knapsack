@@ -14,6 +14,7 @@ class SmallBinPacking
 {
 public:
     SmallBinPacking();
+    ~SmallBinPacking();
 
     QVector<FloatItem> items() const;
     void setItems(const QVector<FloatItem>& items);
@@ -26,14 +27,27 @@ public:
      */
     int minimumNumberOfBins();
     
+    int *assignment();
+    
 private:
     virtual void recalculateValues();
     bool handlePreassignment(int *preassignment, int numberOfBins,
                              QVector<float> normalItemSizes,
                              QVector<int> normalItemNumbers,
                              QMultiMap<float, int> grouping,
+                             QMap<float, int> extraItems,
+                             QSet<int> smallItems,
                              int *resultingAssignment,
                              float *resultingRemainingCapacities);
+    bool packExtraItems(QMap<float, int> extraItems,
+                        QMultiMap<float, int> grouping,
+                        int *assignment,
+                        float *remainingCapacities,
+                        int numberOfBins);
+    bool packSmallItems(QSet<int> smallItems,
+                        int *assignment,
+                        float *remainingCapacities,
+                        int numberOfBins);
 
     float m_delta;
     int m_K;
@@ -41,6 +55,7 @@ private:
     
     bool m_dirty;
     int m_minimumNumberOfBins;
+    int *m_assignment;
 };
 
 #endif // SMALLBINPACKING_H

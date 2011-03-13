@@ -22,9 +22,15 @@ SmallBinPacking::SmallBinPacking()
     : m_dirty(true),
       m_delta(0.38),
       m_K(8),
-      m_minimumNumberOfBins(-1)
+      m_minimumNumberOfBins(-1),
+      m_assignment(0)
 {
 
+}
+
+SmallBinPacking::~SmallBinPacking()
+{
+    delete m_assignment;
 }
 
 QVector< FloatItem > SmallBinPacking::items() const
@@ -49,6 +55,14 @@ int SmallBinPacking::minimumNumberOfBins()
         recalculateValues();
     }
     return m_minimumNumberOfBins;
+}
+
+int *SmallBinPacking::assignment()
+{
+    if(m_dirty) {
+        recalculateValues();
+    }
+    return m_assignment;
 }
 
 void SmallBinPacking::recalculateValues()
@@ -159,7 +173,7 @@ void SmallBinPacking::recalculateValues()
         mediumBins = (maximumBins + minimumBins)/2; // This will not exceed the size of int,
                                                         // because the maximum Number of bins is small.
         delete endRemainingCapacities;
-        endRemainingCapacities = new float[mediumBins];
+        endRemainingCapacities = new float[mediumBins + 1];
         int assignment[m_items.size()];
         for(int i = 0; i < m_items.size(); ++i) {
             if(largeItems.contains(i)) {
@@ -179,9 +193,15 @@ void SmallBinPacking::recalculateValues()
                                                   normalItemsSizes,
                                                   normalItemsNumbers,
                                                   allGroupItems,
+                                                  extraItems,
+                                                  smallItems,
                                                   endAssignment,
                                                   endRemainingCapacities);
             if(foundAssignment) {
+                delete m_assignment;
+                m_assignment = endAssignment;
+                endAssignment = new int[m_items.size()];
+                
                 break;
             }
             
@@ -215,25 +235,36 @@ void SmallBinPacking::recalculateValues()
         if(maximumBins == minimumBins) {
             if(maximumBins < maximumNumberOfBins()) {
                 foundNumber = true;
-                m_minimumNumberOfBins = maximumBins;
+                m_minimumNumberOfBins = maximumBins + 1;
             }
             else {
                 break;
             }
         }
     }
+    
+    if(!foundNumber) {
+        delete m_assignment;
+        m_assignment = 0;
+    }
+    
+    delete endAssignment;
+    delete endRemainingCapacities;
+    
+    m_dirty = false;
 }
 
 bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
                                           QVector<float> normalItemSizes,
                                           QVector<int> normalItemNumbers,
                                           QMultiMap<float, int> grouping,
+                                          QMap<float, int> extraItems,
+                                          QSet<int> smallItems,
                                           int *resultingAssignment,
                                           float *resultingRemainingCapacities)
 {
-    qDebug() << "Testing a preassignment";
     // Initializing the capacities
-    for(int i = 0; i < numberOfBins; ++i) {
+    for(int i = 0; i <= numberOfBins; ++i) {
         resultingRemainingCapacities[i] = 1.0;
     }
     for(int i = 0; i < m_items.size(); ++i) {
@@ -319,6 +350,7 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
                 else {
                     numberOfCurrentSizeItems = currentVector->itemCount(i);
                 }
+                qDebug() << "Group" << i << "gets" << numberOfCurrentSizeItems << "set";
                 
                 float currentSize = normalItemSizes[i];
                 while(numberOfCurrentSizeItems > 0
@@ -355,5 +387,86 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
         delete vector;
     }
     
-    return result;
+    if(result == false) {
+        return false;
+    }
+    
+    bool extraResult = packExtraItems(extraItems,
+                                      grouping,
+                                      resultingAssignment,
+                                      resultingRemainingCapacities,
+                                      numberOfBins);
+    
+    if(!extraResult) {
+        return false;
+    }
+    
+    if(!packSmallItems(smallItems, resultingAssignment, resultingRemainingCapacities, numberOfBins)) {
+        return false;
+    }
+    
+    return true;
 }
+
+
+bool SmallBinPacking::packExtraItems(QMap< float, int > extraItems,
+                                     QMultiMap< float, int > grouping,
+                                     int* assignment,
+                                     float* remainingCapacities,
+                                     int numberOfBins)
+{
+    for(QMap<float, int>::iterator it = extraItems.begin();
+        it != extraItems.end();
+        ++it)
+    {
+        while(1) {
+            QMap<float, int>::const_iterator itemIndexIterator = grouping.find(it.key());
+            if(itemIndexIterator == grouping.end()) {
+                qDebug() << "Group empty!";
+                break;
+            }
+            
+            int itemIndex = *itemIndexIterator;
+            assignment[itemIndex] = numberOfBins;
+            qDebug() << "Item " << itemIndex << "in bin" << numberOfBins;
+            remainingCapacities[numberOfBins] -= m_items[itemIndex].size();
+            qDebug() << "Bin space now:" << remainingCapacities[numberOfBins];
+            grouping.remove(it.key(), itemIndex);
+            if(remainingCapacities[numberOfBins] < 0.0) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+bool SmallBinPacking::packSmallItems(QSet< int > smallItems,
+                                     int* assignment,
+                                     float* remainingCapacities,
+                                     int numberOfBins)
+{
+    for(QSet<int>::iterator it = smallItems.begin(); 
+        it != smallItems.end();
+        ++it)
+    {
+        float currentSize = m_items[*it].size();
+        bool foundBin = false;
+        for(int bin = 0; bin <= numberOfBins; ++bin) {
+            if(remainingCapacities[bin] >= currentSize) {
+                assignment[*it] = bin;
+                remainingCapacities[bin] -= currentSize;
+                foundBin = true;
+                qDebug() << "Item" << *it << "in bin" << bin;
+                break;
+            }
+        }
+        if(!foundBin) {
+            qDebug() << "Small item did not fit into bin.";
+            return false;
+        }
+    }
+    
+    return true;
+}
+

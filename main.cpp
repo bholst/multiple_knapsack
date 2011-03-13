@@ -40,6 +40,15 @@ int main(int argc, char **argv) {
             SmallBinPacking binPacking;
             binPacking.setItems(parser.binItems());
             qDebug() << QString("Minimum number of bins is %1").arg(binPacking.minimumNumberOfBins());
+            
+            int *assignment = binPacking.assignment();
+            if(assignment != 0) {
+                qDebug() << QString("using the following packing:");
+                int numberOfItems = parser.binItems().size();
+                for(int i = 0; i < numberOfItems; ++i) {
+                    qDebug() << QString("Pack item %1 in bin %2.").arg(i).arg(assignment[i]);
+                }
+            }
         }
     }
     return 0;
