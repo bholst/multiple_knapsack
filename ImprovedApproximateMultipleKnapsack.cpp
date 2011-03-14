@@ -72,7 +72,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                   << subsetToString(highProfitSubset, 0, m_firstMediumProfitOrderIndex).toStdString() << std::endl;
         
         bool foundHighProfitSubsetAssignment
-            = firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
+            = firstSubsetAssignment(highProfitSubset, assignment, remainingCapacity, 0, m_firstMediumProfitOrderIndex);
         int numberOfMediumProfitHighSizeItems;
         if(foundHighProfitSubsetAssignment) {
             groupMediumItems(m_totalCapacity - highProfitSubsetSizes);
@@ -308,17 +308,23 @@ QString ImprovedApproximateMultipleKnapsack::highProfitSubsetAssignmentToString(
     return result;
 }
 
-bool ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* highProfitSubset, 
-                                                                          int* assignment, 
-                                                                          int* remainingCapacity)
+bool ImprovedApproximateMultipleKnapsack::firstSubsetAssignment(bool* subset, 
+                                                                int* assignment, 
+                                                                int* remainingCapacity,
+                                                                int first,
+                                                                int count)
 {
-    for(int bin = 0; bin < m_numberOfBins; ++bin) {
-        remainingCapacity[bin] = m_sortedSizes[bin];
+    if(first == 0) {
+        // If we create a new assignment, reset the remaining capacities.
+        for(int bin = 0; bin < m_numberOfBins; ++bin) {
+            remainingCapacity[bin] = m_sortedSizes[bin];
+        }
     }
     
     int item;
-    for(item = 0; item < m_firstMediumProfitOrderIndex; ++item) {
-        if(highProfitSubset[item] == true) {
+    for(item = first; item < first + count; ++item) {
+        // Working with absolute item numbers here.
+        if(subset[item-first] == true) {
             assignment[item] = 0;
             remainingCapacity[0] -= items().at(m_itemProfitSizeOrder[item]).size();
         }
@@ -327,12 +333,14 @@ bool ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* 
         }
     }
     
-    for(; item < m_itemProfitSizeOrder.size(); ++item) {
-        assignment[item] = -1;
+    if(first == 0) {
+        for(; item < m_itemProfitSizeOrder.size(); ++item) {
+            assignment[item] = -1;
+        }
     }
     
     if(remainingCapacity[0] < 0) {
-        return nextSubsetAssignment(highProfitSubset, assignment, remainingCapacity, 0, m_firstMediumProfitOrderIndex);
+        return nextSubsetAssignment(subset, assignment, remainingCapacity, first, count);
     }
     else {
         return true;
