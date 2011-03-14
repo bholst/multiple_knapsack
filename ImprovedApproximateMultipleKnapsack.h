@@ -60,8 +60,8 @@ private:
     /**
      * Generates the next possible assignment of all items in subset @p highProfitSubset to the bins.
      * 
-     * @param highProfitSubset A bool array which is at least m_firstMediumProfitOrderIndex long
-     *                         for which "highProfitSubset[i] == true" is equal to "item i is in the subset".
+     * @param subset A bool array which is at least @p count long
+     *               for which "highProfitSubset[i] == true" is equal to "item i is in the subset".
      * @param assignment An int array which is at least items().size() long.
      *                   It has to be an assignment of all items in the subset that does not have to be
      *                   feasible.
@@ -72,7 +72,7 @@ private:
      *                          assignment.
      *                          After returning this contains the remaining capacities for each bin.
      */
-    bool nextHighProfitSubsetAssignment(bool *highProfitSubset, int *assignment, int *remainingCapacity);    
+    bool nextSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int first, int count);    
     
     QString highProfitSubsetAssignmentToString(int *assignment);
     
