@@ -29,14 +29,14 @@ private:
     /**
      * Generates the next possible subset of all large items.
      * 
-     * @param highProfitSubset A bool array which is at least m_firstMediumProfitOrderIndex long
-     *                         for which "highProfitSubset[i] == true" is equal to "item i is in the subset".
-     *                         It will contain the next subset at return.
-     * @param subsetSize The number of items in the subset highProfitSubset.
-     * @param profit The profit for the subset highProfitSubset.
-     * @param size The size for the subset highProfitSubset.
+     * @param subset A bool array which is at least @p count long
+     *               for which "highProfitSubset[i] == true" is equal to "item i is in the subset".
+     *               It will contain the next subset at return.
+     * @param subsetSize The number of items in the subset @p subset.
+     * @param profit The sum of all profits for the subset @p subset.
+     * @param size The sum of all sizes for the subset @p subset.
      */
-    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize, int *profit, int *size);
+    bool nextSubset(bool *subset, int *subsetSize, int *profit, int *size, int first, int count, int itemLimit);
     
     /**
      * Creating a printable string from the subset @p highProfitSubset.

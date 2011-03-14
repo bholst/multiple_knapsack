@@ -91,10 +91,13 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
         }
         
         // Guess next subset of all high profit items.
-        if(!nextHighProfitSubset(highProfitSubset, 
-                                 &subsetSize, 
-                                 &highProfitSubsetProfit, 
-                                 &highProfitSubsetSize))
+        if(!nextSubset(highProfitSubset,
+                       &subsetSize,
+                       &highProfitSubsetProfit,
+                       &highProfitSubsetSize,
+                       0,
+                       m_firstMediumProfitOrderIndex,
+                       m_highProfitSubsetSizeLimit))
         {
             break;
         }
@@ -205,20 +208,23 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 //     }
 }
 
-bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitSubset,
-                                                               int *subsetSize, 
-                                                               int *profit, 
-                                                               int *size)
+bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
+                                                     int *subsetSize, 
+                                                     int *profit, 
+                                                     int *size,
+                                                     int first,
+                                                     int count,
+                                                     int itemLimit)
 {
     int i = 0;
-    while(i < m_firstMediumProfitOrderIndex) {
-        ProfitItem item = items().at(m_itemProfitSizeOrder[i]);
-        if(highProfitSubset[i] == false) {
+    while(i < count) {
+        ProfitItem item = items().at(m_itemProfitSizeOrder[i+first]);
+        if(subset[i] == false) {
             (*subsetSize)++;
-            highProfitSubset[i] = true;
+            subset[i] = true;
             (*profit) += item.profit();
             (*size) += item.size();
-            if(*subsetSize > m_highProfitSubsetSizeLimit) {
+            if(*subsetSize > itemLimit) {
                 i = 0;
                 continue;
             }
@@ -228,14 +234,14 @@ bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitS
         }
         else {
             (*subsetSize)--;
-            highProfitSubset[i] = false;
+            subset[i] = false;
             (*profit) -= item.profit();
             (*size) -= item.size();
             ++i;
         }
     }
     
-    if(i >= m_firstMediumProfitOrderIndex) {
+    if(i >= count) {
         return false;
     }
     else {
