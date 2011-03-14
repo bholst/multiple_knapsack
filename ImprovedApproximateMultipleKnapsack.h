@@ -81,7 +81,7 @@ private:
     int m_largestBinCapacity;
     int m_totalCapacity;
     
-    QVector<int> m_itemProfitOrder;
+    QVector<int> m_itemProfitSizeOrder;
     int m_firstMediumProfitOrderIndex;
     int m_firstLowProfitOrderIndex;
     

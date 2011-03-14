@@ -123,12 +123,17 @@ QVector< int > MultipleKnapsack::itemProfitOrder()
     }
     
     // Sorting
-    sortItemProfitOrder(&order, 0, m_items.size());
+    sortItemOrder(&order, 0, m_items.size(), 'p');
     
     return order;
 }
 
-void MultipleKnapsack::sortItemProfitOrder(QVector< int >* order, int start, int length)
+void MultipleKnapsack::sortItemSizeOrder(QVector< int >* order, int start, int length)
+{
+    sortItemOrder(order, start, length, 's');
+}
+
+void MultipleKnapsack::sortItemOrder(QVector< int >* order, int start, int length, char mode)
 {
     unsigned int left = 1, right = length - 1;
     int temp;
@@ -137,11 +142,21 @@ void MultipleKnapsack::sortItemProfitOrder(QVector< int >* order, int start, int
         return;
     }
     
-    while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
-        left++;
+    if(mode == 'p') {
+        while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+            left++;
+        }
+        while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+            right--;
+        }
     }
-    while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
-        right--;
+    else {
+        while(left < right && m_items[(*order)[start + left]].size() >= m_items[(*order)[start]].size()) {
+            left++;
+        }
+        while(m_items[(*order)[right + start]].size() < m_items[(*order)[start]].size()) {
+            right--;
+        }
     }
     
     while(left < right) {
@@ -150,11 +165,21 @@ void MultipleKnapsack::sortItemProfitOrder(QVector< int >* order, int start, int
         (*order)[start + left] = (*order)[start + right];
         (*order)[start + right] = temp;
         
-        while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
-            left++;
+        if(mode == 'p') {
+            while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+                left++;
+            }
+            while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+                right--;
+            }
         }
-        while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
-            right--;
+        else {
+            while(left < right && m_items[(*order)[start + left]].size() >= m_items[(*order)[start]].size()) {
+                left++;
+            }
+            while(m_items[(*order)[right + start]].size() < m_items[(*order)[start]].size()) {
+                right--;
+            }
         }
     }
     
@@ -163,6 +188,6 @@ void MultipleKnapsack::sortItemProfitOrder(QVector< int >* order, int start, int
     (*order)[start] = (*order)[start + right];
     (*order)[start + right] = temp;
     
-    sortItemProfitOrder(order, start, right);
-    sortItemProfitOrder(order, start + right + 1, length - right - 1);
+    sortItemOrder(order, start, right, mode);
+    sortItemOrder(order, start + right + 1, length - right - 1, mode);
 }

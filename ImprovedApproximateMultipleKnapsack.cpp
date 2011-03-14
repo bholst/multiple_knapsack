@@ -60,7 +60,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
         highProfitSubset[i] = false;
     }
-    int assignment[m_itemProfitOrder.size()];
+    int assignment[m_itemProfitSizeOrder.size()];
     int remainingCapacity[m_numberOfBins];
     int highProfitSubsetProfit = 0;
     int highProfitSubsetSize = 0;
@@ -115,15 +115,15 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     int minMediumProfit = ceil(2.0 * (m_rho / sizes().size()) * (1 + m_rho) * approximateMaximum);
     qDebug() << "Item has medium profit with:" << minMediumProfit;
     
-    m_itemProfitOrder = itemProfitOrder();
-    qDebug() << m_itemProfitOrder;
+    m_itemProfitSizeOrder = itemProfitOrder();
+    qDebug() << m_itemProfitSizeOrder;
     
     QVector<ProfitItem> allItems = items();
     
     int i;
     // High profit items.
     for(i = 0; i < allItems.size(); ++i) {
-        int itemNr = m_itemProfitOrder[i];
+        int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minHighProfit) {
             m_highProfitItems.insert(itemNr);
@@ -136,7 +136,7 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     // Medium Profit items.
     m_firstMediumProfitOrderIndex = i;
     for(; i < allItems.size(); ++i) {
-        int itemNr = m_itemProfitOrder[i];
+        int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minMediumProfit) {
             m_mediumProfitItems.insert(itemNr);
@@ -152,7 +152,7 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     // Low profit items.
     m_firstLowProfitOrderIndex = i;
     for(; i < allItems.size(); ++i) {
-        int itemNr = m_itemProfitOrder[i];
+        int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         m_lowProfitItems.insert(itemNr);
     }
@@ -160,6 +160,12 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     qDebug() << "High profit items:" << m_highProfitItems;
     qDebug() << "Medium profit items:" << m_mediumProfitItems;
     qDebug() << "Low profit items:" << m_lowProfitItems;
+    
+    sortItemSizeOrder(&m_itemProfitSizeOrder,
+                      m_firstMediumProfitOrderIndex,
+                      m_firstLowProfitOrderIndex - m_firstMediumProfitOrderIndex);
+    qDebug() << "Sorted sizes:";
+    qDebug() << m_itemProfitSizeOrder;
 }
 
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
@@ -177,18 +183,18 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     
     qDebug() << "Medium items:";
     for(int item = m_firstMediumProfitOrderIndex; item < m_firstLowProfitOrderIndex; ++item) {
-        int size = items().at(m_itemProfitOrder[item]).size();
+        int size = items().at(m_itemProfitSizeOrder[item]).size();
         if(size > maxMediumSize) {
             // High size
-            m_mediumProfitHighSizeItems.insert(m_itemProfitOrder[item]);
+            m_mediumProfitHighSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
         else if(size >= minMediumSize) {
             // Medium size
-            m_mediumProfitMediumSizeItems.insert(m_itemProfitOrder[item]);
+            m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
         else {
             // Low size
-            m_mediumProfitLowSizeItems.insert(m_itemProfitOrder[item]);
+            m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
     }
     
@@ -204,7 +210,7 @@ bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitS
 {
     int i = 0;
     while(i < m_firstMediumProfitOrderIndex) {
-        ProfitItem item = items().at(m_itemProfitOrder[i]);
+        ProfitItem item = items().at(m_itemProfitSizeOrder[i]);
         if(highProfitSubset[i] == false) {
             (*subsetSize)++;
             highProfitSubset[i] = true;
@@ -239,7 +245,7 @@ QString ImprovedApproximateMultipleKnapsack::highProfitSubsetToString(bool* high
 {
     QString result;
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        result += QString("%1|").arg(m_itemProfitOrder[i], 5);
+        result += QString("%1|").arg(m_itemProfitSizeOrder[i], 5);
     }
     result += "\n";
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
@@ -257,7 +263,7 @@ QString ImprovedApproximateMultipleKnapsack::highProfitSubsetAssignmentToString(
 {
     QString result;
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        result += QString("%1|").arg(m_itemProfitOrder[i], 5);
+        result += QString("%1|").arg(m_itemProfitSizeOrder[i], 5);
     }
     result += "\n";
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
@@ -278,14 +284,14 @@ bool ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* 
     for(item = 0; item < m_firstMediumProfitOrderIndex; ++item) {
         if(highProfitSubset[item] == true) {
             assignment[item] = 0;
-            remainingCapacity[0] -= items().at(m_itemProfitOrder[item]).size();
+            remainingCapacity[0] -= items().at(m_itemProfitSizeOrder[item]).size();
         }
         else {
             assignment[item] = -1;
         }
     }
     
-    for(; item < m_itemProfitOrder.size(); ++item) {
+    for(; item < m_itemProfitSizeOrder.size(); ++item) {
         assignment[item] = -1;
     }
     
@@ -313,7 +319,7 @@ bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubsetAssignment(bool* h
     
     int i = firstSubsetElement;
     while(i < m_firstMediumProfitOrderIndex) {
-        int itemSize = items().at(m_itemProfitOrder[i]).size();
+        int itemSize = items().at(m_itemProfitSizeOrder[i]).size();
         if(assignment[i] + 1 < m_numberOfBins) {
             remainingCapacity[assignment[i]] += itemSize;
             assignment[i]++;
