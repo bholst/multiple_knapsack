@@ -170,37 +170,45 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 {
-    qDebug() << "Rho is" << m_rho;
-    qDebug() << "Remaining capacity is" << remainingArea;
     int maxMediumSize = floor((m_rho * remainingArea)/(2 * m_K * pow(log2(1.0/m_rho), 3.0)));
-    qDebug() << "maxMediumSize is" << maxMediumSize;
     int minMediumSize = ceil(pow(m_rho, 6.0) * remainingArea);
-    qDebug() << "minMediumSize is" << minMediumSize;
     
     m_mediumProfitHighSizeItems.clear();
     m_mediumProfitMediumSizeItems.clear();
     m_mediumProfitLowSizeItems.clear();
     
     qDebug() << "Medium items:";
-    for(int item = m_firstMediumProfitOrderIndex; item < m_firstLowProfitOrderIndex; ++item) {
+    int item;
+    for(item = m_firstMediumProfitOrderIndex; item < m_firstLowProfitOrderIndex; ++item) {
         int size = items().at(m_itemProfitSizeOrder[item]).size();
         if(size > maxMediumSize) {
             // High size
             m_mediumProfitHighSizeItems.insert(m_itemProfitSizeOrder[item]);
+        } else {
+            break;
         }
-        else if(size >= minMediumSize) {
+    }
+    
+    m_firstMediumProfitMediumSizeOrderIndex = item;
+    
+    for(; item < m_firstLowProfitOrderIndex; ++item) {
+        int size = items().at(m_itemProfitSizeOrder[item]).size();
+        
+        if(size >= minMediumSize) {
             // Medium size
             m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
         else {
-            // Low size
-            m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
+            break;
         }
     }
     
-    qDebug() << "High size:" << m_mediumProfitHighSizeItems;
-    qDebug() << "Medium size:" << m_mediumProfitMediumSizeItems;
-    qDebug() << "Low size:" << m_mediumProfitLowSizeItems;
+    m_firstMediumProfitLowSizeOrderIndex = item;
+    
+    for(; item < m_firstLowProfitOrderIndex; ++item) {
+        // Low size
+        m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
+    }
 }
 
 bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitSubset,

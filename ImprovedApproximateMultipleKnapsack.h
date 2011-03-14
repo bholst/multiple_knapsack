@@ -85,6 +85,9 @@ private:
     int m_firstMediumProfitOrderIndex;
     int m_firstLowProfitOrderIndex;
     
+    int m_firstMediumProfitMediumSizeOrderIndex;
+    int m_firstMediumProfitLowSizeOrderIndex;
+    
     QSet<int> m_highProfitItems;
     QSet<int> m_mediumProfitItems;
     QSet<int> m_lowProfitItems;
