@@ -51,15 +51,18 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
         highProfitSubset[i] = false;
     }
+    int highProfitSubsetProfit = 0;
     int subsetSize = 0;
     int subsetCounter = 0;
     while(1) {
         // Guess next subset of all high profit items.
-        if(!nextHighProfitSubset(highProfitSubset, &subsetSize)) {
+        if(!nextHighProfitSubset(highProfitSubset, &subsetSize, &highProfitSubsetProfit)) {
             break;
         }
-        std::cout << "Subset Nr.: " << subsetCounter++ << std::endl;
-        std::cout << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
+        
+        std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
+                  << "Profit: " << highProfitSubsetProfit << std::endl
+                  << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
     }
     
     m_assignment.clear();
@@ -118,13 +121,14 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     }
 }
 
-bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitSubset, int *subsetSize)
+bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitSubset, int *subsetSize, int *profit)
 {
     int i = 0;
     while(i < m_firstMediumProfitOrderIndex) {
         if(highProfitSubset[i] == false) {
             (*subsetSize)++;
             highProfitSubset[i] = true;
+            (*profit) += items().at(m_itemProfitOrder[i]).profit();
             if(*subsetSize > m_highProfitSubsetSizeLimit) {
                 i = 0;
                 continue;
@@ -136,6 +140,7 @@ bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubset(bool* highProfitS
         else {
             (*subsetSize)--;
             highProfitSubset[i] = false;
+            (*profit) -= items().at(m_itemProfitOrder[i]).profit();
             ++i;
         }
     }

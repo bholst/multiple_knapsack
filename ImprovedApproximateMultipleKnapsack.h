@@ -20,7 +20,7 @@ private:
     
     void groupItems(int approximateMaximum);
     
-    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize);
+    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize, int *profit);
     QString highProfitSubsetToString(bool *highProfitSubset);
     
     int m_largestBinCapacity;
