@@ -71,9 +71,6 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                   << "Profit: " << highProfitSubsetProfit << std::endl
                   << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
         
-        if(subsetCounter == 14) {
-            std::cout << std::endl << "Possible assignments:" << std::endl;
-        }
         bool foundHighProfitSubsetAssignment
             = firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
         if(foundHighProfitSubsetAssignment) {
@@ -81,9 +78,6 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
         }
         while(foundHighProfitSubsetAssignment) {
             // Do stuff with the assignment.
-            if(subsetCounter == 14) {
-                std::cout << highProfitSubsetAssignmentToString(assignment).toStdString() << std::endl << std::endl;
-            }
             
             // Guess the next assignment of all high profit items in subset highProfitSubset
             foundHighProfitSubsetAssignment
