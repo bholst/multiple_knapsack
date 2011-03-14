@@ -24,6 +24,8 @@ private:
      */
     void groupItems(int approximateMaximum);
     
+    void groupMediumItems(int remainingArea);
+    
     /**
      * Generates the next possible subset of all large items.
      * 
@@ -32,8 +34,9 @@ private:
      *                         It will contain the next subset at return.
      * @param subsetSize The number of items in the subset highProfitSubset.
      * @param profit The profit for the subset highProfitSubset.
+     * @param size The size for the subset highProfitSubset.
      */
-    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize, int *profit);
+    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize, int *profit, int *size);
     
     /**
      * Creating a printable string from the subset @p highProfitSubset.
@@ -69,11 +72,14 @@ private:
      *                          assignment.
      *                          After returning this contains the remaining capacities for each bin.
      */
-    bool nextHighProfitSubsetAssignment(bool *highProfitSubset, int *assignment, int *remainingCapacity);
+    bool nextHighProfitSubsetAssignment(bool *highProfitSubset, int *assignment, int *remainingCapacity);    
+    
+    QString highProfitSubsetAssignmentToString(int *assignment);
     
     int m_numberOfBins;
     QList<int> m_sortedSizes;
     int m_largestBinCapacity;
+    int m_totalCapacity;
     
     QVector<int> m_itemProfitOrder;
     int m_firstMediumProfitOrderIndex;
@@ -83,7 +89,12 @@ private:
     QSet<int> m_mediumProfitItems;
     QSet<int> m_lowProfitItems;
     
+    QSet<int> m_mediumProfitHighSizeItems;
+    QSet<int> m_mediumProfitMediumSizeItems;
+    QSet<int> m_mediumProfitLowSizeItems;
+    
     double m_rho;
+    double m_K;
     int m_highProfitSubsetSizeLimit;
 };
 
