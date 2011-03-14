@@ -74,7 +74,7 @@ private:
      */
     bool nextSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int first, int count);    
     
-    QString highProfitSubsetAssignmentToString(int *assignment);
+    QString subsetAssignmentToString(int* assignment, int first, int count);
     
     int m_numberOfBins;
     QList<int> m_sortedSizes;

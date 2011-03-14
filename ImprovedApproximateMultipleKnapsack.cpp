@@ -107,8 +107,15 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                             mediumProfitHighSizeRemainingCapacity,
                                             m_firstMediumProfitOrderIndex,
                                             numberOfMediumProfitHighSizeItems);
+//                 if(foundMediumProfitHighSizeSubsetAssignment) {
+//                     std::cout << "Assignment following now:" << std::endl;
+//                 }
                 while(foundMediumProfitHighSizeSubsetAssignment) {
                     // Do stuff with the Assignment
+//                     std::cout << subsetAssignmentToString(assignment,
+//                                                           m_firstMediumProfitOrderIndex,
+//                                                           numberOfMediumProfitHighSizeItems).toStdString()
+//                               << std::endl << std::endl;
                     
                     // Guess the next assignment of all medium profit item in subset mediumProfitHighSizeSubset.
                     foundMediumProfitHighSizeSubsetAssignment
@@ -328,15 +335,17 @@ QString ImprovedApproximateMultipleKnapsack::subsetToString(bool* subset,
     return result;
 }
 
-QString ImprovedApproximateMultipleKnapsack::highProfitSubsetAssignmentToString(int* assignment)
+QString ImprovedApproximateMultipleKnapsack::subsetAssignmentToString(int* assignment,
+                                                                      int first,
+                                                                      int count)
 {
     QString result;
-    for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        result += QString("%1|").arg(m_itemProfitSizeOrder[i], 5);
+    for(int i = 0; i < count; ++i) {
+        result += QString("%1|").arg(m_itemProfitSizeOrder[i+first], 5);
     }
     result += "\n";
-    for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        result += QString("%1|").arg(assignment[i], 5);
+    for(int i = 0; i < count; ++i) {
+        result += QString("%1|").arg(assignment[i+first], 5);
     }
     return result;
 }
