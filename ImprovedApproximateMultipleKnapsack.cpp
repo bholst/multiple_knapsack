@@ -29,11 +29,12 @@ ImprovedApproximateMultipleKnapsack::~ImprovedApproximateMultipleKnapsack()
 
 void ImprovedApproximateMultipleKnapsack::recalculateValues()
 {
-    QList<int> sortedSizes = sizes();
-    qSort(sortedSizes);
-    qDebug() << sortedSizes;
+    m_sortedSizes = sizes();
+    qSort(m_sortedSizes);
+    qDebug() << m_sortedSizes;
     
-    m_largestBinCapacity = sortedSizes.last();
+    m_numberOfBins = m_sortedSizes.size();
+    m_largestBinCapacity = m_sortedSizes.last();
     
     m_rho = 1.0 / ceil(14.0/approximationLevel());
     m_highProfitSubsetSizeLimit = floor(1.0/m_rho);
@@ -41,7 +42,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     GreedyMultipleKnapsack greedy;
     greedy.setApproximationLevel(m_rho/2.0);
     greedy.setItems(items());
-    greedy.setSizes(sortedSizes);
+    greedy.setSizes(m_sortedSizes);
     
     int approximateMaximum = greedy.maximumProfit();
     
@@ -51,18 +52,32 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
         highProfitSubset[i] = false;
     }
+    int assignment[m_itemProfitOrder.size()];
+    int remainingCapacity[m_numberOfBins];
     int highProfitSubsetProfit = 0;
     int subsetSize = 0;
     int subsetCounter = 0;
     while(1) {
+        std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
+                  << "Profit: " << highProfitSubsetProfit << std::endl
+                  << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
+        
+        firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
+        while(1) {
+            if(subsetCounter == 82) {
+                // Print the assignments
+            }
+            
+            // Guess the next assignment of all high profit items in subset highProfitSubset
+            if(!nextHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity)) {
+                break;
+            }
+        }
+        
         // Guess next subset of all high profit items.
         if(!nextHighProfitSubset(highProfitSubset, &subsetSize, &highProfitSubsetProfit)) {
             break;
         }
-        
-        std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
-                  << "Profit: " << highProfitSubsetProfit << std::endl
-                  << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
     }
     
     m_assignment.clear();
@@ -169,5 +184,87 @@ QString ImprovedApproximateMultipleKnapsack::highProfitSubsetToString(bool* high
         }
     }
     return result;
+}
+
+void ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* highProfitSubset, 
+                                                                          int* assignment, 
+                                                                          int* remainingCapacity)
+{
+    for(int bin = 0; bin < m_numberOfBins; ++bin) {
+        remainingCapacity[bin] = m_sortedSizes[bin];
+    }
+    
+    int item;
+    for(item = 0; item < m_firstMediumProfitOrderIndex; ++item) {
+        if(highProfitSubset[item] == true) {
+            assignment[item] = 0;
+            remainingCapacity[0] -= items().at(m_itemProfitOrder[item]).size();
+        }
+        else {
+            assignment[item] = -1;
+        }
+    }
+    
+    for(; item < m_itemProfitOrder.size(); ++item) {
+        assignment[item] = -1;
+    }
+}
+
+bool ImprovedApproximateMultipleKnapsack::nextHighProfitSubsetAssignment(bool* highProfitSubset, 
+                                                                         int* assignment, 
+                                                                         int* remainingCapacity)
+{
+    int firstSubsetElement = 0;
+    for(; firstSubsetElement < m_firstMediumProfitOrderIndex; ++firstSubsetElement) {
+        if(highProfitSubset[firstSubsetElement] == true) {
+            break;
+        }
+    }
+    if(firstSubsetElement == m_firstMediumProfitOrderIndex) {
+        return false;
+    }
+    
+    int i = firstSubsetElement;
+    while(i < m_firstMediumProfitOrderIndex) {
+        int itemSize = items().at(m_itemProfitOrder[i]).size();
+        if(assignment[i] < m_numberOfBins) {
+            remainingCapacity[assignment[i]] += itemSize;
+            assignment[i]++;
+            remainingCapacity[assignment[i]] -= itemSize;
+            
+            bool feasibleAssignment = true;
+            for(int bin = 0; bin < m_numberOfBins; ++bin) {
+                if(remainingCapacity[bin] < 0) {
+                    feasibleAssignment = false;
+                    break;
+                }
+            }
+            if(!feasibleAssignment) {
+                i = firstSubsetElement;
+                continue;
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            remainingCapacity[assignment[i]] += itemSize;
+            assignment[i] = 0;
+            remainingCapacity[0] -= itemSize;
+            
+            while(i < m_firstMediumProfitOrderIndex) {
+                if(highProfitSubset[++i] == true) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    if(i >= m_firstMediumProfitOrderIndex) {
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 

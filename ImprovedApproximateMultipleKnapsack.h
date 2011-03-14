@@ -23,6 +23,11 @@ private:
     bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize, int *profit);
     QString highProfitSubsetToString(bool *highProfitSubset);
     
+    void firstHighProfitSubsetAssignment(bool *highProfitSubset, int *assignment, int *remainingCapacity);
+    bool nextHighProfitSubsetAssignment(bool *highProfitSubset, int *assignment, int *remainingCapacity);
+    
+    int m_numberOfBins;
+    QList<int> m_sortedSizes;
     int m_largestBinCapacity;
     
     QVector<int> m_itemProfitOrder;
