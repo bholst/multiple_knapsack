@@ -36,8 +36,8 @@ public:
     int totalSize();
     
 protected:
-    QVector<int> itemProfitOrder();
-    void sortItemSizeOrder(QVector<int> *order, int start, int length);
+    int *itemProfitOrder();
+    void sortItemSizeOrder(int *order, int length);
     
     void setDirty(bool dirty);
     int m_maximumProfit;
@@ -49,7 +49,7 @@ private:
     /**
      * @param mode 'p' if you want to sort by profit and 's' if you want to sort by size.
      */
-    void sortItemOrder(QVector<int> *order, int start, int length, char mode);
+    void sortItemOrder(int *order, int length, char mode);
     
     QList<int> m_sizes;
     QVector<ProfitItem> m_items;

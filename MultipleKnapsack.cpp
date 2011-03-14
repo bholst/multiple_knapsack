@@ -112,9 +112,9 @@ QVector< int > MultipleKnapsack::assignment()
     return m_assignment;
 }
 
-QVector< int > MultipleKnapsack::itemProfitOrder()
+int *MultipleKnapsack::itemProfitOrder()
 {
-    QVector< int > order(m_items.size());
+    int *order = new int[m_items.size()];
     
     // Initial fill
     int i;
@@ -123,17 +123,17 @@ QVector< int > MultipleKnapsack::itemProfitOrder()
     }
     
     // Sorting
-    sortItemOrder(&order, 0, m_items.size(), 'p');
+    sortItemOrder(order, m_items.size(), 'p');
     
     return order;
 }
 
-void MultipleKnapsack::sortItemSizeOrder(QVector< int >* order, int start, int length)
+void MultipleKnapsack::sortItemSizeOrder(int *order, int length)
 {
-    sortItemOrder(order, start, length, 's');
+    sortItemOrder(order, length, 's');
 }
 
-void MultipleKnapsack::sortItemOrder(QVector< int >* order, int start, int length, char mode)
+void MultipleKnapsack::sortItemOrder(int *order, int length, char mode)
 {
     unsigned int left = 1, right = length - 1;
     int temp;
@@ -143,51 +143,51 @@ void MultipleKnapsack::sortItemOrder(QVector< int >* order, int start, int lengt
     }
     
     if(mode == 'p') {
-        while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+        while(left < right && m_items[order[left]].profit() >= m_items[order[0]].profit()) {
             left++;
         }
-        while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+        while(m_items[order[right]].profit() < m_items[order[0]].profit()) {
             right--;
         }
     }
     else {
-        while(left < right && m_items[(*order)[start + left]].size() >= m_items[(*order)[start]].size()) {
+        while(left < right && m_items[order[left]].size() >= m_items[order[0]].size()) {
             left++;
         }
-        while(m_items[(*order)[right + start]].size() < m_items[(*order)[start]].size()) {
+        while(m_items[order[right]].size() < m_items[order[0]].size()) {
             right--;
         }
     }
     
     while(left < right) {
         // exchange the order
-        temp = (*order)[start + left];
-        (*order)[start + left] = (*order)[start + right];
-        (*order)[start + right] = temp;
+        temp = order[left];
+        order[left] = order[right];
+        order[right] = temp;
         
         if(mode == 'p') {
-            while(left < right && m_items[(*order)[start + left]].profit() >= m_items[(*order)[start]].profit()) {
+            while(left < right && m_items[order[left]].profit() >= m_items[order[0]].profit()) {
                 left++;
             }
-            while(m_items[(*order)[right + start]].profit() < m_items[(*order)[start]].profit()) {
+            while(m_items[order[right]].profit() < m_items[order[0]].profit()) {
                 right--;
             }
         }
         else {
-            while(left < right && m_items[(*order)[start + left]].size() >= m_items[(*order)[start]].size()) {
+            while(left < right && m_items[order[left]].size() >= m_items[order[0]].size()) {
                 left++;
             }
-            while(m_items[(*order)[right + start]].size() < m_items[(*order)[start]].size()) {
+            while(m_items[order[right]].size() < m_items[order[0]].size()) {
                 right--;
             }
         }
     }
     
     // Putting the pivot element in the right position.
-    temp = (*order)[start];
-    (*order)[start] = (*order)[start + right];
-    (*order)[start + right] = temp;
+    temp = order[0];
+    order[0] = order[right];
+    order[right] = temp;
     
-    sortItemOrder(order, start, right, mode);
-    sortItemOrder(order, start + right + 1, length - right - 1, mode);
+    sortItemOrder(order, right, mode);
+    sortItemOrder(order + right + 1, length - right - 1, mode);
 }

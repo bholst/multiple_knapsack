@@ -18,17 +18,20 @@
 #include "ImprovedApproximateMultipleKnapsack.h"
 
 ImprovedApproximateMultipleKnapsack::ImprovedApproximateMultipleKnapsack()
+    : m_itemProfitSizeOrder(0)
 {
 
 }
 
 ImprovedApproximateMultipleKnapsack::~ImprovedApproximateMultipleKnapsack()
 {
-
+    delete m_itemProfitSizeOrder;
 }
 
 void ImprovedApproximateMultipleKnapsack::recalculateValues()
 {
+    m_itemNumber = items().size();
+    
     m_sortedSizes = sizes();
     qSort(m_sortedSizes);
     qDebug() << m_sortedSizes;
@@ -60,7 +63,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
         highProfitSubset[i] = false;
     }
-    int assignment[m_itemProfitSizeOrder.size()];
+    int assignment[items().size()];
     int remainingCapacity[m_numberOfBins];
     int highProfitSubsetProfits = 0;
     int highProfitSubsetSizes = 0;
@@ -184,8 +187,8 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     int minMediumProfit = ceil(2.0 * (m_rho / sizes().size()) * (1 + m_rho) * approximateMaximum);
     qDebug() << "Item has medium profit with:" << minMediumProfit;
     
+    delete m_itemProfitSizeOrder;
     m_itemProfitSizeOrder = itemProfitOrder();
-    qDebug() << m_itemProfitSizeOrder;
     
     QVector<ProfitItem> allItems = items();
     
@@ -224,11 +227,13 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 //         m_lowProfitItems.insert(itemNr);
 //     }
     
-    sortItemSizeOrder(&m_itemProfitSizeOrder,
-                      m_firstMediumProfitOrderIndex,
+    sortItemSizeOrder(m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                       m_firstLowProfitOrderIndex - m_firstMediumProfitOrderIndex);
     qDebug() << "Sorted sizes:";
-    qDebug() << m_itemProfitSizeOrder;
+    for(int i = 0; i < items().size(); ++i) {
+        std::cout << m_itemProfitSizeOrder[i] << ", ";
+    }
+    std::cout << std::endl;
 }
 
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
@@ -376,7 +381,7 @@ bool ImprovedApproximateMultipleKnapsack::firstSubsetAssignment(bool* subset,
     }
     
     if(first == 0) {
-        for(; item < m_itemProfitSizeOrder.size(); ++item) {
+        for(; item < m_itemNumber; ++item) {
             assignment[item] = -1;
         }
     }
