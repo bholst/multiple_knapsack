@@ -69,22 +69,41 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     
     QVector<ProfitItem> allItems = items();
     
-    for(int item = 0; item < allItems.size(); ++item) {
-        if(allItems[item].profit() >= minHighProfit) {
-            m_highProfitItems.insert(item);
-            qDebug() << "Item" << item << "has high profit.";
+    int i;
+    // High profit items.
+    for(i = 0; i < allItems.size(); ++i) {
+        int itemNr = m_itemProfitOrder[i];
+        int profit = allItems[itemNr].profit();
+        if(profit >= minHighProfit) {
+            m_highProfitItems.insert(itemNr);
         }
-        else if(allItems[item].profit() >= minMediumProfit) {
-            m_mediumProfitItems.insert(item);
-            qDebug() << "Item" << item << "has medium profit.";
+        else {
+            break;
+        }
+    }
+    
+    // Medium Profit items.
+    m_firstMediumProfitOrderIndex = i;
+    for(; i < allItems.size(); ++i) {
+        int itemNr = m_itemProfitOrder[i];
+        int profit = allItems[itemNr].profit();
+        if(profit >= minMediumProfit) {
+            m_mediumProfitItems.insert(itemNr);
             
             // The medium profit items are categorized later in size categories,
             // because the remaining capacity is needed for that.
         }
         else {
-            m_lowProfitItems.insert(item);
-            qDebug() << "Item" << item << "has low profit.";
+            break;
         }
+    }
+    
+    // Low profit items.
+    m_firstLowProfitOrderIndex = i;
+    for(; i < allItems.size(); ++i) {
+        int itemNr = m_itemProfitOrder[i];
+        int profit = allItems[itemNr].profit();
+        m_lowProfitItems.insert(itemNr);
     }
 }
 
