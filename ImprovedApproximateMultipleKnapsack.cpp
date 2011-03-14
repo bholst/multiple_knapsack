@@ -62,22 +62,47 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     }
     int assignment[m_itemProfitSizeOrder.size()];
     int remainingCapacity[m_numberOfBins];
-    int highProfitSubsetProfit = 0;
-    int highProfitSubsetSize = 0;
-    int subsetSize = 0;
+    int highProfitSubsetProfits = 0;
+    int highProfitSubsetSizes = 0;
+    int highProfitSubsetCount = 0;
     int subsetCounter = 0;
     while(1) {
         std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
-                  << "Profit: " << highProfitSubsetProfit << std::endl
+                  << "Profit: " << highProfitSubsetProfits << std::endl
                   << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
         
         bool foundHighProfitSubsetAssignment
             = firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
+        int numberOfMediumProfitHighSizeItems;
         if(foundHighProfitSubsetAssignment) {
-            groupMediumItems(m_totalCapacity - highProfitSubsetSize);
+            groupMediumItems(m_totalCapacity - highProfitSubsetSizes);
+            numberOfMediumProfitHighSizeItems = m_firstMediumProfitMediumSizeOrderIndex - m_firstMediumProfitOrderIndex;
         }
         while(foundHighProfitSubsetAssignment) {
             // Do stuff with the assignment.
+            int mediumProfitHighSizeSubsetProfits = 0;
+            int mediumProfitHighSizeSubsetSizes = 0;
+            int mediumProfitHighSizeSubsetCount = 0;
+            
+            // Creating the first subset (containing none of the items.
+            bool mediumProfitHighSizeSubset[numberOfMediumProfitHighSizeItems];
+            for(int i = 0; i < numberOfMediumProfitHighSizeItems; ++i) {
+                mediumProfitHighSizeSubset[i] = false;
+            }
+            while(1) {
+                // Do stuff with the subset.
+                
+                if(!nextSubset(mediumProfitHighSizeSubset,
+                               &mediumProfitHighSizeSubsetCount,
+                               &mediumProfitHighSizeSubsetProfits,
+                               &mediumProfitHighSizeSubsetSizes,
+                               m_firstMediumProfitOrderIndex,
+                               numberOfMediumProfitHighSizeItems,
+                               numberOfMediumProfitHighSizeItems))
+                {
+                    break;
+                }   
+            }
             
             // Guess the next assignment of all high profit items in subset highProfitSubset
             foundHighProfitSubsetAssignment
@@ -86,9 +111,9 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
         
         // Guess next subset of all high profit items.
         if(!nextSubset(highProfitSubset,
-                       &subsetSize,
-                       &highProfitSubsetProfit,
-                       &highProfitSubsetSize,
+                       &highProfitSubsetCount,
+                       &highProfitSubsetProfits,
+                       &highProfitSubsetSizes,
                        0,
                        m_firstMediumProfitOrderIndex,
                        m_highProfitSubsetSizeLimit))
