@@ -62,16 +62,16 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                   << "Profit: " << highProfitSubsetProfit << std::endl
                   << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
         
-        firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
-        while(1) {
+        bool foundHighProfitSubsetAssignment
+            = firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
+        while(foundHighProfitSubsetAssignment) {
             if(subsetCounter == 82) {
                 // Print the assignments
             }
             
             // Guess the next assignment of all high profit items in subset highProfitSubset
-            if(!nextHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity)) {
-                break;
-            }
+            foundHighProfitSubsetAssignment
+                = nextHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
         }
         
         // Guess next subset of all high profit items.
@@ -186,7 +186,7 @@ QString ImprovedApproximateMultipleKnapsack::highProfitSubsetToString(bool* high
     return result;
 }
 
-void ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* highProfitSubset, 
+bool ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* highProfitSubset, 
                                                                           int* assignment, 
                                                                           int* remainingCapacity)
 {
@@ -207,6 +207,13 @@ void ImprovedApproximateMultipleKnapsack::firstHighProfitSubsetAssignment(bool* 
     
     for(; item < m_itemProfitOrder.size(); ++item) {
         assignment[item] = -1;
+    }
+    
+    if(remainingCapacity[0] < 0) {
+        return nextHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
+    }
+    else {
+        return true;
     }
 }
 
