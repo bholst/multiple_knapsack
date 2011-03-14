@@ -36,12 +36,12 @@ private:
      * @param profit The sum of all profits for the subset @p subset.
      * @param size The sum of all sizes for the subset @p subset.
      */
-    bool nextSubset(bool *subset, int *subsetSize, int *profit, int *size, int first, int count, int itemLimit);
+    bool nextSubset(bool *subset, int *subsetSize, int *profit, int *size, int *itemProfitSizeOrder, int count, int itemLimit);
     
     /**
      * Creating a printable string from the subset @p subset.
      */
-    QString subsetToString(bool* subset, int first, int count);
+    QString subsetToString(bool* subset, int *itemProfitSizeOrder, int count);
     
     /**
      * Generates the first possible assignment of all items in subset @p highProfitSubset to the bins.
@@ -56,7 +56,7 @@ private:
      * 
      * @return Returns true, if there is a feasible assignment.
      */
-    bool firstSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int first, int count);
+    bool firstSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int *itemProfitSizeOrder, int count);
     /**
      * Generates the next possible assignment of all items in subset @p highProfitSubset to the bins.
      * 
@@ -72,9 +72,9 @@ private:
      *                          assignment.
      *                          After returning this contains the remaining capacities for each bin.
      */
-    bool nextSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int first, int count);    
+    bool nextSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int *itemProfitSizeOrder, int count);    
     
-    QString subsetAssignmentToString(int* assignment, int first, int count);
+    QString subsetAssignmentToString(int* assignment, int *itemProfitSizeOrder, int count);
     
     int m_numberOfBins;
     QList<int> m_sortedSizes;

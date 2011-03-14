@@ -72,10 +72,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     while(1) {
         std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
                   << "Profit: " << highProfitSubsetProfits << std::endl
-                  << subsetToString(highProfitSubset, 0, m_firstMediumProfitOrderIndex).toStdString() << std::endl;
+                  << subsetToString(highProfitSubset, m_itemProfitSizeOrder, m_firstMediumProfitOrderIndex).toStdString() << std::endl;
         
         bool foundHighProfitSubsetAssignment
-            = firstSubsetAssignment(highProfitSubset, assignment, remainingCapacity, 0, m_firstMediumProfitOrderIndex);
+            = firstSubsetAssignment(highProfitSubset, assignment, remainingCapacity, m_itemProfitSizeOrder, m_firstMediumProfitOrderIndex);
         int numberOfMediumProfitHighSizeItems;
         if(foundHighProfitSubsetAssignment) {
             groupMediumItems(m_totalCapacity - highProfitSubsetSizes);
@@ -99,33 +99,33 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                 std::cout << "Subset Nr.: " << mediumProfitHighSizeSubsetCounter++ << std::endl
                           << "Profit: " << mediumProfitHighSizeSubsetProfits << std::endl
                           << subsetToString(mediumProfitHighSizeSubset,
-                                            m_firstMediumProfitOrderIndex,
+                                            m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                             numberOfMediumProfitHighSizeItems).toStdString() << std::endl;
                 int mediumProfitHighSizeRemainingCapacity[m_numberOfBins];
                 memcpy(mediumProfitHighSizeRemainingCapacity, remainingCapacity, m_numberOfBins);
                 
                 bool foundMediumProfitHighSizeSubsetAssignment
                     = firstSubsetAssignment(mediumProfitHighSizeSubset,
-                                            assignment,
+                                            assignment + m_firstMediumProfitOrderIndex,
                                             mediumProfitHighSizeRemainingCapacity,
-                                            m_firstMediumProfitOrderIndex,
+                                            m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                             numberOfMediumProfitHighSizeItems);
-//                 if(foundMediumProfitHighSizeSubsetAssignment) {
-//                     std::cout << "Assignment following now:" << std::endl;
-//                 }
+                if(foundMediumProfitHighSizeSubsetAssignment) {
+                    std::cout << "Assignment following now:" << std::endl;
+                }
                 while(foundMediumProfitHighSizeSubsetAssignment) {
                     // Do stuff with the Assignment
-//                     std::cout << subsetAssignmentToString(assignment,
-//                                                           m_firstMediumProfitOrderIndex,
-//                                                           numberOfMediumProfitHighSizeItems).toStdString()
-//                               << std::endl << std::endl;
+                    std::cout << subsetAssignmentToString(assignment + m_firstMediumProfitOrderIndex,
+                                                          m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
+                                                          numberOfMediumProfitHighSizeItems).toStdString()
+                              << std::endl << std::endl;
                     
                     // Guess the next assignment of all medium profit item in subset mediumProfitHighSizeSubset.
                     foundMediumProfitHighSizeSubsetAssignment
                         = nextSubsetAssignment(mediumProfitHighSizeSubset,
-                                               assignment,
+                                               assignment + m_firstMediumProfitOrderIndex,
                                                mediumProfitHighSizeRemainingCapacity,
-                                               m_firstMediumProfitOrderIndex,
+                                               m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                                numberOfMediumProfitHighSizeItems);
                 }
                 
@@ -134,7 +134,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                &mediumProfitHighSizeSubsetCount,
                                &mediumProfitHighSizeSubsetProfits,
                                &mediumProfitHighSizeSubsetSizes,
-                               m_firstMediumProfitOrderIndex,
+                               m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                numberOfMediumProfitHighSizeItems,
                                numberOfMediumProfitHighSizeItems))
                 {
@@ -155,7 +155,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                 = nextSubsetAssignment(highProfitSubset,
                                        assignment,
                                        remainingCapacity,
-                                       0,
+                                       m_itemProfitSizeOrder,
                                        m_firstMediumProfitOrderIndex);
         }
         
@@ -164,7 +164,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                        &highProfitSubsetCount,
                        &highProfitSubsetProfits,
                        &highProfitSubsetSizes,
-                       0,
+                       m_itemProfitSizeOrder,
                        m_firstMediumProfitOrderIndex,
                        m_highProfitSubsetSizeLimit))
         {
@@ -283,13 +283,13 @@ bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
                                                      int *subsetSize, 
                                                      int *profit, 
                                                      int *size,
-                                                     int first,
+                                                     int *itemProfitSizeOrder,
                                                      int count,
                                                      int itemLimit)
 {
     int i = 0;
     while(i < count) {
-        ProfitItem item = items().at(m_itemProfitSizeOrder[i+first]);
+        ProfitItem item = items().at(itemProfitSizeOrder[i]);
         if(subset[i] == false) {
             (*subsetSize)++;
             subset[i] = true;
@@ -321,12 +321,12 @@ bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
 }
 
 QString ImprovedApproximateMultipleKnapsack::subsetToString(bool* subset,
-                                                            int first,
+                                                            int *itemProfitSizeOrder,
                                                             int count)
 {
     QString result;
     for(int i = 0; i < count; ++i) {
-        result += QString("%1|").arg(m_itemProfitSizeOrder[i+first], 5);
+        result += QString("%1|").arg(itemProfitSizeOrder[i], 5);
     }
     result += "\n";
     for(int i = 0; i < count; ++i) {
@@ -340,17 +340,17 @@ QString ImprovedApproximateMultipleKnapsack::subsetToString(bool* subset,
     return result;
 }
 
-QString ImprovedApproximateMultipleKnapsack::subsetAssignmentToString(int* assignment,
-                                                                      int first,
+QString ImprovedApproximateMultipleKnapsack::subsetAssignmentToString(int *assignment,
+                                                                      int *itemProfitSizeOrder,
                                                                       int count)
 {
     QString result;
     for(int i = 0; i < count; ++i) {
-        result += QString("%1|").arg(m_itemProfitSizeOrder[i+first], 5);
+        result += QString("%1|").arg(itemProfitSizeOrder[i], 5);
     }
     result += "\n";
     for(int i = 0; i < count; ++i) {
-        result += QString("%1|").arg(assignment[i+first], 5);
+        result += QString("%1|").arg(assignment[i], 5);
     }
     return result;
 }
@@ -358,10 +358,10 @@ QString ImprovedApproximateMultipleKnapsack::subsetAssignmentToString(int* assig
 bool ImprovedApproximateMultipleKnapsack::firstSubsetAssignment(bool* subset, 
                                                                 int* assignment, 
                                                                 int* remainingCapacity,
-                                                                int first,
+                                                                int *itemProfitSizeOrder,
                                                                 int count)
 {
-    if(first == 0) {
+    if(itemProfitSizeOrder == m_itemProfitSizeOrder) {
         // If we create a new assignment, reset the remaining capacities.
         for(int bin = 0; bin < m_numberOfBins; ++bin) {
             remainingCapacity[bin] = m_sortedSizes[bin];
@@ -369,25 +369,25 @@ bool ImprovedApproximateMultipleKnapsack::firstSubsetAssignment(bool* subset,
     }
     
     int item;
-    for(item = first; item < first + count; ++item) {
+    for(item = 0; item < count; ++item) {
         // Working with absolute item numbers here.
-        if(subset[item-first] == true) {
+        if(subset[item] == true) {
             assignment[item] = 0;
-            remainingCapacity[0] -= items().at(m_itemProfitSizeOrder[item]).size();
+            remainingCapacity[0] -= items().at(itemProfitSizeOrder[item]).size();
         }
         else {
             assignment[item] = -1;
         }
     }
     
-    if(first == 0) {
+    if(itemProfitSizeOrder == m_itemProfitSizeOrder) {
         for(; item < m_itemNumber; ++item) {
             assignment[item] = -1;
         }
     }
     
     if(remainingCapacity[0] < 0) {
-        return nextSubsetAssignment(subset, assignment, remainingCapacity, first, count);
+        return nextSubsetAssignment(subset, assignment, remainingCapacity, itemProfitSizeOrder, count);
     }
     else {
         return true;
@@ -397,7 +397,7 @@ bool ImprovedApproximateMultipleKnapsack::firstSubsetAssignment(bool* subset,
 bool ImprovedApproximateMultipleKnapsack::nextSubsetAssignment(bool* subset, 
                                                                int* assignment, 
                                                                int* remainingCapacity,
-                                                               int first,
+                                                               int *itemProfitSizeOrder,
                                                                int count)
 {
     int firstSubsetElement = 0;
@@ -412,12 +412,11 @@ bool ImprovedApproximateMultipleKnapsack::nextSubsetAssignment(bool* subset,
     
     int i = firstSubsetElement;
     while(i < count) {
-        int absoluteItemNr = i + first;
-        int itemSize = items().at(m_itemProfitSizeOrder[absoluteItemNr]).size();
-        if(assignment[absoluteItemNr] + 1 < m_numberOfBins) {
-            remainingCapacity[assignment[absoluteItemNr]] += itemSize;
-            assignment[absoluteItemNr]++;
-            remainingCapacity[assignment[absoluteItemNr]] -= itemSize;
+        int itemSize = items().at(itemProfitSizeOrder[i]).size();
+        if(assignment[i] + 1 < m_numberOfBins) {
+            remainingCapacity[assignment[i]] += itemSize;
+            assignment[i]++;
+            remainingCapacity[assignment[i]] -= itemSize;
             
             bool feasibleAssignment = true;
             for(int bin = 0; bin < m_numberOfBins; ++bin) {
@@ -435,8 +434,8 @@ bool ImprovedApproximateMultipleKnapsack::nextSubsetAssignment(bool* subset,
             }
         }
         else {
-            remainingCapacity[assignment[absoluteItemNr]] += itemSize;
-            assignment[absoluteItemNr] = 0;
+            remainingCapacity[assignment[i]] += itemSize;
+            assignment[i] = 0;
             remainingCapacity[0] -= itemSize;
             
             while(i < count) {
