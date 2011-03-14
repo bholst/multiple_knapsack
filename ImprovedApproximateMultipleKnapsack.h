@@ -39,9 +39,9 @@ private:
     bool nextSubset(bool *subset, int *subsetSize, int *profit, int *size, int first, int count, int itemLimit);
     
     /**
-     * Creating a printable string from the subset @p highProfitSubset.
+     * Creating a printable string from the subset @p subset.
      */
-    QString highProfitSubsetToString(bool *highProfitSubset);
+    QString subsetToString(bool* subset, int first, int count);
     
     /**
      * Generates the first possible assignment of all items in subset @p highProfitSubset to the bins.

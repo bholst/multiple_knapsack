@@ -69,7 +69,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     while(1) {
         std::cout << "Subset Nr.: " << subsetCounter++ << std::endl
                   << "Profit: " << highProfitSubsetProfits << std::endl
-                  << highProfitSubsetToString(highProfitSubset).toStdString() << std::endl;
+                  << subsetToString(highProfitSubset, 0, m_firstMediumProfitOrderIndex).toStdString() << std::endl;
         
         bool foundHighProfitSubsetAssignment
             = firstHighProfitSubsetAssignment(highProfitSubset, assignment, remainingCapacity);
@@ -84,6 +84,8 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
             int mediumProfitHighSizeSubsetSizes = 0;
             int mediumProfitHighSizeSubsetCount = 0;
             
+            int mediumProfitHighSizeSubsetCounter = 0;
+            
             // Creating the first subset (containing none of the items.
             bool mediumProfitHighSizeSubset[numberOfMediumProfitHighSizeItems];
             for(int i = 0; i < numberOfMediumProfitHighSizeItems; ++i) {
@@ -91,6 +93,11 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
             }
             while(1) {
                 // Do stuff with the subset.
+                std::cout << "Subset Nr.: " << mediumProfitHighSizeSubsetCounter++ << std::endl
+                          << "Profit: " << mediumProfitHighSizeSubsetProfits << std::endl
+                          << subsetToString(mediumProfitHighSizeSubset,
+                                            m_firstMediumProfitOrderIndex,
+                                            numberOfMediumProfitHighSizeItems).toStdString() << std::endl;
                 
                 if(!nextSubset(mediumProfitHighSizeSubset,
                                &mediumProfitHighSizeSubsetCount,
@@ -268,15 +275,17 @@ bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
     }
 }
 
-QString ImprovedApproximateMultipleKnapsack::highProfitSubsetToString(bool* highProfitSubset)
+QString ImprovedApproximateMultipleKnapsack::subsetToString(bool* subset,
+                                                            int first,
+                                                            int count)
 {
     QString result;
-    for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        result += QString("%1|").arg(m_itemProfitSizeOrder[i], 5);
+    for(int i = 0; i < count; ++i) {
+        result += QString("%1|").arg(m_itemProfitSizeOrder[i+first], 5);
     }
     result += "\n";
-    for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
-        if(highProfitSubset[i]) {
+    for(int i = 0; i < count; ++i) {
+        if(subset[i]) {
             result += QString("  *  |");
         }
         else {
