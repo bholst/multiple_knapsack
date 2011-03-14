@@ -20,6 +20,9 @@ private:
     
     void groupItems(int approximateMaximum);
     
+    bool nextHighProfitSubset(bool *highProfitSubset, int *subsetSize);
+    QString highProfitSubsetToString(bool *highProfitSubset);
+    
     int m_largestBinCapacity;
     
     QVector<int> m_itemProfitOrder;
@@ -31,6 +34,7 @@ private:
     QSet<int> m_lowProfitItems;
     
     double m_rho;
+    int m_highProfitSubsetSizeLimit;
 };
 
 #endif // IMPROVEDAPPROXIMATEMULTIPLEKNAPSACK_H
