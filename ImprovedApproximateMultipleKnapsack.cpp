@@ -39,9 +39,9 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     m_numberOfBins = m_sortedSizes.size();
     m_largestBinCapacity = m_sortedSizes.last();
     
-//     m_rho = 1.0 / ceil(14.0/approximationLevel());
-    m_rho = 1.0 / ceil(4.0/approximationLevel());
-    m_K = 5.0;
+    m_rho = 1.0 / ceil(14.0/approximationLevel());
+//     m_rho = 1.0 / ceil(4.0/approximationLevel());
+    m_K = 56.0;
     m_highProfitSubsetSizeLimit = floor(1.0/m_rho);
     
     GreedyMultipleKnapsack greedy;
@@ -207,6 +207,7 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     
     // Medium Profit items.
     m_firstMediumProfitOrderIndex = i;
+    qDebug() << "First medium profit order index =" << m_firstMediumProfitOrderIndex;
     for(; i < allItems.size(); ++i) {
         int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
@@ -238,8 +239,11 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 {
-    int maxMediumSize = floor((m_rho * remainingArea)/(2 * m_K * pow(log2(1.0/m_rho), 3.0)));
-    int minMediumSize = ceil(pow(m_rho, 6.0) * remainingArea);
+    double relativeRemainingArea = ((double) remainingArea)/((double) m_largestBinCapacity);
+    int maxMediumSize = floor((m_largestBinCapacity * m_rho * relativeRemainingArea)/(2 * m_K * pow(log2(1.0/m_rho), 3.0)));
+    qDebug() << "Item has medium size with at most" << maxMediumSize;
+    int minMediumSize = ceil(m_largestBinCapacity * pow(m_rho, 6.0) * relativeRemainingArea);
+    qDebug() << "Item has medium size with at least" << minMediumSize;
     
 //     m_mediumProfitHighSizeItems.clear();
 //     m_mediumProfitMediumSizeItems.clear();
@@ -258,6 +262,12 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     }
     
     m_firstMediumProfitMediumSizeOrderIndex = item;
+    qDebug() << "First medium profit medium size order index =" << m_firstMediumProfitMediumSizeOrderIndex;
+    
+    // Finding out the number of groups of medium profit items with medium size.
+    int upperLimit = ceil(log2((m_K * pow(log2(1.0/m_rho), 3))/(m_rho * relativeRemainingArea)));
+    int lowerLimit = floor(1.0/pow(m_rho, 6) * relativeRemainingArea) - 1;
+    qDebug() << "upperlimit =" << upperLimit << ", lowerlimit =" << lowerLimit;
     
     for(; item < m_firstLowProfitOrderIndex; ++item) {
         int size = items().at(m_itemProfitSizeOrder[item]).size();
@@ -272,6 +282,7 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     }
     
     m_firstMediumProfitLowSizeOrderIndex = item;
+    qDebug() << "First medium profit low size order index =" << m_firstMediumProfitLowSizeOrderIndex;
     
 //     for(; item < m_firstLowProfitOrderIndex; ++item) {
         // Low size
