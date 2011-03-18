@@ -20,7 +20,8 @@
 ImprovedApproximateMultipleKnapsack::ImprovedApproximateMultipleKnapsack()
     : m_itemProfitSizeOrder(0),
       m_orderedRelativeSizes(0),
-      m_firstMediumProfitMediumSizeGroupOrderIndex(0)
+      m_mediumProfitMediumSizeGroupSize(0),
+      m_mediumProfitMediumSizeGroupCount(0)
 {
     setApproximationLevel(0.7);
 }
@@ -29,7 +30,8 @@ ImprovedApproximateMultipleKnapsack::~ImprovedApproximateMultipleKnapsack()
 {
     delete m_itemProfitSizeOrder;
     delete m_orderedRelativeSizes;
-    delete m_firstMediumProfitMediumSizeGroupOrderIndex;
+    delete m_mediumProfitMediumSizeGroupSize;
+    delete m_mediumProfitMediumSizeGroupCount;
 }
 
 void ImprovedApproximateMultipleKnapsack::recalculateValues()
@@ -278,8 +280,14 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     // Finding out the number of groups of medium profit items with medium size.
     m_minR = floor(-log2(minHighSize));
     m_maxR = floor(-log2(minMediumSize));
-    delete m_firstMediumProfitMediumSizeGroupOrderIndex;
-    m_firstMediumProfitMediumSizeGroupOrderIndex = new int[m_maxR - m_minR];
+    delete m_mediumProfitMediumSizeGroupSize;
+    delete m_mediumProfitMediumSizeGroupCount;
+    m_mediumProfitMediumSizeGroupSize = new int[m_maxR - m_minR];
+    m_mediumProfitMediumSizeGroupCount = new int[m_maxR - m_minR];
+    for(int i = 0; i < m_maxR - m_minR; ++i) {
+        m_mediumProfitMediumSizeGroupCount[i] = 0;
+        m_mediumProfitMediumSizeGroupSize[i] = -1;
+    }
     
     int currentGroup = 0;
     
@@ -290,10 +298,13 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
             // Medium size
             qDebug() << "Relative size:" << ((double) size) / ((double) m_largestBinCapacity);
             int itemGroup = floor(-log2(size)) - m_minR;
-            while(currentGroup <= itemGroup) {
-                qDebug() << "Group" << currentGroup << "starts at" << item;
-                m_firstMediumProfitMediumSizeGroupOrderIndex[currentGroup] = item;
-                currentGroup++;
+            
+            m_mediumProfitMediumSizeGroupCount[itemGroup]++;
+            if(currentGroup < itemGroup) {
+                m_mediumProfitMediumSizeGroupSize[itemGroup] = items().at(m_itemProfitSizeOrder[item]).size();
+                while(currentGroup <= itemGroup) {
+                    currentGroup++;
+                }
             }
             qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemGroup;
 //             m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
@@ -303,10 +314,9 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
         }
     }
     
-    while(currentGroup <= m_maxR - m_minR) {
-        qDebug() << "Group" << currentGroup << "starts at" << item;
-        m_firstMediumProfitMediumSizeGroupOrderIndex[currentGroup] = item;
-        currentGroup++;
+    for(int i = 0; i < m_maxR - m_minR; ++i) {
+        qDebug() << "Group" << i << "contains" << m_mediumProfitMediumSizeGroupCount[i] << "items";
+        qDebug() << "and has size" << m_mediumProfitMediumSizeGroupSize[i];
     }
     
     m_firstMediumProfitLowSizeOrderIndex = item;

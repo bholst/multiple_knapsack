@@ -89,7 +89,8 @@ private:
     
     int m_firstMediumProfitMediumSizeOrderIndex;
     int m_firstMediumProfitLowSizeOrderIndex;
-    int *m_firstMediumProfitMediumSizeGroupOrderIndex;
+    int *m_mediumProfitMediumSizeGroupSize;
+    int *m_mediumProfitMediumSizeGroupCount;
     int m_minR;
     int m_maxR;
     
