@@ -83,11 +83,15 @@ private:
     
     int m_itemNumber;
     int *m_itemProfitSizeOrder;
+    double *m_orderedRelativeSizes;
     int m_firstMediumProfitOrderIndex;
     int m_firstLowProfitOrderIndex;
     
     int m_firstMediumProfitMediumSizeOrderIndex;
     int m_firstMediumProfitLowSizeOrderIndex;
+    int *m_firstMediumProfitMediumSizeGroupOrderIndex;
+    int m_minR;
+    int m_maxR;
     
 //     QSet<int> m_highProfitItems;
 //     QSet<int> m_mediumProfitItems;

@@ -18,14 +18,18 @@
 #include "ImprovedApproximateMultipleKnapsack.h"
 
 ImprovedApproximateMultipleKnapsack::ImprovedApproximateMultipleKnapsack()
-    : m_itemProfitSizeOrder(0)
+    : m_itemProfitSizeOrder(0),
+      m_orderedRelativeSizes(0),
+      m_firstMediumProfitMediumSizeGroupOrderIndex(0)
 {
-
+    setApproximationLevel(0.7);
 }
 
 ImprovedApproximateMultipleKnapsack::~ImprovedApproximateMultipleKnapsack()
 {
     delete m_itemProfitSizeOrder;
+    delete m_orderedRelativeSizes;
+    delete m_firstMediumProfitMediumSizeGroupOrderIndex;
 }
 
 void ImprovedApproximateMultipleKnapsack::recalculateValues()
@@ -39,9 +43,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     m_numberOfBins = m_sortedSizes.size();
     m_largestBinCapacity = m_sortedSizes.last();
     
-    m_rho = 1.0 / ceil(14.0/approximationLevel());
-//     m_rho = 1.0 / ceil(4.0/approximationLevel());
-    m_K = 56.0;
+//     m_rho = 1.0 / ceil(14.0/approximationLevel());
+    m_rho = 1.0 / ceil(4.0/approximationLevel());
+//     m_K = 56.0;
+    m_K = 1;
     m_highProfitSubsetSizeLimit = floor(1.0/m_rho);
     
     GreedyMultipleKnapsack greedy;
@@ -190,6 +195,9 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     delete m_itemProfitSizeOrder;
     m_itemProfitSizeOrder = itemProfitOrder();
     
+    delete m_orderedRelativeSizes;
+    m_orderedRelativeSizes = new double[m_itemNumber];
+    
     QVector<ProfitItem> allItems = items();
     
     int i;
@@ -198,6 +206,7 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
         int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minHighProfit) {
+            m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
 //             m_highProfitItems.insert(itemNr);
         }
         else {
@@ -212,6 +221,7 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
         int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minMediumProfit) {
+            m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
 //             m_mediumProfitItems.insert(itemNr);
             
             // The medium profit items are categorized later in size categories,
@@ -224,9 +234,10 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     
     // Low profit items.
     m_firstLowProfitOrderIndex = i;
-//     for(; i < allItems.size(); ++i) {
-//         m_lowProfitItems.insert(itemNr);
-//     }
+    for(; i < allItems.size(); ++i) {
+        int itemNr = m_itemProfitSizeOrder[i];
+        m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
+    }
     
     sortItemSizeOrder(m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                       m_firstLowProfitOrderIndex - m_firstMediumProfitOrderIndex);
@@ -240,9 +251,9 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 {
     double relativeRemainingArea = ((double) remainingArea)/((double) m_largestBinCapacity);
-    int maxMediumSize = floor((m_largestBinCapacity * m_rho * relativeRemainingArea)/(2 * m_K * pow(log2(1.0/m_rho), 3.0)));
-    qDebug() << "Item has medium size with at most" << maxMediumSize;
-    int minMediumSize = ceil(m_largestBinCapacity * pow(m_rho, 6.0) * relativeRemainingArea);
+    double minHighSize = m_rho * relativeRemainingArea/(2 * m_K * pow(log2(1.0/m_rho), 3.0));
+    qDebug() << "Item has high size with at least" << minHighSize;
+    double minMediumSize = pow(m_rho, 6.0) * relativeRemainingArea;
     qDebug() << "Item has medium size with at least" << minMediumSize;
     
 //     m_mediumProfitHighSizeItems.clear();
@@ -252,8 +263,8 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     qDebug() << "Medium items:";
     int item;
     for(item = m_firstMediumProfitOrderIndex; item < m_firstLowProfitOrderIndex; ++item) {
-        int size = items().at(m_itemProfitSizeOrder[item]).size();
-        if(size > maxMediumSize) {
+        double size = m_orderedRelativeSizes[item];
+        if(size >= minHighSize) {
             // High size
 //             m_mediumProfitHighSizeItems.insert(m_itemProfitSizeOrder[item]);
         } else {
@@ -265,20 +276,37 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     qDebug() << "First medium profit medium size order index =" << m_firstMediumProfitMediumSizeOrderIndex;
     
     // Finding out the number of groups of medium profit items with medium size.
-    int upperLimit = ceil(log2((m_K * pow(log2(1.0/m_rho), 3))/(m_rho * relativeRemainingArea)));
-    int lowerLimit = floor(1.0/pow(m_rho, 6) * relativeRemainingArea) - 1;
-    qDebug() << "upperlimit =" << upperLimit << ", lowerlimit =" << lowerLimit;
+    m_minR = floor(-log2(minHighSize));
+    m_maxR = floor(-log2(minMediumSize));
+    delete m_firstMediumProfitMediumSizeGroupOrderIndex;
+    m_firstMediumProfitMediumSizeGroupOrderIndex = new int[m_maxR - m_minR];
+    
+    int currentGroup = 0;
     
     for(; item < m_firstLowProfitOrderIndex; ++item) {
-        int size = items().at(m_itemProfitSizeOrder[item]).size();
+        double size = m_orderedRelativeSizes[item];
         
         if(size >= minMediumSize) {
             // Medium size
+            qDebug() << "Relative size:" << ((double) size) / ((double) m_largestBinCapacity);
+            int itemGroup = floor(-log2(size)) - m_minR;
+            while(currentGroup <= itemGroup) {
+                qDebug() << "Group" << currentGroup << "starts at" << item;
+                m_firstMediumProfitMediumSizeGroupOrderIndex[currentGroup] = item;
+                currentGroup++;
+            }
+            qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemGroup;
 //             m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
         else {
             break;
         }
+    }
+    
+    while(currentGroup <= m_maxR - m_minR) {
+        qDebug() << "Group" << currentGroup << "starts at" << item;
+        m_firstMediumProfitMediumSizeGroupOrderIndex[currentGroup] = item;
+        currentGroup++;
     }
     
     m_firstMediumProfitLowSizeOrderIndex = item;
