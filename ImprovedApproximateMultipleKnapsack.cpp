@@ -133,7 +133,11 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                         groupSubset[i] = 0;
                     }
                     while(1) {
-                        // Do stuff with the group
+                        if(groupSubsetSize <= m_mediumProfitMediumSizeSubsetSizeLimit)
+                        {
+                            qDebug() << "This group is feasible";
+                            // Do stuff with the group
+                        }
                         
                         if(!nextGroupSubset(groupSubset,
                                             &groupSubsetCount,
@@ -350,6 +354,10 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
         m_mediumProfitLowSizeSize++;
 //         m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
     }
+    
+    m_mediumProfitMediumSizeSubsetSizeLimit = m_largestBinCapacity * (m_rho * ((double) remainingArea)) / (4.0 * pow(log2(1 / m_rho), 2.0));
+    m_mediumProfitMediumSizeSubsetSizeLimit -= m_mediumProfitLowSizeSize;
+    qDebug() << "Medium profit medium size subset size limit:" << m_mediumProfitMediumSizeSubsetSizeLimit;
 }
 
 bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,

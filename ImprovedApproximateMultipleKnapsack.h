@@ -110,6 +110,7 @@ private:
     int *m_mediumProfitMediumSizeGroupStart;
     int m_minR;
     int m_maxR;
+    int m_mediumProfitMediumSizeSubsetSizeLimit;
     int m_mediumProfitLowSizeSize;
     
 //     QSet<int> m_highProfitItems;
