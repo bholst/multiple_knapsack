@@ -126,6 +126,25 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                                           m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                                           numberOfMediumProfitHighSizeItems).toStdString()
                               << std::endl << std::endl;
+                    int groupSubset[m_maxR - m_minR];
+                    int groupSubsetCount = 0;
+                    int groupSubsetSize = 0;
+                    for(int i = 0; i < m_maxR - m_minR; ++i) {
+                        groupSubset[i] = 0;
+                    }
+                    while(1) {
+                        // Do stuff with the group
+                        
+                        if(!nextGroupSubset(groupSubset,
+                                            &groupSubsetCount,
+                                            &groupSubsetSize,
+                                            m_mediumProfitMediumSizeGroupSize,
+                                            m_mediumProfitMediumSizeGroupCount,
+                                            m_maxR - m_minR))
+                        {
+                            break;
+                        }
+                    }
                     
                     // Guess the next assignment of all medium profit item in subset mediumProfitHighSizeSubset.
                     foundMediumProfitHighSizeSubsetAssignment
@@ -208,7 +227,6 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
         int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minHighProfit) {
-            m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
 //             m_highProfitItems.insert(itemNr);
         }
         else {
@@ -223,7 +241,6 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
         int itemNr = m_itemProfitSizeOrder[i];
         int profit = allItems[itemNr].profit();
         if(profit >= minMediumProfit) {
-            m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
 //             m_mediumProfitItems.insert(itemNr);
             
             // The medium profit items are categorized later in size categories,
@@ -238,13 +255,13 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
     m_firstLowProfitOrderIndex = i;
     for(; i < allItems.size(); ++i) {
         int itemNr = m_itemProfitSizeOrder[i];
-        m_orderedRelativeSizes[i] = ((double) allItems[itemNr].size()) / ((double) m_largestBinCapacity);
     }
     
     sortItemSizeOrder(m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                       m_firstLowProfitOrderIndex - m_firstMediumProfitOrderIndex);
     qDebug() << "Sorted sizes:";
     for(int i = 0; i < items().size(); ++i) {
+        m_orderedRelativeSizes[i] = ((double) allItems.at(m_itemProfitSizeOrder[i]).size()) / ((double) m_largestBinCapacity);
         std::cout << m_itemProfitSizeOrder[i] << ", ";
     }
     std::cout << std::endl;
@@ -261,6 +278,9 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 //     m_mediumProfitHighSizeItems.clear();
 //     m_mediumProfitMediumSizeItems.clear();
 //     m_mediumProfitLowSizeItems.clear();
+    for(int i = 0; i < m_itemNumber; ++i) {
+        qDebug() << "Order item" << i << "size" << m_orderedRelativeSizes[i];
+    }
     
     qDebug() << "Medium items:";
     int item;
@@ -284,27 +304,29 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     delete m_mediumProfitMediumSizeGroupCount;
     m_mediumProfitMediumSizeGroupSize = new int[m_maxR - m_minR];
     m_mediumProfitMediumSizeGroupCount = new int[m_maxR - m_minR];
+    m_mediumProfitMediumSizeGroupStart = new int[m_maxR - m_minR];
     for(int i = 0; i < m_maxR - m_minR; ++i) {
         m_mediumProfitMediumSizeGroupCount[i] = 0;
         m_mediumProfitMediumSizeGroupSize[i] = -1;
     }
     
-    int currentGroup = 0;
+    int currentGroup = -1;
     
     for(; item < m_firstLowProfitOrderIndex; ++item) {
         double size = m_orderedRelativeSizes[item];
         
         if(size >= minMediumSize) {
             // Medium size
-            qDebug() << "Relative size:" << ((double) size) / ((double) m_largestBinCapacity);
+            qDebug() << "Relative size:" << size;
             int itemGroup = floor(-log2(size)) - m_minR;
             
             m_mediumProfitMediumSizeGroupCount[itemGroup]++;
             if(currentGroup < itemGroup) {
-                m_mediumProfitMediumSizeGroupSize[itemGroup] = items().at(m_itemProfitSizeOrder[item]).size();
-                while(currentGroup <= itemGroup) {
+                while(currentGroup < itemGroup) {
                     currentGroup++;
+                    m_mediumProfitMediumSizeGroupStart[currentGroup] = item;
                 }
+                m_mediumProfitMediumSizeGroupSize[itemGroup] = items().at(m_itemProfitSizeOrder[item]).size();
             }
             qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemGroup;
 //             m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
@@ -322,10 +344,12 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     m_firstMediumProfitLowSizeOrderIndex = item;
     qDebug() << "First medium profit low size order index =" << m_firstMediumProfitLowSizeOrderIndex;
     
-//     for(; item < m_firstLowProfitOrderIndex; ++item) {
+    m_mediumProfitLowSizeSize = 0;
+    for(; item < m_firstLowProfitOrderIndex; ++item) {
         // Low size
+        m_mediumProfitLowSizeSize++;
 //         m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
-//     }
+    }
 }
 
 bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
@@ -357,6 +381,36 @@ bool ImprovedApproximateMultipleKnapsack::nextSubset(bool *subset,
             subset[i] = false;
             (*profit) -= item.profit();
             (*size) -= item.size();
+            ++i;
+        }
+    }
+    
+    if(i >= count) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+bool ImprovedApproximateMultipleKnapsack::nextGroupSubset(int *subset,
+                                                          int *subsetSize,
+                                                          int *size,
+                                                          int *groupSizes,
+                                                          int *groupCounts,
+                                                          int count)
+{
+    int i = 0;
+    while(i < count) {
+        if(subset[i] < groupCounts[i]) {
+            (*subsetSize)++;
+            subset[i]++;
+            (*size) += groupSizes[i];
+        }
+        else {
+            (*subsetSize) -= subset[i];
+            (*size) -= subset[i] * groupSizes[i];
+            subset[i] = 0;
             ++i;
         }
     }

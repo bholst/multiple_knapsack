@@ -39,6 +39,22 @@ private:
     bool nextSubset(bool *subset, int *subsetSize, int *profit, int *size, int *itemProfitSizeOrder, int count, int itemLimit);
     
     /**
+     * Generates the next possible subset of the given groups.
+     * 
+     * @param subset An int array which is at least @p count long
+     *               for which "subset[i] = k" is equal to "k items of group i are in the subset.
+     *               It will contain the next subset at return.
+     * @param subsetSize The number of items in the subset @p subset.
+     * @param size The sum of all sizes for the subset @p subset.
+     * @param groupSizes An int array which is at least @p count long
+     *                   "groupSizes[i] = size" means "the items in group i are size large".
+     * @param groupCounts An int array which is at least @p count long
+     *                   "groupCount[i] = k" means "group i contains k items".
+     * @param count The number of groups.
+     */
+    bool nextGroupSubset(int *subset, int *subsetSize, int *size, int *groupSizes, int *groupCounts, int count);
+    
+    /**
      * Creating a printable string from the subset @p subset.
      */
     QString subsetToString(bool* subset, int *itemProfitSizeOrder, int count);
@@ -91,8 +107,10 @@ private:
     int m_firstMediumProfitLowSizeOrderIndex;
     int *m_mediumProfitMediumSizeGroupSize;
     int *m_mediumProfitMediumSizeGroupCount;
+    int *m_mediumProfitMediumSizeGroupStart;
     int m_minR;
     int m_maxR;
+    int m_mediumProfitLowSizeSize;
     
 //     QSet<int> m_highProfitItems;
 //     QSet<int> m_mediumProfitItems;
