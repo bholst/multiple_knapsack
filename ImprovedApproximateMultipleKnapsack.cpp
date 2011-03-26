@@ -12,8 +12,8 @@
 
 // Project
 #include "GreedyMultipleKnapsack.h"
-#include "ItemVectorWithPredecessor.h"
 #include "ProfitItem.h"
+#include "PackingAlgorithms.h"
 
 // Self
 #include "ImprovedApproximateMultipleKnapsack.h"
@@ -584,107 +584,16 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                                                          int *assignment,
                                                          int count)
 {
-    QList<ItemVectorWithPredecessor *> allItemVectors;
-    QList<ItemVectorWithPredecessor *> itemVectors;
-    itemVectors.append(new ItemVectorWithPredecessor(count));
+    int *groupPacking = findGroupedPacking(groupCount,
+                                           groupSizes,
+                                           remainingCapacities,
+                                           count,
+                                           m_numberOfBins);
     
-    ItemVectorWithPredecessor *sufficientFill = 0;
-    int sufficientBinNumber = -1;
-    for(int bin = 0; bin < m_numberOfBins && sufficientFill == 0; ++bin) {
-        int remainingCapacity = remainingCapacities[bin];
-        
-        QList<ItemVectorWithPredecessor *> nextItemVectors;
-        ItemVector currentBinFill(count);
-        
-        bool allFills = false;
-        while(!allFills && sufficientFill == 0) {
-            int itemGroup = count - 1;
-            bool foundNextFill = false;
-            while(!allFills && !foundNextFill) {
-                int itemSize = groupSizes[itemGroup];
-                
-                int currentItemCount = currentBinFill.itemCount(itemGroup);
-                
-                if(itemSize <= 0) {
-                    itemGroup--;
-                    continue;
-                }
-                else if(remainingCapacity > itemSize) {
-                        currentBinFill.setItemCount(itemGroup, currentItemCount + 1);
-                        remainingCapacity -= itemSize;
-                        foundNextFill = true;
-                }
-                else {
-                    remainingCapacity += itemSize * currentItemCount;
-                    currentBinFill.setItemCount(itemGroup, 0);
-                    itemGroup--;
-                    if(itemGroup < 0) {
-                        allFills = true;
-                    }
-                }
-            }
-            
-            if(allFills) {
-                break;
-            }
-            
-            // Ensure that no items fit into the bin anymore.
-            for(itemGroup = count - 1; itemGroup >= 0; --itemGroup) {
-                int itemSize = groupSizes[itemGroup];
-                if(itemSize <= 0) {
-                    continue;
-                }
-                int currentItemCount = currentBinFill.itemCount(itemGroup);
-                int fittingGroupItems = floor(((double) remainingCapacity) / ((double) itemSize)) + currentItemCount;
-                if(fittingGroupItems <= currentItemCount) {
-                    break;
-                }
-                if(fittingGroupItems > groupCount[itemGroup]) {
-                    fittingGroupItems = groupCount[itemGroup];
-                }
-                
-                currentBinFill.setItemCount(itemGroup, fittingGroupItems);
-                remainingCapacity -= itemSize * (fittingGroupItems - currentItemCount);
-            }
-            
-            // Now we have a new fill.
-            foreach(ItemVectorWithPredecessor *vector, itemVectors) {
-                ItemVectorWithPredecessor *nextFill = new ItemVectorWithPredecessor(currentBinFill, vector);
-                nextItemVectors.append(nextFill);
-                if(nextFill->isFull(groupCount)) {
-                    sufficientFill = nextFill;
-                    sufficientBinNumber = bin;
-                    break;
-                }
-            }
-        }
-        
-        allItemVectors.append(itemVectors);
-        itemVectors = nextItemVectors;
-    }
-    
-    int result = false;
-    
-    if(sufficientFill != 0) {
-        ItemVectorWithPredecessor *currentVector = sufficientFill;
-        int remainingItemNumbers[count];
-        memcpy(remainingItemNumbers, groupCount, count);
-        
-        for(int bin = sufficientBinNumber; bin >= 0; --bin) {
+    if(groupPacking != 0) {
+        for(int bin = 0; bin < m_numberOfBins; ++bin) {
             for(int i = 0; i < count; ++i) {
-                int numberOfCurrentSizeItems;
-                if(currentVector->predecessor() != 0) {
-                    numberOfCurrentSizeItems = currentVector->itemCount(i) - currentVector->predecessor()->itemCount(i);
-                }
-                else {
-                    numberOfCurrentSizeItems = currentVector->itemCount(i);
-                }
-                qDebug() << "Group" << i << "gets" << numberOfCurrentSizeItems << "set";
-                
-                if(numberOfCurrentSizeItems > remainingItemNumbers[i]) {
-                    numberOfCurrentSizeItems = remainingItemNumbers[i];
-                }
-                remainingItemNumbers[i] -= numberOfCurrentSizeItems;
+                int numberOfCurrentSizeItems = groupPacking[bin * count + i];
                 
                 float currentSize = groupSizes[i];
                 for(; numberOfCurrentSizeItems > 0; numberOfCurrentSizeItems--)
@@ -696,22 +605,14 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                     qDebug() << "Bin space now:" << remainingCapacities[bin];
                 }
             }
-            currentVector = currentVector->predecessor();
         }
         
         qDebug() << "Found sufficient fill!";
-        result = true;
+        return true;
     }
-    
-    foreach(ItemVectorWithPredecessor *vector, allItemVectors) {
-        delete vector;
+    else {
+        return false;
     }
-    
-    foreach(ItemVectorWithPredecessor *vector, itemVectors) {
-        delete vector;
-    }
-    
-    return result;
 }
                                                                           
 
