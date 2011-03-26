@@ -115,14 +115,6 @@ private:
     int m_mediumProfitMediumSizeSubsetSizeLimit;
     int m_mediumProfitLowSizeSize;
     
-//     QSet<int> m_highProfitItems;
-//     QSet<int> m_mediumProfitItems;
-//     QSet<int> m_lowProfitItems;
-    
-//     QSet<int> m_mediumProfitHighSizeItems;
-//     QSet<int> m_mediumProfitMediumSizeItems;
-//     QSet<int> m_mediumProfitLowSizeItems;
-    
     double m_rho;
     double m_K;
     int m_highProfitSubsetSizeLimit;

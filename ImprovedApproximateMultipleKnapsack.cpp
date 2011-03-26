@@ -291,9 +291,6 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     double minMediumSize = pow(m_rho, 6.0) * relativeRemainingArea;
     qDebug() << "Item has medium size with at least" << minMediumSize;
     
-//     m_mediumProfitHighSizeItems.clear();
-//     m_mediumProfitMediumSizeItems.clear();
-//     m_mediumProfitLowSizeItems.clear();
     for(int i = 0; i < m_itemNumber; ++i) {
         qDebug() << "Order item" << i << "size" << m_orderedRelativeSizes[i];
     }
@@ -304,7 +301,6 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
         double size = m_orderedRelativeSizes[item];
         if(size >= minHighSize) {
             // High size
-//             m_mediumProfitHighSizeItems.insert(m_itemProfitSizeOrder[item]);
         } else {
             break;
         }
@@ -345,7 +341,6 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
                 m_mediumProfitMediumSizeGroupSize[itemGroup] = items().at(m_itemProfitSizeOrder[item]).size();
             }
             qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemGroup;
-//             m_mediumProfitMediumSizeItems.insert(m_itemProfitSizeOrder[item]);
         }
         else {
             break;
@@ -364,7 +359,6 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     for(; item < m_firstLowProfitOrderIndex; ++item) {
         // Low size
         m_mediumProfitLowSizeSize++;
-//         m_mediumProfitLowSizeItems.insert(m_itemProfitSizeOrder[item]);
     }
     
     m_mediumProfitMediumSizeSubsetSizeLimit = m_largestBinCapacity * (m_rho * ((double) remainingArea)) / (4.0 * pow(log2(1 / m_rho), 2.0));
