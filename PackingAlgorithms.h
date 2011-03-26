@@ -44,6 +44,9 @@ template< typename T > int *findGroupedPacking(int *groupCount,
                 
                 if(itemSize <= 0) {
                     itemGroup--;
+                    if(itemGroup < 0) {
+                        allFills = true;
+                    }
                     continue;
                 }
                 else if(remainingCapacity > itemSize) {
@@ -107,7 +110,7 @@ template< typename T > int *findGroupedPacking(int *groupCount,
         
         ItemVectorWithPredecessor *currentVector = sufficientFill;
         int remainingItemNumbers[count];
-        memcpy(remainingItemNumbers, groupCount, count);
+        memcpy(remainingItemNumbers, groupCount, count * sizeof(int));
         
         int bin;
         for(bin = binCount - 1; bin > sufficientBinNumber; --bin) {

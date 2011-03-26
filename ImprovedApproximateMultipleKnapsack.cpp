@@ -46,10 +46,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     m_numberOfBins = m_sortedSizes.size();
     m_largestBinCapacity = m_sortedSizes.last();
     
-//     m_rho = 1.0 / ceil(14.0/approximationLevel());
-    m_rho = 1.0 / ceil(4.0/approximationLevel());
-//     m_K = 56.0;
-    m_K = 1;
+    m_rho = 1.0 / ceil(14.0/approximationLevel());
+//     m_rho = 1.0 / ceil(4.0/approximationLevel());
+    m_K = 56.0;
+//     m_K = 1;
     m_highProfitSubsetSizeLimit = floor(1.0/m_rho);
     
     GreedyMultipleKnapsack greedy;
@@ -71,8 +71,15 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     for(int i = 0; i < m_firstMediumProfitOrderIndex; ++i) {
         highProfitSubset[i] = false;
     }
+    
+    int maxProfit = 0;
+    int maxAssignment[items().size()];
+    
     int assignment[items().size()];
     int remainingCapacity[m_numberOfBins];
+    for(int i = 0; i < m_numberOfBins; ++i) {
+        remainingCapacity[i] = sizes().at(i);
+    }
     int highProfitSubsetProfits = 0;
     int highProfitSubsetSizes = 0;
     int highProfitSubsetCount = 0;
@@ -110,7 +117,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                             m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                             numberOfMediumProfitHighSizeItems).toStdString() << std::endl;
                 int mediumProfitHighSizeRemainingCapacity[m_numberOfBins];
-                memcpy(mediumProfitHighSizeRemainingCapacity, remainingCapacity, m_numberOfBins);
+                memcpy(mediumProfitHighSizeRemainingCapacity, remainingCapacity, m_numberOfBins * sizeof(int));
                 
                 bool foundMediumProfitHighSizeSubsetAssignment
                     = firstSubsetAssignment(mediumProfitHighSizeSubset,
@@ -141,14 +148,28 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                             int mediumProfitMediumSizeRemainingCapacity[m_numberOfBins];
                             memcpy(mediumProfitMediumSizeRemainingCapacity,
                                    mediumProfitHighSizeRemainingCapacity,
-                                   m_numberOfBins);
+                                   m_numberOfBins * sizeof(int));
                             int mediumProfitMediumSizeAssignment[m_itemNumber];
-                            memcpy(mediumProfitMediumSizeAssignment, assignment, m_itemNumber);
-                            packGroupItems(groupSubset,
-                                           m_mediumProfitMediumSizeGroupSize,
-                                           mediumProfitHighSizeRemainingCapacity,
-                                           mediumProfitMediumSizeAssignment,
-                                           m_maxR - m_minR);
+                            memcpy(mediumProfitMediumSizeAssignment, assignment, m_itemNumber * sizeof(int));
+                            
+                            int mediumProfitMediumSizeProfit = 0;
+                            if(packGroupItems(groupSubset,
+                                              m_mediumProfitMediumSizeGroupSize,
+                                              mediumProfitHighSizeRemainingCapacity,
+                                              mediumProfitMediumSizeAssignment,
+                                              m_maxR - m_minR,
+                                              &mediumProfitMediumSizeProfit))
+                            {
+                                int totalProfit = highProfitSubsetProfits
+                                                  + mediumProfitHighSizeSubsetProfits
+                                                  + mediumProfitMediumSizeProfit;
+                                qDebug() << "Total profit =" << totalProfit;
+                                if(totalProfit > maxProfit) {
+                                    qDebug() << "New max profit.";
+                                    memcpy(maxAssignment, mediumProfitMediumSizeAssignment, m_itemNumber * sizeof(int));
+                                    maxProfit = totalProfit;
+                                }
+                            }
                         }
                         
                         if(!nextGroupSubset(groupSubset,
@@ -215,7 +236,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
     }
     
     m_assignment.clear();
-    m_maximumProfit = 0;
+    m_maximumProfit = maxProfit;
+    for(int i = 0; i < m_itemNumber; ++i) {
+        m_assignment.append(maxAssignment[i]);
+    }
     setDirty(false);
 }
 
@@ -576,7 +600,8 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                                                          int *groupSizes,
                                                          int *remainingCapacities,
                                                          int *assignment,
-                                                         int count)
+                                                         int count, 
+                                                         int *profit)
 {
     int *groupPacking = findGroupedPacking<int>(groupCount,
                                            groupSizes,
@@ -596,6 +621,7 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                     assignment[itemIndex] = bin;
                     qDebug() << "Item " << m_itemProfitSizeOrder[itemIndex] << "in bin" << bin;
                     remainingCapacities[bin] -= items().at(m_itemProfitSizeOrder[itemIndex]).size();
+                    (*profit) += items().at(m_itemProfitSizeOrder[itemIndex]).profit();
                     qDebug() << "Bin space now:" << remainingCapacities[bin];
                 }
             }

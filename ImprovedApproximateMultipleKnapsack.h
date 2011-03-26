@@ -90,7 +90,7 @@ private:
      */
     bool nextSubsetAssignment(bool* subset, int* assignment, int* remainingCapacity, int *itemProfitSizeOrder, int count);    
     
-    bool packGroupItems(int *groupCount, int *groupSizes, int *remainingCapacities, int *assignment, int count);
+    bool packGroupItems(int *groupCount, int *groupSizes, int *remainingCapacities, int *assignment, int count, int *profit);
     
     QString subsetAssignmentToString(int* assignment, int *itemProfitSizeOrder, int count);
     

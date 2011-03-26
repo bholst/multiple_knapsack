@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
                 ImprovedApproximateMultipleKnapsack multipleKnapsack;
                 multipleKnapsack.setItems(parser.mkpItems());
                 multipleKnapsack.setSizes(parser.sizes());
-                multipleKnapsack.maximumProfit();
+                qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
             }
         }
         else if(parser.type() == InstanceParser::BinPacking) {
