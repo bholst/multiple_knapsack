@@ -584,7 +584,7 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                                                          int *assignment,
                                                          int count)
 {
-    int *groupPacking = findGroupedPacking(groupCount,
+    int *groupPacking = findGroupedPacking<int>(groupCount,
                                            groupSizes,
                                            remainingCapacities,
                                            count,
