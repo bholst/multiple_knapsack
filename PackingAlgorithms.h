@@ -25,6 +25,21 @@ template< typename T > int *findGroupedPacking(int *groupCount,
     QList<ItemVectorWithPredecessor *> itemVectors;
     itemVectors.append(new ItemVectorWithPredecessor(count));
     
+    // The empty case:
+    bool isEmpty = true;
+    for(int i = 0; i < count; ++i) {
+        if(groupSizes[i] > 0) {
+            isEmpty = false;
+        }
+    }
+    if(isEmpty) {
+        int *packing = new int[binCount * count];
+        for(int i = 0; i < binCount * count; ++i) {
+            packing[i] = 0;
+        }
+        return packing;
+    }
+    
     ItemVectorWithPredecessor *sufficientFill = 0;
     int sufficientBinNumber = -1;
     for(int bin = 0; bin < binCount && sufficientFill == 0; ++bin) {
