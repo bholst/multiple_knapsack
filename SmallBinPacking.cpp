@@ -14,6 +14,7 @@
 #include "FloatItem.h"
 #include "ItemVectorWithPredecessor.h"
 #include "ItemVector.h"
+#include "PackingAlgorithms.h"
 
 // Self
 #include "SmallBinPacking.h"
@@ -277,80 +278,28 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
         }
     }
     
-    QList<ItemVectorWithPredecessor *> allItemVectors;
-    QList<ItemVectorWithPredecessor *> itemVectors;
-    itemVectors.append(new ItemVectorWithPredecessor(normalItemNumbers.size()));
-    
-    ItemVectorWithPredecessor *sufficientFill = 0;
-    int sufficientBinNumber = -1;
-    for(int bin = 0; bin < numberOfBins && sufficientFill == 0; ++bin) {
-        float remainingCapacity = resultingRemainingCapacities[bin];
-        
-        QList<ItemVectorWithPredecessor *> nextItemVectors;
-        ItemVector currentBinFill(normalItemNumbers.size());
-        
-        bool allFills = false;
-        while(!allFills && sufficientFill == 0) {
-            int itemClass = normalItemSizes.size() - 1;
-            bool foundNextFill = false;
-            while(!allFills && !foundNextFill) {
-                float itemSize = normalItemSizes[itemClass];
-                int fittingClassItems = floor(remainingCapacity / itemSize);
-                if(fittingClassItems > normalItemNumbers[itemClass]) {
-                    fittingClassItems = normalItemNumbers[itemClass];
-                }
-                
-                if(fittingClassItems > currentBinFill.itemCount(itemClass)) {
-                    currentBinFill.setItemCount(itemClass, fittingClassItems);
-                    remainingCapacity -= itemSize * fittingClassItems;
-                    foundNextFill = true;
-                }
-                else {
-                    remainingCapacity += itemSize * currentBinFill.itemCount(itemClass);
-                    currentBinFill.setItemCount(itemClass, 0);
-                    itemClass--;
-                    if(itemClass < 0) {
-                        allFills = true;
-                    }
-                }
-            }
-            
-            if(!allFills) {
-                // Now we have a new fill.
-                foreach(ItemVectorWithPredecessor *vector, itemVectors) {
-                    ItemVectorWithPredecessor *nextFill = new ItemVectorWithPredecessor(currentBinFill, vector);
-                    nextItemVectors.append(nextFill);
-                    if(nextFill->isFull(normalItemNumbers)) {
-                        sufficientFill = nextFill;
-                        sufficientBinNumber = bin;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        allItemVectors.append(itemVectors);
-        itemVectors = nextItemVectors;
+    float groupSizes[normalItemSizes.size()];
+    int groupCount[normalItemSizes.size()];
+    for(int i = 0; i < normalItemSizes.size(); ++i) {
+        groupSizes[i] = normalItemSizes[i];
+        groupCount[i] = normalItemNumbers[i];
     }
     
-    int result = false;
+    int *groupedPacking = findGroupedPacking<float>(groupCount, 
+                                                    groupSizes,
+                                                    resultingRemainingCapacities,
+                                                    normalItemSizes.size(),
+                                                    numberOfBins);
+    
     for(int i = 0; i < m_items.size(); ++i) {
         resultingAssignment[i] = preassignment[i];
     }
     
-    if(sufficientFill != 0) {
-        ItemVectorWithPredecessor *currentVector = sufficientFill;
+    if(groupedPacking != 0) {
         QVector<int> remainingItemNumbers = normalItemNumbers;
-        for(int bin = sufficientBinNumber; bin >= 0; --bin) {
+        for(int bin = 0; bin < numberOfBins; ++bin) {
             for(int i = 0; i < normalItemSizes.size(); ++i) {
-                int numberOfCurrentSizeItems;
-                if(currentVector->predecessor() != 0) {
-                    numberOfCurrentSizeItems = currentVector->itemCount(i) - currentVector->predecessor()->itemCount(i);
-                }
-                else {
-                    numberOfCurrentSizeItems = currentVector->itemCount(i);
-                }
-                qDebug() << "Group" << i << "gets" << numberOfCurrentSizeItems << "set";
+                int numberOfCurrentSizeItems = groupedPacking[bin * normalItemSizes.size() + i];
                 
                 float currentSize = normalItemSizes[i];
                 while(numberOfCurrentSizeItems > 0
@@ -372,22 +321,11 @@ bool SmallBinPacking::handlePreassignment(int* preassignment, int numberOfBins,
                     numberOfCurrentSizeItems--;
                 }
             }
-            currentVector = currentVector->predecessor();
         }
         
         qDebug() << "Found sufficient fill!";
-        result = true;
     }
-    
-    foreach(ItemVectorWithPredecessor *vector, allItemVectors) {
-        delete vector;
-    }
-    
-    foreach(ItemVectorWithPredecessor *vector, itemVectors) {
-        delete vector;
-    }
-    
-    if(result == false) {
+    else {
         return false;
     }
     

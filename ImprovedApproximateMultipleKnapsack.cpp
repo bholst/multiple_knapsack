@@ -608,6 +608,7 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
         }
         
         qDebug() << "Found sufficient fill!";
+        delete groupPacking;
         return true;
     }
     else {
