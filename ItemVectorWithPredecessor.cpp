@@ -48,6 +48,17 @@ bool ItemVectorWithPredecessor::isFull(const QVector< int >& allItems)
     return true;
 }
 
+bool ItemVectorWithPredecessor::isFull(int *allItems)
+{
+    for(int i = 0; i < m_numberOfItemSizes; ++i) {
+        if(allItems[i] > m_itemCount[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 int ItemVectorWithPredecessor::itemCount(int sizeNumber) const
 {
     if(sizeNumber >= m_numberOfItemSizes) {

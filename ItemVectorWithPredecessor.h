@@ -21,6 +21,7 @@ public:
     ~ItemVectorWithPredecessor();
     
     bool isFull(const QVector<int>& allItems);
+    bool isFull(int *allItems);
     int itemCount(int sizeNumber) const;
     ItemVectorWithPredecessor *predecessor();
     

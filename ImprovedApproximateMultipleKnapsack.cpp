@@ -12,6 +12,7 @@
 
 // Project
 #include "GreedyMultipleKnapsack.h"
+#include "ItemVectorWithPredecessor.h"
 #include "ProfitItem.h"
 
 // Self
@@ -137,6 +138,17 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                         {
                             qDebug() << "This group is feasible";
                             // Do stuff with the group
+                            int mediumProfitMediumSizeRemainingCapacity[m_numberOfBins];
+                            memcpy(mediumProfitMediumSizeRemainingCapacity,
+                                   mediumProfitHighSizeRemainingCapacity,
+                                   m_numberOfBins);
+                            int mediumProfitMediumSizeAssignment[m_itemNumber];
+                            memcpy(mediumProfitMediumSizeAssignment, assignment, m_itemNumber);
+                            packGroupItems(groupSubset,
+                                           m_mediumProfitMediumSizeGroupSize,
+                                           mediumProfitHighSizeRemainingCapacity,
+                                           mediumProfitMediumSizeAssignment,
+                                           m_maxR - m_minR);
                         }
                         
                         if(!nextGroupSubset(groupSubset,
@@ -414,6 +426,7 @@ bool ImprovedApproximateMultipleKnapsack::nextGroupSubset(int *subset,
             (*subsetSize)++;
             subset[i]++;
             (*size) += groupSizes[i];
+            break;
         }
         else {
             (*subsetSize) -= subset[i];
@@ -564,4 +577,141 @@ bool ImprovedApproximateMultipleKnapsack::nextSubsetAssignment(bool* subset,
         return true;
     }
 }
+
+bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
+                                                         int *groupSizes,
+                                                         int *remainingCapacities,
+                                                         int *assignment,
+                                                         int count)
+{
+    QList<ItemVectorWithPredecessor *> allItemVectors;
+    QList<ItemVectorWithPredecessor *> itemVectors;
+    itemVectors.append(new ItemVectorWithPredecessor(count));
+    
+    ItemVectorWithPredecessor *sufficientFill = 0;
+    int sufficientBinNumber = -1;
+    for(int bin = 0; bin < m_numberOfBins && sufficientFill == 0; ++bin) {
+        int remainingCapacity = remainingCapacities[bin];
+        
+        QList<ItemVectorWithPredecessor *> nextItemVectors;
+        ItemVector currentBinFill(count);
+        
+        bool allFills = false;
+        while(!allFills && sufficientFill == 0) {
+            int itemGroup = count - 1;
+            bool foundNextFill = false;
+            while(!allFills && !foundNextFill) {
+                int itemSize = groupSizes[itemGroup];
+                
+                int currentItemCount = currentBinFill.itemCount(itemGroup);
+                
+                if(itemSize <= 0) {
+                    itemGroup--;
+                    continue;
+                }
+                else if(remainingCapacity > itemSize) {
+                        currentBinFill.setItemCount(itemGroup, currentItemCount + 1);
+                        remainingCapacity -= itemSize;
+                        foundNextFill = true;
+                }
+                else {
+                    remainingCapacity += itemSize * currentItemCount;
+                    currentBinFill.setItemCount(itemGroup, 0);
+                    itemGroup--;
+                    if(itemGroup < 0) {
+                        allFills = true;
+                    }
+                }
+            }
+            
+            if(allFills) {
+                break;
+            }
+            
+            // Ensure that no items fit into the bin anymore.
+            for(itemGroup = count - 1; itemGroup >= 0; --itemGroup) {
+                int itemSize = groupSizes[itemGroup];
+                if(itemSize <= 0) {
+                    continue;
+                }
+                int currentItemCount = currentBinFill.itemCount(itemGroup);
+                int fittingGroupItems = floor(((double) remainingCapacity) / ((double) itemSize)) + currentItemCount;
+                if(fittingGroupItems <= currentItemCount) {
+                    break;
+                }
+                if(fittingGroupItems > groupCount[itemGroup]) {
+                    fittingGroupItems = groupCount[itemGroup];
+                }
+                
+                currentBinFill.setItemCount(itemGroup, fittingGroupItems);
+                remainingCapacity -= itemSize * (fittingGroupItems - currentItemCount);
+            }
+            
+            // Now we have a new fill.
+            foreach(ItemVectorWithPredecessor *vector, itemVectors) {
+                ItemVectorWithPredecessor *nextFill = new ItemVectorWithPredecessor(currentBinFill, vector);
+                nextItemVectors.append(nextFill);
+                if(nextFill->isFull(groupCount)) {
+                    sufficientFill = nextFill;
+                    sufficientBinNumber = bin;
+                    break;
+                }
+            }
+        }
+        
+        allItemVectors.append(itemVectors);
+        itemVectors = nextItemVectors;
+    }
+    
+    int result = false;
+    
+    if(sufficientFill != 0) {
+        ItemVectorWithPredecessor *currentVector = sufficientFill;
+        int remainingItemNumbers[count];
+        memcpy(remainingItemNumbers, groupCount, count);
+        
+        for(int bin = sufficientBinNumber; bin >= 0; --bin) {
+            for(int i = 0; i < count; ++i) {
+                int numberOfCurrentSizeItems;
+                if(currentVector->predecessor() != 0) {
+                    numberOfCurrentSizeItems = currentVector->itemCount(i) - currentVector->predecessor()->itemCount(i);
+                }
+                else {
+                    numberOfCurrentSizeItems = currentVector->itemCount(i);
+                }
+                qDebug() << "Group" << i << "gets" << numberOfCurrentSizeItems << "set";
+                
+                if(numberOfCurrentSizeItems > remainingItemNumbers[i]) {
+                    numberOfCurrentSizeItems = remainingItemNumbers[i];
+                }
+                remainingItemNumbers[i] -= numberOfCurrentSizeItems;
+                
+                float currentSize = groupSizes[i];
+                for(; numberOfCurrentSizeItems > 0; numberOfCurrentSizeItems--)
+                {
+                    int itemIndex = m_mediumProfitMediumSizeGroupStart[i] + numberOfCurrentSizeItems;
+                    assignment[itemIndex] = bin;
+                    qDebug() << "Item " << m_itemProfitSizeOrder[itemIndex] << "in bin" << bin;
+                    remainingCapacities[bin] -= items().at(m_itemProfitSizeOrder[itemIndex]).size();
+                    qDebug() << "Bin space now:" << remainingCapacities[bin];
+                }
+            }
+            currentVector = currentVector->predecessor();
+        }
+        
+        qDebug() << "Found sufficient fill!";
+        result = true;
+    }
+    
+    foreach(ItemVectorWithPredecessor *vector, allItemVectors) {
+        delete vector;
+    }
+    
+    foreach(ItemVectorWithPredecessor *vector, itemVectors) {
+        delete vector;
+    }
+    
+    return result;
+}
+                                                                          
 
