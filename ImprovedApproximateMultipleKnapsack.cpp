@@ -21,8 +21,12 @@
 ImprovedApproximateMultipleKnapsack::ImprovedApproximateMultipleKnapsack()
     : m_itemProfitSizeOrder(0),
       m_orderedRelativeSizes(0),
-      m_mediumProfitMediumSizeGroupSize(0),
-      m_mediumProfitMediumSizeGroupCount(0)
+      m_normalGroupSize(0),
+      m_normalGroupCount(0),
+      m_normalGroupStart(0),
+      m_extraGroupSize(0),
+      m_extraGroupCount(0),
+      m_extraGroupStart(0)
 {
     setApproximationLevel(0.7);
 }
@@ -31,8 +35,12 @@ ImprovedApproximateMultipleKnapsack::~ImprovedApproximateMultipleKnapsack()
 {
     delete m_itemProfitSizeOrder;
     delete m_orderedRelativeSizes;
-    delete m_mediumProfitMediumSizeGroupSize;
-    delete m_mediumProfitMediumSizeGroupCount;
+    delete m_normalGroupSize;
+    delete m_normalGroupCount;
+    delete m_normalGroupStart;
+    delete m_extraGroupSize;
+    delete m_extraGroupCount;
+    delete m_extraGroupStart;
 }
 
 void ImprovedApproximateMultipleKnapsack::recalculateValues()
@@ -134,10 +142,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                                           m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                                           numberOfMediumProfitHighSizeItems).toStdString()
                               << std::endl << std::endl;
-                    int groupSubset[m_maxR - m_minR];
+                    int groupSubset[m_normalGroupNumber];
                     int groupSubsetCount = 0;
                     int groupSubsetSize = 0;
-                    for(int i = 0; i < m_maxR - m_minR; ++i) {
+                    for(int i = 0; i < m_normalGroupNumber; ++i) {
                         groupSubset[i] = 0;
                     }
                     while(1) {
@@ -154,10 +162,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                             
                             int mediumProfitMediumSizeProfit = 0;
                             if(packGroupItems(groupSubset,
-                                              m_mediumProfitMediumSizeGroupSize,
+                                              m_normalGroupSize,
                                               mediumProfitHighSizeRemainingCapacity,
                                               mediumProfitMediumSizeAssignment,
-                                              m_maxR - m_minR,
+                                              m_normalGroupNumber,
                                               &mediumProfitMediumSizeProfit))
                             {
                                 int totalProfit = highProfitSubsetProfits
@@ -175,9 +183,9 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                         if(!nextGroupSubset(groupSubset,
                                             &groupSubsetCount,
                                             &groupSubsetSize,
-                                            m_mediumProfitMediumSizeGroupSize,
-                                            m_mediumProfitMediumSizeGroupCount,
-                                            m_maxR - m_minR))
+                                            m_normalGroupSize,
+                                            m_normalGroupCount,
+                                            m_normalGroupNumber))
                         {
                             break;
                         }
@@ -336,17 +344,17 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
     // Finding out the number of groups of medium profit items with medium size.
     m_minR = floor(-log2(minHighSize));
     m_maxR = floor(-log2(minMediumSize));
-    delete m_mediumProfitMediumSizeGroupSize;
-    delete m_mediumProfitMediumSizeGroupCount;
-    m_mediumProfitMediumSizeGroupSize = new int[m_maxR - m_minR];
-    m_mediumProfitMediumSizeGroupCount = new int[m_maxR - m_minR];
-    m_mediumProfitMediumSizeGroupStart = new int[m_maxR - m_minR];
+    QVector<int> **mediumProfitMediumSizeGroupSize = (QVector<int> **) malloc((m_maxR - m_minR) * sizeof(void *));
+    QVector<int> **mediumProfitMediumSizeGroupCount = (QVector<int> **) malloc((m_maxR - m_minR) * sizeof(void *));
+    QVector<int> **mediumProfitMediumSizeGroupStart = (QVector<int> **) malloc((m_maxR - m_minR) * sizeof(void *));
     for(int i = 0; i < m_maxR - m_minR; ++i) {
-        m_mediumProfitMediumSizeGroupCount[i] = 0;
-        m_mediumProfitMediumSizeGroupSize[i] = -1;
+        mediumProfitMediumSizeGroupCount[i] = 0;
+        mediumProfitMediumSizeGroupSize[i] = 0;
+        mediumProfitMediumSizeGroupStart[i] = 0;
     }
     
-    int currentGroup = -1;
+    int groupCountLimit = 0;
+    int currentClass = -1;
     
     for(; item < m_firstLowProfitOrderIndex; ++item) {
         double size = m_orderedRelativeSizes[item];
@@ -354,26 +362,109 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
         if(size >= minMediumSize) {
             // Medium size
             qDebug() << "Relative size:" << size;
-            int itemGroup = floor(-log2(size)) - m_minR;
+            int itemClass = floor(-log2(size)) - m_minR;
             
-            m_mediumProfitMediumSizeGroupCount[itemGroup]++;
-            if(currentGroup < itemGroup) {
-                while(currentGroup < itemGroup) {
-                    currentGroup++;
-                    m_mediumProfitMediumSizeGroupStart[currentGroup] = item;
+            if(currentClass < itemClass) {
+                while(currentClass < itemClass) {
+                    currentClass++;
+//                     m_mediumProfitMediumSizeGroupStart[currentClass] = item;
                 }
-                m_mediumProfitMediumSizeGroupSize[itemGroup] = items().at(m_itemProfitSizeOrder[item]).size();
+                mediumProfitMediumSizeGroupCount[itemClass] = new QVector<int>();
+                mediumProfitMediumSizeGroupSize[itemClass] = new QVector<int>();
+                mediumProfitMediumSizeGroupStart[itemClass] = new QVector<int>();
+                
+                groupCountLimit = ceil(pow(2.0, itemClass + m_minR) * relativeRemainingArea 
+                                       / m_K * pow(log2(1.0/m_rho), 3.0));
+                qDebug() << "Group count limit is" << groupCountLimit;
+                
+                mediumProfitMediumSizeGroupSize[itemClass]
+                    ->append(items().at(m_itemProfitSizeOrder[item]).size());
+                mediumProfitMediumSizeGroupStart[itemClass]->append(item);
+                mediumProfitMediumSizeGroupCount[itemClass]->append(1);
             }
-            qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemGroup;
+            else {
+                if(mediumProfitMediumSizeGroupCount[itemClass]->last() >= groupCountLimit) {
+                    mediumProfitMediumSizeGroupSize[itemClass]
+                        ->append(items().at(m_itemProfitSizeOrder[item]).size());
+                    mediumProfitMediumSizeGroupStart[itemClass]->append(item);
+                    mediumProfitMediumSizeGroupCount[itemClass]->append(1);
+                }
+                else {
+                    (mediumProfitMediumSizeGroupCount[itemClass]->last())++;
+                    qDebug() << "Last is now" << mediumProfitMediumSizeGroupCount[itemClass]->last();
+                }
+            }
+            
+            qDebug() << "Item" << m_itemProfitSizeOrder[item] << "in group" << itemClass;
         }
         else {
             break;
         }
     }
     
+    m_normalGroupNumber = 0;
+    m_extraGroupNumber = 0;
     for(int i = 0; i < m_maxR - m_minR; ++i) {
-        qDebug() << "Group" << i << "contains" << m_mediumProfitMediumSizeGroupCount[i] << "items";
-        qDebug() << "and has size" << m_mediumProfitMediumSizeGroupSize[i];
+        if(mediumProfitMediumSizeGroupCount[i]) {
+            int groupCount = mediumProfitMediumSizeGroupCount[i]->size();
+            if(groupCount > 0) {
+                m_normalGroupNumber += groupCount - 1;
+                m_extraGroupNumber += 1;
+            }
+        }
+    }
+    
+    delete m_normalGroupSize;
+    delete m_normalGroupCount;
+    delete m_normalGroupStart;
+    delete m_extraGroupSize;
+    delete m_extraGroupCount;
+    delete m_extraGroupStart;
+    m_normalGroupSize = new int[m_normalGroupNumber];
+    m_normalGroupCount = new int[m_normalGroupNumber];
+    m_normalGroupStart = new int[m_normalGroupNumber];
+    m_extraGroupSize = new int[m_extraGroupNumber];
+    m_extraGroupCount = new int[m_extraGroupNumber];
+    m_extraGroupStart = new int[m_extraGroupNumber];
+    
+    int normalGroupIndex = 0;
+    int extraGroupIndex = 0;
+    for(int i = 0; i < m_maxR - m_minR; ++i) {
+        if(mediumProfitMediumSizeGroupCount[i]
+           && mediumProfitMediumSizeGroupCount[i]->size() > 0 )
+        {
+            m_extraGroupSize[extraGroupIndex] = mediumProfitMediumSizeGroupSize[i]->at(0);
+            m_extraGroupCount[extraGroupIndex] = mediumProfitMediumSizeGroupCount[i]->at(0);
+            m_extraGroupStart[extraGroupIndex] = mediumProfitMediumSizeGroupStart[i]->at(0);
+            ++extraGroupIndex;
+            for(int j = 1; j < mediumProfitMediumSizeGroupCount[i]->size(); ++j) {
+                m_normalGroupSize[normalGroupIndex] = mediumProfitMediumSizeGroupSize[i]->at(j);
+                m_normalGroupCount[normalGroupIndex] = mediumProfitMediumSizeGroupCount[i]->at(j);
+                m_normalGroupStart[normalGroupIndex] = mediumProfitMediumSizeGroupStart[i]->at(j);
+                ++normalGroupIndex;
+            }
+        }
+    }
+    
+    for(int i = 0; i < m_maxR - m_minR; ++i) {
+        delete mediumProfitMediumSizeGroupCount[i];
+        delete mediumProfitMediumSizeGroupSize[i];
+        delete mediumProfitMediumSizeGroupStart[i];
+    }
+    delete mediumProfitMediumSizeGroupCount;
+    delete mediumProfitMediumSizeGroupSize;
+    delete mediumProfitMediumSizeGroupStart;
+    
+    qDebug() << "Extra groups:";
+    for(int i = 0; i < m_extraGroupNumber; ++i) {
+        qDebug() << "Group" << i << "contains" << m_extraGroupCount[i] << "items"
+                 << "and has size" << m_extraGroupSize[i];
+    }
+    
+    qDebug() << "Normal groups:";
+    for(int i = 0; i < m_normalGroupNumber; ++i) {
+        qDebug() << "Group" << i << "contains" << m_normalGroupCount[i] << "items"
+                 << "and has size" << m_normalGroupSize[i];
     }
     
     m_firstMediumProfitLowSizeOrderIndex = item;
@@ -617,7 +708,8 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
                 float currentSize = groupSizes[i];
                 for(; numberOfCurrentSizeItems > 0; numberOfCurrentSizeItems--)
                 {
-                    int itemIndex = m_mediumProfitMediumSizeGroupStart[i] + numberOfCurrentSizeItems;
+                    // FIXME: The following line uses a class member.
+                    int itemIndex = m_normalGroupStart[i] + numberOfCurrentSizeItems;
                     assignment[itemIndex] = bin;
                     qDebug() << "Item " << m_itemProfitSizeOrder[itemIndex] << "in bin" << bin;
                     remainingCapacities[bin] -= items().at(m_itemProfitSizeOrder[itemIndex]).size();

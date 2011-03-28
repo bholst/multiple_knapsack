@@ -5,8 +5,11 @@
 #ifndef IMPROVEDAPPROXIMATEMULTIPLEKNAPSACK_H
 #define IMPROVEDAPPROXIMATEMULTIPLEKNAPSACK_H
 
-#include "MultipleKnapsack.h"
+// Qt
+#include <QtCore/QVector>
 
+// Project
+#include "MultipleKnapsack.h"
 
 class ImprovedApproximateMultipleKnapsack : public MultipleKnapsack
 {
@@ -107,11 +110,16 @@ private:
     
     int m_firstMediumProfitMediumSizeOrderIndex;
     int m_firstMediumProfitLowSizeOrderIndex;
-    int *m_mediumProfitMediumSizeGroupSize;
-    int *m_mediumProfitMediumSizeGroupCount;
-    int *m_mediumProfitMediumSizeGroupStart;
     int m_minR;
     int m_maxR;
+    int m_normalGroupNumber;
+    int *m_normalGroupSize;
+    int *m_normalGroupCount;
+    int *m_normalGroupStart;
+    int m_extraGroupNumber;
+    int *m_extraGroupSize;
+    int *m_extraGroupCount;
+    int *m_extraGroupStart;
     int m_mediumProfitMediumSizeSubsetSizeLimit;
     int m_mediumProfitLowSizeSize;
     
