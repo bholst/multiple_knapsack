@@ -50,6 +50,11 @@ int main(int argc, char **argv) {
                 multipleKnapsack.setItems(parser.mkpItems());
                 multipleKnapsack.setSizes(parser.sizes());
                 qDebug() << QString("Maximum profit is %1").arg(multipleKnapsack.maximumProfit());
+                qDebug() << "This is how it is to be packed:";
+                QVector<int> assignment = multipleKnapsack.assignment();
+                for(int i = 0; i < assignment.size(); ++i) {
+                    qDebug() << QString("Item %1 in bin %2").arg(i).arg(assignment[i]);
+                }
             }
         }
         else if(parser.type() == InstanceParser::BinPacking) {

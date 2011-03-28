@@ -171,16 +171,23 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                 int totalProfit = highProfitSubsetProfits
                                                   + mediumProfitHighSizeSubsetProfits
                                                   + mediumProfitMediumSizeProfit;
-                                                  
-                                int profitRemoved = totalProfit;
-                                int assignmentRemoved[m_itemNumber];
-                                memcpy(assignmentRemoved,
-                                       mediumProfitMediumSizeAssignment,
-                                       m_itemNumber * sizeof(int));
-                                removeWorstBinPart(assignmentRemoved, &profitRemoved);
-                                qDebug() << "Removed profit is" << profitRemoved;
+                                qDebug() << "Medium packed profit =" << totalProfit;
+                                packLowProfitItems(m_itemProfitSizeOrder + m_firstLowProfitOrderIndex,
+                                                   mediumProfitMediumSizeRemainingCapacity,
+                                                   mediumProfitMediumSizeAssignment + m_firstLowProfitOrderIndex,
+                                                   &totalProfit,
+                                                   m_itemNumber - m_firstLowProfitOrderIndex);
+                                qDebug() << "Low packed profit =" << totalProfit;
+                                int freeBin = removeWorstBinPart(mediumProfitMediumSizeAssignment,
+                                                                 &totalProfit);
+                                qDebug() << "Removed profit is" << totalProfit;
+                                packItemsInBin(
+                                    m_itemProfitSizeOrder + m_firstMediumProfitLowSizeOrderIndex,
+                                    mediumProfitMediumSizeAssignment + m_firstMediumProfitLowSizeOrderIndex,
+                                    &totalProfit, freeBin,
+                                    m_firstLowProfitOrderIndex - m_firstMediumProfitLowSizeOrderIndex);
+                                qDebug() << "Packed small items profit" << totalProfit;
                                 
-                                qDebug() << "Total profit =" << totalProfit;
                                 if(totalProfit > maxProfit) {
                                     qDebug() << "New max profit.";
                                     memcpy(maxAssignment, mediumProfitMediumSizeAssignment, m_itemNumber * sizeof(int));
@@ -840,6 +847,35 @@ int ImprovedApproximateMultipleKnapsack::removeWorstBinPart(int *assignment, int
     free(currentBinPartItems);
     
     return worstBinIndex;
+}
+
+void ImprovedApproximateMultipleKnapsack::packLowProfitItems(int *itemIndices,
+                                                             int *remainingCapacities,
+                                                             int *assignment,
+                                                             int *profit,
+                                                             int count)
+{
+    for(int i = 0; i < count; ++i) {
+        const ProfitItem &item = items().at(itemIndices[i]);
+        for(int bin = 0; bin < m_numberOfBins; ++bin) {
+            if(remainingCapacities[bin] >= item.size()) {
+                assignment[i] = bin;
+                (*profit) += item.profit();
+            }
+        }
+    }
+}
+
+void ImprovedApproximateMultipleKnapsack::packItemsInBin(int *itemIndices,
+                                                         int *assignment,
+                                                         int *profit,
+                                                         int bin,
+                                                         int count)
+{
+    for(int i = 0; i < count; ++i) {
+        assignment[i] = bin;
+        (*profit) += items().at(itemIndices[i]).profit();
+    }
 }
                                                                           
 

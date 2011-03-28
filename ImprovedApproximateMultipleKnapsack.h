@@ -97,6 +97,10 @@ private:
     
     int removeWorstBinPart(int *assignment, int* profit);
     
+    void packLowProfitItems(int *itemIndices, int *remainingCapacities, int *assignment, int *profit, int count);
+    
+    void packItemsInBin(int *itemIndices, int *assignment, int *profit, int bin, int count);
+    
     QString subsetAssignmentToString(int* assignment, int *itemProfitSizeOrder, int count);
     
     int m_numberOfBins;
