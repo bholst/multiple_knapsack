@@ -171,6 +171,15 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                 int totalProfit = highProfitSubsetProfits
                                                   + mediumProfitHighSizeSubsetProfits
                                                   + mediumProfitMediumSizeProfit;
+                                                  
+                                int profitRemoved = totalProfit;
+                                int assignmentRemoved[m_itemNumber];
+                                memcpy(assignmentRemoved,
+                                       mediumProfitMediumSizeAssignment,
+                                       m_itemNumber * sizeof(int));
+                                removeWorstBinPart(assignmentRemoved, &profitRemoved);
+                                qDebug() << "Removed profit is" << profitRemoved;
+                                
                                 qDebug() << "Total profit =" << totalProfit;
                                 if(totalProfit > maxProfit) {
                                     qDebug() << "New max profit.";
@@ -317,10 +326,10 @@ void ImprovedApproximateMultipleKnapsack::groupItems(int approximateMaximum)
 
 void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
 {
-    double relativeRemainingArea = ((double) remainingArea)/((double) m_largestBinCapacity);
-    double minHighSize = m_rho * relativeRemainingArea/(2 * m_K * pow(log2(1.0/m_rho), 3.0));
+    m_relativeRemainingArea = ((double) remainingArea)/((double) m_largestBinCapacity);
+    double minHighSize = m_rho * m_relativeRemainingArea/(2 * m_K * pow(log2(1.0/m_rho), 3.0));
     qDebug() << "Item has high size with at least" << minHighSize;
-    double minMediumSize = pow(m_rho, 6.0) * relativeRemainingArea;
+    double minMediumSize = pow(m_rho, 6.0) * m_relativeRemainingArea;
     qDebug() << "Item has medium size with at least" << minMediumSize;
     
     for(int i = 0; i < m_itemNumber; ++i) {
@@ -373,7 +382,7 @@ void ImprovedApproximateMultipleKnapsack::groupMediumItems(int remainingArea)
                 mediumProfitMediumSizeGroupSize[itemClass] = new QVector<int>();
                 mediumProfitMediumSizeGroupStart[itemClass] = new QVector<int>();
                 
-                groupCountLimit = ceil(pow(2.0, itemClass + m_minR) * relativeRemainingArea 
+                groupCountLimit = ceil(pow(2.0, itemClass + m_minR) * m_relativeRemainingArea 
                                        / m_K * pow(log2(1.0/m_rho), 3.0));
                 qDebug() << "Group count limit is" << groupCountLimit;
                 
@@ -726,6 +735,97 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
     else {
         return false;
     }
+}
+
+int ImprovedApproximateMultipleKnapsack::removeWorstBinPart(int *assignment, int *profit)
+{
+    int **binPartProfit = (int **) malloc(m_numberOfBins * sizeof(int *));
+    int **binPartRemainingSize = (int **) malloc(m_numberOfBins * sizeof(int *));
+    QVector<int> ***binPartItems = (QVector<int> ***) malloc((m_numberOfBins) * sizeof(void *));
+    
+    int partSize = ceil(m_largestBinCapacity * m_rho * m_relativeRemainingArea / (4.0 * pow(log2(1.0 / m_rho), 2.0)));
+    int *numberOfParts = new int[m_numberOfBins];
+    
+    for(int i = 0; i < m_numberOfBins; ++i) {
+        numberOfParts[i] = sizes().at(i) / partSize;
+        binPartProfit[i] = (int *) malloc(numberOfParts[i] * sizeof(int));
+        binPartRemainingSize[i] = (int *) malloc(numberOfParts[i] * sizeof(int));
+        binPartItems[i] = (QVector<int> **) malloc(numberOfParts[i] * sizeof(QVector<int> *));
+        for(int j = 0; j < numberOfParts[i]; j++) {
+            binPartProfit[i][j] = 0;
+            binPartRemainingSize[i][j] = partSize;
+            binPartItems[i][j] = new QVector<int>();
+        }
+    }
+    
+    int currentPartIndex[m_numberOfBins];
+    for(int i = 0; i < m_numberOfBins; ++i) {
+        currentPartIndex[i] = 0;
+    }
+    
+    for(int item = 0; item < items().size(); ++item) {
+        int currentBin = assignment[item];
+        if(currentBin >= 0) {
+            ProfitItem currentItem = items().at(m_itemProfitSizeOrder[item]);
+            int remainingSize = currentItem.size();
+            int remainingProfit = currentItem.profit();
+            
+            while(remainingSize > 0) {
+                int currentPart = currentPartIndex[currentBin];
+                
+                binPartItems[currentBin][currentPart]->append(item);
+                if(remainingSize <= binPartRemainingSize[currentBin][currentPart]) {
+                    binPartProfit[currentBin][currentPart] += remainingProfit;
+                    binPartRemainingSize[currentBin][currentPart] -= remainingSize;
+                    remainingSize = 0;
+                }
+                else {
+                    int profitPart = (double) remainingProfit / (double) remainingSize
+                                     * (double) binPartRemainingSize[currentBin][currentPart];
+                    remainingSize -= binPartRemainingSize[currentBin][currentPart];
+                    binPartRemainingSize[currentBin][currentPart] = 0;
+                    remainingProfit -= profitPart;
+                    binPartProfit[currentBin][currentPart] += profitPart;
+                }
+            
+                if(binPartRemainingSize[currentBin][currentPart] == 0) {
+                    currentPartIndex[currentBin]++;
+                }
+            }
+        }
+    }
+    
+    int worstBin = 0;
+    int worstPart = 0;
+    int worstProfit = binPartProfit[0][0];
+    for(int bin = 0; bin < m_numberOfBins; ++bin) {
+        for(int part = 0; part < numberOfParts[bin]; ++part) {
+            if(binPartProfit[bin][part] < worstProfit) {
+                worstBin = bin;
+                worstPart = part;
+            }
+        }
+    }
+    
+    QVector<int> *worstItems = binPartItems[worstBin][worstPart];
+    for(int i = 0; i < worstItems->size(); ++i) {
+        assignment[worstItems->at(i)] = -1;
+        (*profit) -= items().at(m_itemProfitSizeOrder[worstItems->at(i)]).profit();
+    }
+    
+    for(int i = 0; i < m_numberOfBins; ++i) {
+        for(int j = 0; j < numberOfParts[i]; j++) {
+            delete binPartItems[i][j];
+        }
+        delete binPartProfit[i];
+        delete binPartRemainingSize[i];
+        delete binPartItems[i];
+    }
+    free(binPartProfit);
+    free(binPartRemainingSize);
+    free(binPartItems);
+    
+    return worstBin;
 }
                                                                           
 

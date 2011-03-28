@@ -21,7 +21,7 @@
 
 SmallBinPacking::SmallBinPacking()
     : m_dirty(true),
-      m_delta(0.38),
+      m_delta(0.4),
       m_K(8),
       m_minimumNumberOfBins(-1),
       m_assignment(0)

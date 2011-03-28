@@ -95,6 +95,8 @@ private:
     
     bool packGroupItems(int *groupCount, int *groupSizes, int *remainingCapacities, int *assignment, int count, int *profit);
     
+    int removeWorstBinPart(int *assignment, int* profit);
+    
     QString subsetAssignmentToString(int* assignment, int *itemProfitSizeOrder, int count);
     
     int m_numberOfBins;
@@ -108,6 +110,7 @@ private:
     int m_firstMediumProfitOrderIndex;
     int m_firstLowProfitOrderIndex;
     
+    double m_relativeRemainingArea;
     int m_firstMediumProfitMediumSizeOrderIndex;
     int m_firstMediumProfitLowSizeOrderIndex;
     int m_minR;
