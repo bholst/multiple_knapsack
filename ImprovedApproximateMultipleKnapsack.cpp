@@ -163,7 +163,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                             int mediumProfitMediumSizeProfit = 0;
                             if(packGroupItems(groupSubset,
                                               m_normalGroupSize,
-                                              mediumProfitHighSizeRemainingCapacity,
+                                              mediumProfitMediumSizeRemainingCapacity,
                                               mediumProfitMediumSizeAssignment,
                                               m_normalGroupNumber,
                                               &mediumProfitMediumSizeProfit))
