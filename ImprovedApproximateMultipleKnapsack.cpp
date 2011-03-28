@@ -133,15 +133,15 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                             mediumProfitHighSizeRemainingCapacity,
                                             m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
                                             numberOfMediumProfitHighSizeItems);
-                if(foundMediumProfitHighSizeSubsetAssignment) {
-                    std::cout << "Assignment following now:" << std::endl;
-                }
+//                 if(foundMediumProfitHighSizeSubsetAssignment) {
+//                     std::cout << "Assignment following now:" << std::endl;
+//                 }
                 while(foundMediumProfitHighSizeSubsetAssignment) {
                     // Do stuff with the Assignment
-                    std::cout << subsetAssignmentToString(assignment + m_firstMediumProfitOrderIndex,
-                                                          m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
-                                                          numberOfMediumProfitHighSizeItems).toStdString()
-                              << std::endl << std::endl;
+//                     std::cout << subsetAssignmentToString(assignment + m_firstMediumProfitOrderIndex,
+//                                                           m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
+//                                                           numberOfMediumProfitHighSizeItems).toStdString()
+//                               << std::endl << std::endl;
                     int groupSubset[m_normalGroupNumber];
                     int groupSubsetCount = 0;
                     int groupSubsetSize = 0;
@@ -823,7 +823,7 @@ int ImprovedApproximateMultipleKnapsack::removeWorstBinPart(int *assignment, int
             worstBinPartProfit = currentBinPartProfit[bin];
             delete worstBinPartItems;
             worstBinPartItems = currentBinPartItems[bin];
-            currentBinPartItems = 0;
+            currentBinPartItems[bin] = 0;
             worstBinIndex = bin;
         }
         delete currentBinPartItems[bin];
