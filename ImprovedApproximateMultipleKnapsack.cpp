@@ -739,29 +739,29 @@ bool ImprovedApproximateMultipleKnapsack::packGroupItems(int *groupCount,
 
 int ImprovedApproximateMultipleKnapsack::removeWorstBinPart(int *assignment, int *profit)
 {
-    int **binPartProfit = (int **) malloc(m_numberOfBins * sizeof(int *));
-    int **binPartRemainingSize = (int **) malloc(m_numberOfBins * sizeof(int *));
-    QVector<int> ***binPartItems = (QVector<int> ***) malloc((m_numberOfBins) * sizeof(void *));
+    int *currentBinPartProfit = (int *) malloc(m_numberOfBins * sizeof(int));
+    int *currentBinPartRemainingSize = (int *) malloc(m_numberOfBins * sizeof(int));
+    QVector<int> **currentBinPartItems = (QVector<int> **) malloc((m_numberOfBins) * sizeof(void *));
     
     int partSize = ceil(m_largestBinCapacity * m_rho * m_relativeRemainingArea / (4.0 * pow(log2(1.0 / m_rho), 2.0)));
     int *numberOfParts = new int[m_numberOfBins];
     
     for(int i = 0; i < m_numberOfBins; ++i) {
-        numberOfParts[i] = sizes().at(i) / partSize;
-        binPartProfit[i] = (int *) malloc(numberOfParts[i] * sizeof(int));
-        binPartRemainingSize[i] = (int *) malloc(numberOfParts[i] * sizeof(int));
-        binPartItems[i] = (QVector<int> **) malloc(numberOfParts[i] * sizeof(QVector<int> *));
-        for(int j = 0; j < numberOfParts[i]; j++) {
-            binPartProfit[i][j] = 0;
-            binPartRemainingSize[i][j] = partSize;
-            binPartItems[i][j] = new QVector<int>();
-        }
+        int binSize = sizes().at(i);
+        // Only save full parts.
+        numberOfParts[i] = floor((double) binSize / (double) partSize);
+        currentBinPartItems[i] = new QVector<int>();
+        currentBinPartRemainingSize[i] = partSize;
+        currentBinPartProfit[i] = 0;
     }
     
-    int currentPartIndex[m_numberOfBins];
+    int currentPartNumber[m_numberOfBins];
     for(int i = 0; i < m_numberOfBins; ++i) {
-        currentPartIndex[i] = 0;
+        currentPartNumber[i] = 1;
     }
+    int worstBinPartProfit = -1;
+    QVector<int> *worstBinPartItems = 0;
+    int worstBinIndex = -1;
     
     for(int item = 0; item < items().size(); ++item) {
         int currentBin = assignment[item];
@@ -771,61 +771,75 @@ int ImprovedApproximateMultipleKnapsack::removeWorstBinPart(int *assignment, int
             int remainingProfit = currentItem.profit();
             
             while(remainingSize > 0) {
-                int currentPart = currentPartIndex[currentBin];
-                
-                binPartItems[currentBin][currentPart]->append(item);
-                if(remainingSize <= binPartRemainingSize[currentBin][currentPart]) {
-                    binPartProfit[currentBin][currentPart] += remainingProfit;
-                    binPartRemainingSize[currentBin][currentPart] -= remainingSize;
+//                 int currentPart = currentPartIndex[currentBin];
+                currentBinPartItems[currentBin]->append(item);
+                if(remainingSize <= currentBinPartRemainingSize[currentBin]) {
+                    currentBinPartProfit[currentBin] += remainingProfit;
+                    currentBinPartRemainingSize[currentBin] -= remainingSize;
                     remainingSize = 0;
                 }
                 else {
                     int profitPart = (double) remainingProfit / (double) remainingSize
-                                     * (double) binPartRemainingSize[currentBin][currentPart];
-                    remainingSize -= binPartRemainingSize[currentBin][currentPart];
-                    binPartRemainingSize[currentBin][currentPart] = 0;
+                                     * (double) currentBinPartRemainingSize[currentBin];
+                    remainingSize -= currentBinPartRemainingSize[currentBin];
+                    currentBinPartRemainingSize[currentBin] = 0;
                     remainingProfit -= profitPart;
-                    binPartProfit[currentBin][currentPart] += profitPart;
+                    currentBinPartProfit[currentBin] += profitPart;
                 }
             
-                if(binPartRemainingSize[currentBin][currentPart] == 0) {
-                    currentPartIndex[currentBin]++;
+                if(currentBinPartRemainingSize[currentBin] == 0) {
+                    if(worstBinPartProfit < 0
+                       || currentBinPartProfit[currentBin] < worstBinPartProfit)
+                    {
+                        worstBinPartProfit = currentBinPartProfit[currentBin];
+                        delete worstBinPartItems;
+                        worstBinPartItems = currentBinPartItems[currentBin];
+                        worstBinIndex = currentBin;
+                    }
+                    else {
+                        delete currentBinPartItems[currentBin];
+                    }
+                    currentBinPartProfit[currentBin] = 0;
+                    currentBinPartRemainingSize[currentBin] = partSize;
+                    currentBinPartItems[currentBin] = new QVector<int>();
+                    
+                    currentPartNumber[currentBin]++;
                 }
             }
         }
     }
     
-    int worstBin = 0;
-    int worstPart = 0;
-    int worstProfit = binPartProfit[0][0];
     for(int bin = 0; bin < m_numberOfBins; ++bin) {
-        for(int part = 0; part < numberOfParts[bin]; ++part) {
-            if(binPartProfit[bin][part] < worstProfit) {
-                worstBin = bin;
-                worstPart = part;
-            }
+        if(currentPartNumber[bin] < numberOfParts[bin]) {
+            worstBinIndex = bin;
+            worstBinPartProfit = 0;
+            delete worstBinPartItems;
+            worstBinPartItems = new QVector<int>();
         }
-    }
-    
-    QVector<int> *worstItems = binPartItems[worstBin][worstPart];
-    for(int i = 0; i < worstItems->size(); ++i) {
-        assignment[worstItems->at(i)] = -1;
-        (*profit) -= items().at(m_itemProfitSizeOrder[worstItems->at(i)]).profit();
-    }
-    
-    for(int i = 0; i < m_numberOfBins; ++i) {
-        for(int j = 0; j < numberOfParts[i]; j++) {
-            delete binPartItems[i][j];
+        else if(currentPartNumber[bin] == numberOfParts[bin]
+                && (worstBinPartProfit < 0
+                || currentBinPartProfit[bin] < worstBinPartProfit))
+        {
+            worstBinPartProfit = currentBinPartProfit[bin];
+            delete worstBinPartItems;
+            worstBinPartItems = currentBinPartItems[bin];
+            currentBinPartItems = 0;
+            worstBinIndex = bin;
         }
-        delete binPartProfit[i];
-        delete binPartRemainingSize[i];
-        delete binPartItems[i];
+        delete currentBinPartItems[bin];
     }
-    free(binPartProfit);
-    free(binPartRemainingSize);
-    free(binPartItems);
     
-    return worstBin;
+    for(int i = 0; i < worstBinPartItems->size(); ++i) {
+        assignment[worstBinPartItems->at(i)] = -1;
+        (*profit) -= items().at(m_itemProfitSizeOrder[worstBinPartItems->at(i)]).profit();
+    }
+    delete worstBinPartItems;
+    
+    free(currentBinPartProfit);
+    free(currentBinPartRemainingSize);
+    free(currentBinPartItems);
+    
+    return worstBinIndex;
 }
                                                                           
 
