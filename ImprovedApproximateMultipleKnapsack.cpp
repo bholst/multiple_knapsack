@@ -105,6 +105,7 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
             numberOfMediumProfitHighSizeItems = m_firstMediumProfitMediumSizeOrderIndex - m_firstMediumProfitOrderIndex;
         }
         while(foundHighProfitSubsetAssignment) {
+            checkProfit(m_itemProfitSizeOrder, assignment, highProfitSubsetProfits, m_itemNumber);
             // Do stuff with the assignment.
             int mediumProfitHighSizeSubsetProfits = 0;
             int mediumProfitHighSizeSubsetSizes = 0;
@@ -142,6 +143,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
 //                                                           m_itemProfitSizeOrder + m_firstMediumProfitOrderIndex,
 //                                                           numberOfMediumProfitHighSizeItems).toStdString()
 //                               << std::endl << std::endl;
+                    checkProfit(m_itemProfitSizeOrder,
+                                assignment,
+                                mediumProfitHighSizeSubsetProfits + highProfitSubsetProfits,
+                                m_itemNumber);
                     int groupSubset[m_normalGroupNumber];
                     int groupSubsetCount = 0;
                     int groupSubsetSize = 0;
@@ -168,6 +173,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                               m_normalGroupNumber,
                                               &mediumProfitMediumSizeProfit))
                             {
+                                checkProfit(m_itemProfitSizeOrder,
+                                            mediumProfitMediumSizeAssignment, 
+                                            mediumProfitHighSizeSubsetProfits + highProfitSubsetProfits + mediumProfitMediumSizeProfit,
+                                            m_itemNumber);
                                 int totalProfit = highProfitSubsetProfits
                                                   + mediumProfitHighSizeSubsetProfits
                                                   + mediumProfitMediumSizeProfit;
@@ -177,6 +186,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                                    mediumProfitMediumSizeAssignment + m_firstLowProfitOrderIndex,
                                                    &totalProfit,
                                                    m_itemNumber - m_firstLowProfitOrderIndex);
+                                checkProfit(m_itemProfitSizeOrder,
+                                            mediumProfitMediumSizeAssignment, 
+                                            totalProfit,
+                                            m_itemNumber);
                                 qDebug() << "Low packed profit =" << totalProfit;
                                 int freeBin = removeWorstBinPart(mediumProfitMediumSizeAssignment,
                                                                  &totalProfit);
@@ -186,6 +199,10 @@ void ImprovedApproximateMultipleKnapsack::recalculateValues()
                                     mediumProfitMediumSizeAssignment + m_firstMediumProfitLowSizeOrderIndex,
                                     &totalProfit, freeBin,
                                     m_firstLowProfitOrderIndex - m_firstMediumProfitLowSizeOrderIndex);
+                                checkProfit(m_itemProfitSizeOrder,
+                                            mediumProfitMediumSizeAssignment, 
+                                            totalProfit,
+                                            m_itemNumber);
                                 qDebug() << "Packed small items profit" << totalProfit;
                                 
                                 if(totalProfit > maxProfit) {
@@ -861,6 +878,7 @@ void ImprovedApproximateMultipleKnapsack::packLowProfitItems(int *itemIndices,
             if(remainingCapacities[bin] >= item.size()) {
                 assignment[i] = bin;
                 (*profit) += item.profit();
+                break;
             }
         }
     }
@@ -875,6 +893,27 @@ void ImprovedApproximateMultipleKnapsack::packItemsInBin(int *itemIndices,
     for(int i = 0; i < count; ++i) {
         assignment[i] = bin;
         (*profit) += items().at(itemIndices[i]).profit();
+    }
+}
+
+bool ImprovedApproximateMultipleKnapsack::checkProfit(int *itemIndices,
+                                                      int *assignment,
+                                                      int profit,
+                                                      int count)
+{
+    int calculatedProfit = 0;
+    for(int i = 0; i < count; ++i) {
+        if(assignment[i] >= 0) {
+            calculatedProfit += items().at(itemIndices[i]).profit();
+        }
+    }
+    
+    if(calculatedProfit != profit) {
+        qDebug() << "WARNING: Wrong profit.";
+        return false;
+    }
+    else {
+        return true;
     }
 }
                                                                           

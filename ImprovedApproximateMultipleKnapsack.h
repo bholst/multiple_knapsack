@@ -103,6 +103,8 @@ private:
     
     QString subsetAssignmentToString(int* assignment, int *itemProfitSizeOrder, int count);
     
+    bool checkProfit(int *itemIndices, int *assignment, int profit, int count);
+    
     int m_numberOfBins;
     QList<int> m_sortedSizes;
     int m_largestBinCapacity;
